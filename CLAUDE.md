@@ -12,9 +12,19 @@ The new Metagame site. Fresh start — **don't copy from the 2025 site** (it liv
 
 ## Email signup
 
-The form posts to `/api/signup` (`src/app/api/signup/route.ts`), which currently **no-ops**
-(validates + logs). The real destination is **Airtable** — wiring is a TODO pending the
-base/table details from Brian.
+The form posts to `/api/signup` (`src/app/api/signup/route.ts`) → `recordSignup()` in
+`src/lib/airtable.ts`, which writes a record to **Airtable**. Until the Airtable env vars are
+set it **gracefully no-ops** (logs + returns `{ ok: true, stored: false }`), so the form works
+in local dev without credentials.
+
+## Environment variables
+
+- **`.env.example`** is the committed source of truth — `cp .env.example .env.local` and fill in.
+- **`src/env.ts`** declares the contract (`ENV_SPEC`) + a typed `env` accessor. `validateEnv()`
+  is wired into `next.config.ts`, so `next dev` / `next build` **warn** (never fail) when a
+  required var is missing.
+- Add a new var in **both** `.env.example` and `ENV_SPEC` to keep them in sync.
+- Supabase isn't used yet — its vars are commented placeholders in `.env.example` only.
 
 ## Worktrees & parallel work
 
