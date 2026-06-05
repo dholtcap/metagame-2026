@@ -20,6 +20,14 @@ export async function POST(request: Request) {
 
   try {
     const result = await recordSignup(email.trim(), trimmedName || undefined);
+    // Not stored in prod = misconfigured env; error instead of faking success.
+    if (!result.stored && process.env.NODE_ENV === "production") {
+      console.error("[signup] Airtable not configured in production — signup not stored");
+      return NextResponse.json(
+        { error: "Signup is temporarily unavailable" },
+        { status: 503 },
+      );
+    }
     return NextResponse.json({ ok: true, stored: result.stored });
   } catch (err) {
     console.error("[signup] failed to store email:", err);
