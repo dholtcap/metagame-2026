@@ -37,11 +37,11 @@ stays Tailwind.
 
 ## Code comments
 
-Comments are good — lean toward a short one that explains the _why_. Use the fewest words that
-still say all we need: a one-line "blue box behind button, revealed on hover" beats a two-line
-recap of mechanics the code already shows — unless an important or genuinely complicated
-annotation calls for the extra length. Don't narrate a routine edit just because you touched the
-line; if the prose isn't doing real work, cut it.
+A short comment is welcome when it documents something non-obvious — _why_ a line is there, or
+what it interacts with — even if nothing's about to break. Keep it to the fewest words: the
+one-line "blue box behind button, revealed on hover" is the model. Two things to avoid: narrating
+_the change itself_ ("flipped X to Y so it now reads left→right") — that belongs in the commit/PR,
+not the source — and letting a comment swell into a multi-line PR-report.
 
 ## Linting & formatting
 
