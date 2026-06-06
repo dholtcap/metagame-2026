@@ -23,7 +23,7 @@ export default function DiceHero() {
         <div aria-hidden className="hidden flex-[3] sm:block" />
 
         <span className="text-center text-lg text-[#1b1530]">
-          Game design, strategy, narrative, and play.
+          A conference for game design, strategy, narrative, and play.
         </span>
         <div className="flex items-center gap-[clamp(10px,2.5vw,22px)] text-center font-[family-name:var(--font-bebas)] text-[clamp(38px,9vw,68px)] leading-[0.85] tracking-[0.02em]">
           <span>Nov 6&ndash;8, 2026</span>
