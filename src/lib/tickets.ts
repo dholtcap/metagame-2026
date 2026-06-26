@@ -8,7 +8,7 @@
 // code (see src/lib/discount-codes.ts). `earlyBird.btc` here is just the
 // advertised default the homepage button shows.
 
-type StripeMode = "test" | "live";
+export type StripeMode = "test" | "live";
 
 const stripeMode: StripeMode =
   process.env.VERCEL_ENV === "production" ? "live" : "test";
@@ -53,6 +53,77 @@ export const ticketTiers: TicketTier[] = [
 /** Look up a tier by id; undefined when none matches. */
 export function getTicket(id: string): TicketTier | undefined {
   return ticketTiers.find((t) => t.id === id);
+}
+
+// ── Supporter tier ──────────────────────────────────────────────────────────
+// A pay-what-you-want tier (floor $525 / ₿0.0087) sitting alongside the standard
+// ticket. USD checkout uses one Stripe Payment Link per quick-pick amount; BTC
+// checkout goes through the OpenNode modal with an editable amount.
+
+/** One quick-pick amount: a USD Stripe preset + its hardcoded BTC equivalent. */
+export type SupporterChip = {
+  usd: number; // Stripe price preset (dollars)
+  btc: number; // ~equivalent whole BTC, hardcoded
+  links: Record<StripeMode, string>; // Payment Link for this chip's custom-amount Stripe price
+};
+
+export type SupporterTier = {
+  id: "supporter";
+  label: string;
+  floor: Price; // minimum accepted in either currency
+  defaultChipUsd: number; // which chip is selected when the modal opens
+  chips: SupporterChip[];
+};
+
+export const supporterTier: SupporterTier = {
+  id: "supporter",
+  label: "Supporter",
+  floor: { usd: 525, btc: 0.0087 },
+  defaultChipUsd: 650,
+  chips: [
+    {
+      usd: 525,
+      btc: 0.0087,
+      links: {
+        test: "https://buy.stripe.com/test_00wcN43430oLcF5aZkfw40b",
+        live: "https://buy.stripe.com/4gM9AS5cb1sP8oP6J4fw406",
+      },
+    },
+    {
+      usd: 650,
+      btc: 0.0108,
+      links: {
+        test: "https://buy.stripe.com/test_eVq14m0VV2wT7kL8Rcfw40c",
+        live: "https://buy.stripe.com/bJeaEW1ZZ2wT48z8Rcfw407",
+      },
+    },
+    {
+      usd: 750,
+      btc: 0.0124,
+      links: {
+        test: "https://buy.stripe.com/test_6oU4gy343fjF9sTebwfw40d",
+        live: "https://buy.stripe.com/3cIeVc9sr4F1dJ91oKfw408",
+      },
+    },
+    {
+      usd: 1024,
+      btc: 0.017,
+      links: {
+        test: "https://buy.stripe.com/test_4gM4gy3435J56gH9Vgfw40e",
+        live: "https://buy.stripe.com/4gMaEWcED7RdeNdgjEfw409",
+      },
+    },
+  ],
+};
+
+/**
+ * The supporter chip's Payment Link for the active Stripe mode, or null when it's
+ * still an unfilled placeholder — so the UI can render without navigating nowhere.
+ */
+export function supporterChipUrl(chip: SupporterChip): string | null {
+  const link = chip.links[stripeMode];
+  if (!link || link === "TODO_PAYMENT_LINK") return null;
+  return link;
 }
 
 /**
