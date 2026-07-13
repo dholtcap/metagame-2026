@@ -1,6 +1,7 @@
 import Dice from "@/components/Dice";
 import TicketsSection from "@/components/TicketsSection";
 import NotifyMe from "@/components/NotifyMe";
+import ProposeSession from "@/components/ProposeSession";
 import LastYearLineup from "@/components/LastYearLineup";
 import { FaEnvelope, FaExternalLinkAlt } from "react-icons/fa";
 
@@ -77,6 +78,8 @@ export default function Home() {
 
         <div aria-hidden className="flex-[1]" />
       </main>
+
+      <ProposeSession />
 
       <LastYearLineup />
 
