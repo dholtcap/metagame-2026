@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { FaArrowRight } from "react-icons/fa";
 import {
   EMAIL_LIST_VALUE,
   INTEREST_OPTIONS,
   type InterestValue,
 } from "@/lib/interests";
+import { RFP_FORM_URL } from "@/lib/links";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -49,9 +51,27 @@ export default function InterestFollowup({ email }: { email: string }) {
 
   if (status === "success") {
     return (
-      <p className="text-center text-sm text-[#1b1530]">
-        Additional details submitted ✓
-      </p>
+      <div className="flex w-full flex-col items-center gap-4">
+        <p className="text-center text-sm text-[#1b1530]">
+          Additional details submitted ✓
+        </p>
+        {/* Submitted "Speaking" → push them to the session-proposal (RFP) form. */}
+        {selected.includes("speaking") && (
+          <a
+            href={RFP_FORM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative inline-block"
+          >
+            {/* orange box behind, revealed on hover as the blue front slides */}
+            <span aria-hidden className="absolute inset-0 bg-[#eaa35a]" />
+            <span className="relative flex min-h-14 items-center justify-center gap-2 border-2 border-[#eaa35a] bg-[#2b9bf0] px-6 py-3 text-center font-[family-name:var(--font-bebas)] text-[clamp(18px,4.5vw,24px)] leading-tight tracking-[0.06em] text-[#f4ecd2] transition-transform group-hover:-translate-x-[5px] group-hover:-translate-y-[5px]">
+              Interested in speaking? Fill out the Session Proposal form!
+              <FaArrowRight size={16} aria-hidden className="shrink-0" />
+            </span>
+          </a>
+        )}
+      </div>
     );
   }
 
