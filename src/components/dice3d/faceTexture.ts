@@ -67,6 +67,19 @@ function toTexture(canvas: HTMLCanvasElement): THREE.CanvasTexture {
   return tex;
 }
 
+const loader = new THREE.TextureLoader();
+
+// Letter face from a pre-rendered tile: /public/dice-letters/<color>_<letter>.png.
+export function letterImageTexture(
+  letter: string,
+  color: "blue" | "orange",
+): THREE.Texture {
+  const tex = loader.load(`/dice-letters/${color}_${letter.toLowerCase()}.png`);
+  tex.anisotropy = 8;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 // Fill the whole texture with the base color plus a baked top-light gradient.
 function paintPanel(ctx: CanvasRenderingContext2D, bg: string) {
   ctx.fillStyle = bg;
@@ -117,7 +130,7 @@ export function pipTexture(value: number): THREE.CanvasTexture {
   const on = PIP_MAP[value] ?? [];
   const pad = TEX * 0.22;
   const cell = (TEX - pad * 2) / 2; // gaps between the 3x3 centers
-  const r = TEX * 0.078;
+  const r = TEX * 0.095;
 
   for (const idx of on) {
     const col = idx % 3;

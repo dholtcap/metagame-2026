@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
-import { COLORS, letterTexture, pipTexture } from "./faceTexture";
+import { COLORS, letterImageTexture, pipTexture } from "./faceTexture";
 import { sampleRollIn, type RollInConfig } from "./rollIn";
 
 export type DieData = {
@@ -119,10 +119,10 @@ export default function Die({
 
   // Per-face textures, built once.
   const textures = useMemo(() => {
-    const blue = letterTexture(data.front, COLORS.blue);
-    const blueBack = letterTexture(data.front, COLORS.blue);
-    const orange = letterTexture(data.right, COLORS.orange);
-    const orangeLeft = letterTexture(data.right, COLORS.orange);
+    const blue = letterImageTexture(data.front, "blue");
+    const blueBack = letterImageTexture(data.front, "blue");
+    const orange = letterImageTexture(data.right, "orange");
+    const orangeLeft = letterImageTexture(data.right, "orange");
     const top = pipTexture(data.top);
     const bottom = pipTexture(7 - data.top);
     return [blue, blueBack, orange, orangeLeft, top, bottom];
@@ -234,6 +234,9 @@ export default function Die({
               // specular highlights and read brighter; letter faces stay a touch matte
               roughness={i >= 4 ? 0.35 : 0.7}
               metalness={0}
+              // letter tiles carry a keyed alpha: the black regions drop out so the
+              // die body shows through instead of a flatter, deader pure black
+              alphaTest={i < 4 ? 0.5 : 0}
               polygonOffset
               polygonOffsetFactor={-4}
             />
