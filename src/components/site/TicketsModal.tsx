@@ -1,28 +1,28 @@
 "use client";
 
-import { useRef } from "react";
-import { createPortal } from "react-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import TicketsPanel from "./TicketsPanel";
 
-// Modal wrapper around <TicketsPanel>: portal to <body>, blurred backdrop, and
-// click-outside to close. Scroll-lock + Escape live in the panel (gated on the
-// onClose it receives here). The /tickets page renders the same panel bare.
+// Modal wrapper around <TicketsPanel>: the shared Dialog supplies the navy panel,
+// blurred backdrop, focus-trap, Escape and scroll-lock. The /tickets page renders
+// the same panel bare inside its own box. The supporter/BTC sub-modals launched
+// from within the panel are nested Radix dialogs, so Escape closes the top-most
+// first and they stack above this one.
 export default function TicketsModal({ onClose }: { onClose: () => void }) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  return createPortal(
-    <div
-      ref={overlayRef}
-      onMouseDown={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Tickets"
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-ink/70 p-4 backdrop-blur-sm"
-    >
-      <TicketsPanel onClose={onClose} />
-    </div>,
-    document.body,
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-w-[560px] flex-col items-center gap-[22px] px-9 py-8">
+        <DialogTitle className="sr-only">Tickets</DialogTitle>
+        <DialogDescription className="sr-only">
+          Buy a Metagame 2026 ticket in USD or Bitcoin.
+        </DialogDescription>
+        <TicketsPanel />
+      </DialogContent>
+    </Dialog>
   );
 }

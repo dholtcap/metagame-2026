@@ -1,21 +1,22 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
-import { createPortal } from "react-dom";
-import { FaBitcoin, FaTimes } from "react-icons/fa";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { FaBitcoin } from "react-icons/fa";
 import { supporterTier, supporterChipUrl } from "@/lib/tickets";
 import {
   subscribeCurrency,
   getCurrencySnapshot,
   getCurrencyServerSnapshot,
 } from "@/lib/currency-store";
-import { BTN_PRIMARY, HEADING } from "./site/styles";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { HEADING } from "./site/styles";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -32,15 +33,11 @@ function isOpenNodeCheckoutUrl(url: string): boolean {
   }
 }
 
-const FIELD =
-  "h-12 w-full rounded-lg border-[1.5px] border-cream/25 bg-navy2 px-4 text-base text-cream outline-none transition-colors placeholder:text-cream/40 focus:border-tan";
-
 // Mirrors the server cap so over-long input fails fast in the browser too.
 const MAX_FIELD_LEN = 200;
 
 export default function SupporterModal({ onClose }: { onClose: () => void }) {
   const { floor, defaultChipUsd, chips } = supporterTier;
-  const titleId = useId();
   const currency = useSyncExternalStore(
     subscribeCurrency,
     getCurrencySnapshot,
@@ -65,21 +62,6 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
   const [belowFloor, setBelowFloor] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  // Interruptive modal: lock page scroll while open, close on Escape.
-  useEffect(() => {
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [onClose]);
 
   // Clicking a chip selects it and (BTC mode) sets the editable amount to its value.
   function pickChip(i: number) {
@@ -177,38 +159,19 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
     </div>
   );
 
-  // Portal to <body>: ancestors with backdrop-filter (the hero ticket box)
-  // would otherwise become the containing block for fixed positioning and
-  // shrink the overlay to their own bounds.
-  return createPortal(
-    <div
-      ref={overlayRef}
-      onMouseDown={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/70 p-4 backdrop-blur-sm"
-    >
-      <div className="relative flex w-full max-w-[460px] flex-col gap-5 rounded-xl border border-cream/15 bg-navy p-6 text-cream shadow-2xl sm:p-8">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center text-cream/50 transition-colors hover:text-cream"
-        >
-          <FaTimes size={18} />
-        </button>
-
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-w-[460px] flex-col gap-5 p-6 sm:p-8">
         <div className="flex flex-col gap-1 pr-6">
-          <h2
-            id={titleId}
+          <DialogTitle
             className={`${HEADING} flex items-center gap-2 text-[clamp(24px,6vw,30px)]`}
           >
             {isBtc && <FaBitcoin aria-hidden className="text-tan" />}
             Supporter tier
-          </h2>
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Support Metagame 2026 with a supporter-tier ticket.
+          </DialogDescription>
           {!isBtc && (
             <p className="text-base text-cream/80">
               Help make Metagame 2026 even better!
@@ -236,7 +199,7 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
               <label className="font-space-mono text-xs tracking-wide text-cream/60 uppercase">
                 Amount (BTC)
               </label>
-              <input
+              <Input
                 type="number"
                 inputMode="decimal"
                 step="0.0001"
@@ -244,7 +207,6 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
                 value={btcAmount}
                 onChange={(e) => setBtcAmount(e.target.value)}
                 aria-label="BTC amount"
-                className={FIELD}
               />
               {belowFloor && (
                 <p className="text-xs text-salmon">
@@ -253,7 +215,7 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
               )}
             </div>
             {chipRow}
-            <input
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -262,9 +224,8 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
               autoComplete="name"
               maxLength={MAX_FIELD_LEN}
               required
-              className={FIELD}
             />
-            <input
+            <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -273,25 +234,23 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
               autoComplete="email"
               maxLength={MAX_FIELD_LEN}
               required
-              className={FIELD}
             />
-            <input
+            <Input
               type="text"
               value={discord}
               onChange={(e) => setDiscord(e.target.value)}
               placeholder="Discord handle (optional)"
               aria-label="Discord handle (optional)"
               maxLength={MAX_FIELD_LEN}
-              className={FIELD}
             />
             {error && <p className="text-sm text-salmon">{error}</p>}
-            <button
+            <Button
               type="submit"
               disabled={submitting}
-              className={`${BTN_PRIMARY} h-12 w-full text-base disabled:opacity-60`}
+              className="h-12 w-full text-base"
             >
               {submitting ? "Starting checkout…" : "Pay with BTC"}
-            </button>
+            </Button>
           </form>
         ) : (
           <div className="flex flex-col gap-3">
@@ -310,17 +269,16 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
               </a>
               !
             </p>
-            <button
+            <Button
               type="button"
               onClick={checkoutAtStripe}
-              className={`${BTN_PRIMARY} h-12 w-full text-base`}
+              className="h-12 w-full text-base"
             >
               Checkout at Stripe
-            </button>
+            </Button>
           </div>
         )}
-      </div>
-    </div>,
-    document.body,
+      </DialogContent>
+    </Dialog>
   );
 }

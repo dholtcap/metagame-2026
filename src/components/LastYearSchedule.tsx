@@ -13,6 +13,7 @@ import {
   startsInSlot,
   heightPx,
   SLOT_PX,
+  type Ages,
   type Day,
   type Location,
   type Session,
@@ -219,6 +220,7 @@ export default function LastYearSchedule({
   variant = "tabbed",
   defaultView = "grid",
   locationNames,
+  ages,
   showViewToggle = true,
 }: {
   /** "tabbed": one day at a time with a day switcher (the /last-year page).
@@ -228,13 +230,19 @@ export default function LastYearSchedule({
   defaultView?: View;
   /** Restrict to these location names (exact match); omit for all locations. */
   locationNames?: string[];
+  /** Restrict to these age flags (e.g. ["KIDS"] for the children view). */
+  ages?: Ages[];
   /** Show the grid/list toggle. When false, the view is pinned to defaultView. */
   showViewToggle?: boolean;
 }) {
+  // Stable primitive keys so the memo only recomputes when the filters actually
+  // change (a new array identity each render otherwise would not).
+  const locationNamesKey = locationNames?.join("|");
+  const agesKey = ages?.join("|");
   const { days, locations } = useMemo(
-    () => buildSchedule(locationNames ? { locationNames } : undefined),
+    () => buildSchedule({ locationNames, ages }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locationNames?.join("|")],
+    [locationNamesKey, agesKey],
   );
 
   // Grid template: a narrow sticky time column + one min-width column per

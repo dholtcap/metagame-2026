@@ -1,21 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import InterestFollowup from "./InterestFollowup";
-import { BTN_PRIMARY } from "./site/styles";
+import { FIELD_LIGHT } from "./site/styles";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-const FIELD_BASE =
-  "h-12 w-full rounded-lg border-[1.5px] px-4 text-base outline-none transition-colors";
-// Dark by default (navy modal / navy sections); `light` variant for cream backgrounds.
-const FIELD_DARK =
-  "border-cream/25 bg-navy2 text-cream placeholder:text-cream/40 focus:border-tan";
-const FIELD_LIGHT =
-  "border-navy/20 bg-white text-ink placeholder:text-ink/40 focus:border-meeple";
-
 export default function SignupForm({ light = false }: { light?: boolean }) {
-  const field = `${FIELD_BASE} ${light ? FIELD_LIGHT : FIELD_DARK}`;
+  // <Input> is dark by default; the `light` cream-section variant overrides it.
+  // min-w-0 lets the fields shrink in the row; the row itself is a container
+  // query (see the form) so it stacks in a narrow modal and only goes side-by-
+  // side when its own width allows — not based on the viewport.
+  const field = cn(light && FIELD_LIGHT, "min-w-0 @lg:w-auto @lg:flex-1");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   // Remembered after success so the interest follow-up can patch the same row.
@@ -56,18 +55,21 @@ export default function SignupForm({ light = false }: { light?: boolean }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-3">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <input
+    <form
+      onSubmit={handleSubmit}
+      className="@container flex w-full flex-col gap-3"
+    >
+      <div className="flex flex-col gap-3 @lg:flex-row">
+        <Input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Name"
           aria-label="Name"
           autoComplete="name"
-          className={`${field} sm:w-auto sm:flex-1`}
+          className={field}
         />
-        <input
+        <Input
           type="email"
           required
           value={email}
@@ -75,15 +77,15 @@ export default function SignupForm({ light = false }: { light?: boolean }) {
           placeholder="you@example.com*"
           aria-label="Email address"
           autoComplete="email"
-          className={`${field} sm:w-auto sm:flex-1`}
+          className={field}
         />
-        <button
+        <Button
           type="submit"
           disabled={status === "submitting"}
-          className={`${BTN_PRIMARY} h-12 px-7 text-base disabled:opacity-60`}
+          className="h-12 px-7 text-base"
         >
           {status === "submitting" ? "…" : "Notify me"}
-        </button>
+        </Button>
       </div>
       {status === "error" && (
         <p className="text-sm text-salmon">Something went wrong. Try again.</p>

@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import lighthavenMap from "../../../../public/images/lighthaven.png";
+import { Button } from "@/components/ui/button";
 import UpdatesButton from "@/components/site/UpdatesButton";
-import {
-  BTN_PRIMARY,
-  HEADING,
-  NEWSLETTER_LINK,
-} from "@/components/site/styles";
+import { HEADING, NEWSLETTER_LINK } from "@/components/site/styles";
 
 export const metadata: Metadata = {
   title: "Metagame FAQ — Nov 6-8, 2026",
@@ -165,9 +162,9 @@ export default function FaqPage() {
             </a>{" "}
             and we shall respond.
           </p>
-          <a href="mailto:team@metagame.games" className={BTN_PRIMARY}>
-            Email Us
-          </a>
+          <Button asChild>
+            <a href="mailto:team@metagame.games">Email Us</a>
+          </Button>
         </div>
       </div>
     </section>

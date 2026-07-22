@@ -8,16 +8,12 @@ import {
   type InterestValue,
 } from "@/lib/interests";
 import { RFP_FORM_URL } from "@/lib/links";
-import { BTN_PRIMARY } from "./site/styles";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { FIELD_LIGHT } from "./site/styles";
 
 type Status = "idle" | "submitting" | "success" | "error";
-
-const FIELD_BASE =
-  "h-12 w-full rounded-lg border-[1.5px] px-4 text-base outline-none transition-colors";
-const FIELD_DARK =
-  "border-cream/25 bg-navy2 text-cream placeholder:text-cream/40 focus:border-tan";
-const FIELD_LIGHT =
-  "border-navy/20 bg-white text-ink placeholder:text-ink/40 focus:border-meeple";
 
 // Optional knock-on shown under the signup thank-you: re-posts to /api/signup with
 // the email we just captured, so the upsert merges interests/notes onto the same row.
@@ -28,7 +24,8 @@ export default function InterestFollowup({
   email: string;
   light?: boolean;
 }) {
-  const field = `${FIELD_BASE} ${light ? FIELD_LIGHT : FIELD_DARK}`;
+  // <Input> is dark by default; the `light` cream-section variant overrides it.
+  const field = cn(light && FIELD_LIGHT);
   const muted = light ? "text-ink/70" : "text-cream/75";
   const label = light ? "text-ink" : "text-cream";
   const [selected, setSelected] = useState<InterestValue[]>([]);
@@ -71,15 +68,12 @@ export default function InterestFollowup({
         </p>
         {/* Submitted "Speaking" → push them to the session-proposal (RFP) form. */}
         {selected.includes("speaking") && (
-          <a
-            href={RFP_FORM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`${BTN_PRIMARY} gap-2 text-center whitespace-normal`}
-          >
-            Interested in speaking? Fill out the Session Proposal form!
-            <FaArrowRight size={16} aria-hidden className="shrink-0" />
-          </a>
+          <Button asChild className="text-center whitespace-normal">
+            <a href={RFP_FORM_URL} target="_blank" rel="noopener noreferrer">
+              Interested in speaking? Fill out the Session Proposal form!
+              <FaArrowRight size={16} aria-hidden className="shrink-0" />
+            </a>
+          </Button>
         )}
       </div>
     );
@@ -111,7 +105,7 @@ export default function InterestFollowup({
           ))}
         </fieldset>
 
-        <input
+        <Input
           type="text"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -120,13 +114,13 @@ export default function InterestFollowup({
           className={field}
         />
 
-        <button
+        <Button
           type="submit"
           disabled={empty || status === "submitting"}
-          className={`${BTN_PRIMARY} h-12 self-center px-7 text-base disabled:opacity-60`}
+          className="h-12 self-center px-7 text-base"
         >
           {status === "submitting" ? "…" : "Send"}
-        </button>
+        </Button>
 
         {status === "error" && (
           <p className="text-sm text-salmon">

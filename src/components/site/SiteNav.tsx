@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { NavLogo } from "./LogoDice";
 import TicketsModal from "./TicketsModal";
-import { BTN_PRIMARY, BTN_SM } from "./styles";
 
 const NAV_LINKS = [
   { href: "/schedule", label: "Schedule" },
@@ -77,13 +77,9 @@ export default function SiteNav() {
           })}
         </nav>
         <div className="ml-auto flex flex-none items-center gap-3 min-[1000px]:ml-0 sm:gap-5">
-          <button
-            type="button"
-            onClick={() => setTicketsOpen(true)}
-            className={`${BTN_PRIMARY} ${BTN_SM}`}
-          >
+          <Button type="button" size="sm" onClick={() => setTicketsOpen(true)}>
             Buy tickets
-          </button>
+          </Button>
           {ticketsOpen && (
             <TicketsModal onClose={() => setTicketsOpen(false)} />
           )}

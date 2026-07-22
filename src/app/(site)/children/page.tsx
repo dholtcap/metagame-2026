@@ -38,6 +38,7 @@ export default function ChildrensProgrammingPage() {
           </h2>
           <LastYearSchedule
             locationNames={["The Family Room"]}
+            ages={["KIDS"]}
             variant="sequential"
             defaultView="list"
             showViewToggle={false}

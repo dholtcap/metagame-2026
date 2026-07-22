@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { FaBitcoin, FaTimes } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { FaBitcoin } from "react-icons/fa";
 import type { TicketTier } from "@/lib/tickets";
-import { BTN_PRIMARY, HEADING } from "./site/styles";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { HEADING } from "./site/styles";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -21,9 +28,6 @@ function isOpenNodeCheckoutUrl(url: string): boolean {
   }
 }
 
-const FIELD =
-  "h-12 w-full rounded-lg border-[1.5px] border-cream/25 bg-navy2 px-4 text-base text-cream outline-none transition-colors placeholder:text-cream/40 focus:border-tan";
-
 // Mirrors the server cap so over-long input fails fast in the browser too.
 const MAX_FIELD_LEN = 200;
 
@@ -35,7 +39,6 @@ export default function BtcModal({
   onClose: () => void;
 }) {
   const { full } = ticket.prices;
-  const titleId = useId();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -52,21 +55,6 @@ export default function BtcModal({
   }>({ validating: true, valid: false, test: false, btcPrice: null });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  // Interruptive modal: lock page scroll while open, close on Escape.
-  useEffect(() => {
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [onClose]);
 
   // Live-validate the discount code (on mount + on change, debounced) so the
   // displayed price reflects what the server would actually charge. The charge
@@ -175,37 +163,15 @@ export default function BtcModal({
     }
   }
 
-  // Portal to <body>: TicketsModal's backdrop-blur ancestor would otherwise
-  // become the containing block for this fixed overlay and clip it; portaling
-  // also lets this stack above the tickets modal.
-  return createPortal(
-    <div
-      ref={overlayRef}
-      onMouseDown={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/70 p-4 backdrop-blur-sm"
-    >
-      <div className="relative flex w-full max-w-[460px] flex-col gap-6 rounded-xl border border-cream/15 bg-navy p-6 text-cream shadow-2xl sm:p-8">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center text-cream/50 transition-colors hover:text-cream"
-        >
-          <FaTimes size={18} />
-        </button>
-
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-w-[460px] flex-col gap-6 p-6 sm:p-8">
         <div className="flex items-center justify-between gap-2 pr-6">
-          <h2
-            id={titleId}
+          <DialogTitle
             className={`${HEADING} flex items-center gap-2 text-[clamp(24px,6vw,30px)]`}
           >
             <FaBitcoin aria-hidden className="text-tan" /> Pay with BTC
-          </h2>
+          </DialogTitle>
           <span className="flex items-center gap-2 text-lg">
             {discounted ? (
               <>
@@ -221,9 +187,12 @@ export default function BtcModal({
             )}
           </span>
         </div>
+        <DialogDescription className="sr-only">
+          Pay for your Metagame 2026 ticket with Bitcoin.
+        </DialogDescription>
 
         <form onSubmit={payWithBtc} className="flex flex-col gap-3">
-          <input
+          <Input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -232,9 +201,8 @@ export default function BtcModal({
             autoComplete="name"
             maxLength={MAX_FIELD_LEN}
             required
-            className={FIELD}
           />
-          <input
+          <Input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -243,19 +211,17 @@ export default function BtcModal({
             autoComplete="email"
             maxLength={MAX_FIELD_LEN}
             required
-            className={FIELD}
           />
-          <input
+          <Input
             type="text"
             value={discord}
             onChange={(e) => setDiscord(e.target.value)}
             placeholder="Discord handle (optional)"
             aria-label="Discord handle (optional)"
             maxLength={MAX_FIELD_LEN}
-            className={FIELD}
           />
           <div className="flex flex-col gap-1">
-            <input
+            <Input
               type="text"
               value={discountCode}
               onChange={(e) => setDiscountCode(e.target.value)}
@@ -263,7 +229,11 @@ export default function BtcModal({
               aria-label="Discount code"
               autoCapitalize="characters"
               maxLength={MAX_FIELD_LEN}
-              className={`${FIELD} ${discounted ? "border-[#22c55e]/60! text-[#4ade80]! focus:border-[#22c55e]!" : ""}`}
+              className={
+                discounted
+                  ? "border-[#22c55e]/60! text-[#4ade80]! focus:border-[#22c55e]!"
+                  : undefined
+              }
             />
             {!codeEmpty && codeState.validating && (
               <p className="text-xs text-cream/70">Checking</p>
@@ -289,16 +259,15 @@ export default function BtcModal({
             )}
           </div>
           {error && <p className="text-sm text-salmon">{error}</p>}
-          <button
+          <Button
             type="submit"
             disabled={submitting || isTestCode}
-            className={`${BTN_PRIMARY} h-12 w-full text-base disabled:opacity-60`}
+            className="h-12 w-full text-base"
           >
             {submitting ? "Starting checkout…" : "Pay with BTC"}
-          </button>
+          </Button>
         </form>
-      </div>
-    </div>,
-    document.body,
+      </DialogContent>
+    </Dialog>
   );
 }

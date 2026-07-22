@@ -160,9 +160,14 @@ export function startsInSlot(session: Session, slotStart: number): boolean {
  * shown locations while preserving SCHEDULE_LOCATION_ORDER ordering; omit it for
  * all locations. Each day's `slots` are recomputed from its filtered sessions so
  * a single-location view isn't padded with empty hours, and days with no
- * matching sessions are dropped (no empty tabs).
+ * matching sessions are dropped (no empty tabs). `ages` further restricts to
+ * sessions whose age flag is in the given set (e.g. ["KIDS"] for the children
+ * view); sessions with no age flag are excluded when `ages` is set.
  */
-export function buildSchedule(opts?: { locationNames?: string[] }): {
+export function buildSchedule(opts?: {
+  locationNames?: string[];
+  ages?: Ages[];
+}): {
   days: Day[];
   locations: Location[];
 } {
@@ -176,6 +181,7 @@ export function buildSchedule(opts?: { locationNames?: string[] }): {
   }
 
   const shownIds = new Set(locations.map((l) => l.id));
+  const agesWanted = opts?.ages ? new Set<Ages>(opts.ages) : null;
 
   const builtDays: Day[] = [];
   for (const day of CONFERENCE_DAYS) {
@@ -184,7 +190,8 @@ export function buildSchedule(opts?: { locationNames?: string[] }): {
         (s) =>
           pacificDayKey(s.start_time) === day.key &&
           s.location_id !== null &&
-          shownIds.has(s.location_id),
+          shownIds.has(s.location_id) &&
+          (!agesWanted || (s.ages !== null && agesWanted.has(s.ages))),
       )
       .sort((a, b) => a.start_time.localeCompare(b.start_time));
 
