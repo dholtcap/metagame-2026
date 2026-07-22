@@ -3,53 +3,47 @@
 // it from this list: the kept rolls ARE the shipped set, there is no bake step.
 import type { RollInTake } from "../introDriver";
 import t1784690348613 from "./take-1784690348613.json";
-import t1784692477620 from "./take-1784692477620.json";
 import t1784692525673 from "./take-1784692525673.json";
 import t1784693542362 from "./take-1784693542362.json";
 import t1784693552815 from "./take-1784693552815.json";
 import t1784694721202 from "./take-1784694721202.json";
-import t1784695368928 from "./take-1784695368928.json";
 import t1784695434287 from "./take-1784695434287.json";
 import t1784695558040 from "./take-1784695558040.json";
-import t1784695664560 from "./take-1784695664560.json";
 import t1784750756119 from "./take-1784750756119.json";
 import t1784750824914 from "./take-1784750824914.json";
-import t1784750852569 from "./take-1784750852569.json";
 import t1784750899683 from "./take-1784750899683.json";
-import t1784758878278 from "./take-1784758878278.json";
+import t1784760960136 from "./take-1784760960136.json";
+import t1784761016061 from "./take-1784761016061.json";
+import t1784761145205 from "./take-1784761145205.json";
 
 export const TAKE_NAMES = [
   "take-1784690348613.json",
-  "take-1784692477620.json",
   "take-1784692525673.json",
   "take-1784693542362.json",
   "take-1784693552815.json",
   "take-1784694721202.json",
-  "take-1784695368928.json",
   "take-1784695434287.json",
   "take-1784695558040.json",
-  "take-1784695664560.json",
   "take-1784750756119.json",
   "take-1784750824914.json",
-  "take-1784750852569.json",
   "take-1784750899683.json",
-  "take-1784758878278.json",
+  "take-1784760960136.json",
+  "take-1784761016061.json",
+  "take-1784761145205.json",
 ];
 
 export const TAKES: RollInTake[] = [
   t1784690348613.take,
-  t1784692477620.take,
   t1784692525673.take,
   t1784693542362.take,
   t1784693552815.take,
   t1784694721202.take,
-  t1784695368928.take,
   t1784695434287.take,
   t1784695558040.take,
-  t1784695664560.take,
   t1784750756119.take,
   t1784750824914.take,
-  t1784750852569.take,
   t1784750899683.take,
-  t1784758878278.take,
+  t1784760960136.take,
+  t1784761016061.take,
+  t1784761145205.take,
 ];
