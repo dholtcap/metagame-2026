@@ -7,6 +7,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { createPortal } from "react-dom";
 import { FaBitcoin, FaTimes } from "react-icons/fa";
 import { supporterTier, supporterChipUrl } from "@/lib/tickets";
 import {
@@ -14,6 +15,7 @@ import {
   getCurrencySnapshot,
   getCurrencyServerSnapshot,
 } from "@/lib/currency-store";
+import { BTN_PRIMARY, HEADING } from "./site/styles";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -31,7 +33,7 @@ function isOpenNodeCheckoutUrl(url: string): boolean {
 }
 
 const FIELD =
-  "h-12 w-full border-[1.5px] border-[#1b1530]/35 bg-[#f4ecd2] px-4 text-base text-[#1b1530] outline-none transition-colors placeholder:text-[#1b1530]/40 focus:border-[#eaa35a]";
+  "h-12 w-full rounded-lg border-[1.5px] border-cream/25 bg-navy2 px-4 text-base text-cream outline-none transition-colors placeholder:text-cream/40 focus:border-tan";
 
 // Mirrors the server cap so over-long input fails fast in the browser too.
 const MAX_FIELD_LEN = 200;
@@ -64,6 +66,20 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  // Interruptive modal: lock page scroll while open, close on Escape.
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
 
   // Clicking a chip selects it and (BTC mode) sets the editable amount to its value.
   function pickChip(i: number) {
@@ -148,10 +164,10 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
             type="button"
             aria-pressed={active}
             onClick={() => pickChip(i)}
-            className={`border-[1.5px] px-4 py-2 font-[family-name:var(--font-bebas)] text-lg tracking-[0.06em] transition-colors ${
+            className={`rounded-lg border-[1.5px] px-4 py-2 font-space-mono text-base tracking-[0.04em] transition-colors ${
               active
-                ? "border-[#1b1530] bg-[#1b1530] text-[#f4ecd2]"
-                : "border-[#1b1530]/35 text-[#1b1530] hover:border-[#eaa35a]"
+                ? "border-tan bg-tan font-bold text-navy"
+                : "border-cream/30 text-cream hover:border-tan"
             }`}
           >
             {isBtc ? <>&#8383;{c.btc}</> : <>${c.usd}</>}
@@ -161,7 +177,10 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
     </div>
   );
 
-  return (
+  // Portal to <body>: ancestors with backdrop-filter (the hero ticket box)
+  // would otherwise become the containing block for fixed positioning and
+  // shrink the overlay to their own bounds.
+  return createPortal(
     <div
       ref={overlayRef}
       onMouseDown={(e) => {
@@ -170,14 +189,14 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#1b1530]/70 p-4 font-[family-name:var(--font-space-grotesk)]"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/70 p-4 backdrop-blur-sm"
     >
-      <div className="relative flex w-full max-w-[460px] flex-col gap-5 bg-[#fff5e4] p-6 text-[#1b1530] shadow-2xl sm:p-8">
+      <div className="relative flex w-full max-w-[460px] flex-col gap-5 rounded-xl border border-cream/15 bg-navy p-6 text-cream shadow-2xl sm:p-8">
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center text-[#1b1530]/50 transition-colors hover:text-[#1b1530]"
+          className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center text-cream/50 transition-colors hover:text-cream"
         >
           <FaTimes size={18} />
         </button>
@@ -185,13 +204,13 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
         <div className="flex flex-col gap-1 pr-6">
           <h2
             id={titleId}
-            className="flex items-center gap-2 font-[family-name:var(--font-bebas)] text-[clamp(26px,6vw,34px)] leading-tight tracking-[0.04em]"
+            className={`${HEADING} flex items-center gap-2 text-[clamp(24px,6vw,30px)]`}
           >
-            {isBtc && <FaBitcoin aria-hidden className="text-[#eaa35a]" />}
-            Supporter Tier
+            {isBtc && <FaBitcoin aria-hidden className="text-tan" />}
+            Supporter tier
           </h2>
           {!isBtc && (
-            <p className="text-base text-[#1b1530]/80">
+            <p className="text-base text-cream/80">
               Help make Metagame 2026 even better!
             </p>
           )}
@@ -199,7 +218,7 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
 
         {isBtc ? (
           <form onSubmit={payWithBtc} className="flex flex-col gap-3">
-            <p className="text-sm text-[#1b1530]/75">
+            <p className="text-sm text-cream/75">
               Help make Metagame 2026 even better! Pay-what-you-want,
               &ge;&#8383;{floor.btc}. There may be benefits/perks for
               Supporters, but we haven&rsquo;t decided if/what those might be
@@ -207,14 +226,14 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
               reach out to{" "}
               <a
                 href="mailto:team@metagame.games"
-                className="underline transition-colors hover:text-[#eaa35a]"
+                className="underline transition-colors hover:text-tan"
               >
                 team@metagame.games
               </a>
               .
             </p>
             <div className="flex flex-col gap-1">
-              <label className="text-xs tracking-wide text-[#1b1530]/60 uppercase">
+              <label className="font-space-mono text-xs tracking-wide text-cream/60 uppercase">
                 Amount (BTC)
               </label>
               <input
@@ -228,7 +247,7 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
                 className={FIELD}
               />
               {belowFloor && (
-                <p className="text-xs text-[#c0392b]">
+                <p className="text-xs text-salmon">
                   Minimum is &#8383;{floor.btc}.
                 </p>
               )}
@@ -265,30 +284,27 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
               maxLength={MAX_FIELD_LEN}
               className={FIELD}
             />
-            {error && <p className="text-sm text-[#c0392b]">{error}</p>}
+            {error && <p className="text-sm text-salmon">{error}</p>}
             <button
               type="submit"
               disabled={submitting}
-              className="group relative disabled:opacity-60"
+              className={`${BTN_PRIMARY} h-12 w-full text-base disabled:opacity-60`}
             >
-              <span aria-hidden className="absolute inset-0 bg-[#eaa35a]" />
-              <span className="relative flex h-12 items-center justify-center bg-[#1b1530] px-7 font-[family-name:var(--font-bebas)] text-xl tracking-[0.08em] text-[#f4ecd2] transition-transform group-hover:-translate-x-[5px] group-hover:-translate-y-[5px] group-disabled:translate-x-0! group-disabled:translate-y-0!">
-                {submitting ? "Starting checkout…" : "Pay with BTC"}
-              </span>
+              {submitting ? "Starting checkout…" : "Pay with BTC"}
             </button>
           </form>
         ) : (
           <div className="flex flex-col gap-3">
             {chipRow}
-            <p className="text-xs text-[#1b1530]/55">
+            <p className="text-xs text-cream/55">
               You can set any custom amount &ge;$525 at the Stripe checkout
               page.
             </p>
-            <p className="text-sm text-[#1b1530]/75">
+            <p className="text-sm text-cream/75">
               Interested in a formal sponsorship? Reach out to{" "}
               <a
                 href="mailto:team@metagame.games"
-                className="underline transition-colors hover:text-[#eaa35a]"
+                className="underline transition-colors hover:text-tan"
               >
                 team@metagame.games
               </a>
@@ -297,16 +313,14 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={checkoutAtStripe}
-              className="group relative"
+              className={`${BTN_PRIMARY} h-12 w-full text-base`}
             >
-              <span aria-hidden className="absolute inset-0 bg-[#eaa35a]" />
-              <span className="relative flex h-12 items-center justify-center bg-[#1b1530] px-7 font-[family-name:var(--font-bebas)] text-xl tracking-[0.08em] text-[#f4ecd2] transition-transform group-hover:-translate-x-[5px] group-hover:-translate-y-[5px]">
-                Checkout at Stripe
-              </span>
+              Checkout at Stripe
             </button>
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Space_Grotesk } from "next/font/google";
+import { Bebas_Neue, Inter, Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
 
 const bebasNeue = Bebas_Neue({
@@ -13,10 +13,22 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
 });
 
+const inter = Inter({
+  weight: ["400", "500", "600"],
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const spaceMono = Space_Mono({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-space-mono",
+});
+
 export const metadata: Metadata = {
-  title: "Metagame 2026",
+  title: "Metagame — Nov 6-8, 2026",
   description:
-    "Metagame 2026 — the boutique conference about games returns. Get notified.",
+    "Metagame 2026 — a convention of games, designs, and puzzles. Nov 6-8, 2026 at Lighthaven, Berkeley, California.",
 };
 
 export default function RootLayout({
@@ -28,7 +40,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${bebasNeue.variable} ${spaceGrotesk.variable} h-full antialiased`}
+      className={`${bebasNeue.variable} ${spaceGrotesk.variable} ${inter.variable} ${spaceMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         {/* Apply the saved ticket currency before first paint (localStorage is

@@ -8,15 +8,29 @@ import {
   type InterestValue,
 } from "@/lib/interests";
 import { RFP_FORM_URL } from "@/lib/links";
+import { BTN_PRIMARY } from "./site/styles";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-const FIELD =
-  "h-12 w-full border-[1.5px] border-[#1b1530]/35 bg-[#f4ecd2] px-4 text-base text-[#1b1530] outline-none transition-colors placeholder:text-[#1b1530]/40 focus:border-[#2b9bf0]";
+const FIELD_BASE =
+  "h-12 w-full rounded-lg border-[1.5px] px-4 text-base outline-none transition-colors";
+const FIELD_DARK =
+  "border-cream/25 bg-navy2 text-cream placeholder:text-cream/40 focus:border-tan";
+const FIELD_LIGHT =
+  "border-navy/20 bg-white text-ink placeholder:text-ink/40 focus:border-meeple";
 
 // Optional knock-on shown under the signup thank-you: re-posts to /api/signup with
 // the email we just captured, so the upsert merges interests/notes onto the same row.
-export default function InterestFollowup({ email }: { email: string }) {
+export default function InterestFollowup({
+  email,
+  light = false,
+}: {
+  email: string;
+  light?: boolean;
+}) {
+  const field = `${FIELD_BASE} ${light ? FIELD_LIGHT : FIELD_DARK}`;
+  const muted = light ? "text-ink/70" : "text-cream/75";
+  const label = light ? "text-ink" : "text-cream";
   const [selected, setSelected] = useState<InterestValue[]>([]);
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -52,7 +66,7 @@ export default function InterestFollowup({ email }: { email: string }) {
   if (status === "success") {
     return (
       <div className="flex w-full flex-col items-center gap-4">
-        <p className="text-center text-sm text-[#1b1530]">
+        <p className={`text-center text-sm ${muted}`}>
           Additional details submitted ✓
         </p>
         {/* Submitted "Speaking" → push them to the session-proposal (RFP) form. */}
@@ -61,14 +75,10 @@ export default function InterestFollowup({ email }: { email: string }) {
             href={RFP_FORM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative inline-block"
+            className={`${BTN_PRIMARY} gap-2 text-center whitespace-normal`}
           >
-            {/* orange box behind, revealed on hover as the blue front slides */}
-            <span aria-hidden className="absolute inset-0 bg-[#eaa35a]" />
-            <span className="relative flex min-h-14 items-center justify-center gap-2 border-2 border-[#eaa35a] bg-[#2b9bf0] px-6 py-3 text-center font-[family-name:var(--font-bebas)] text-[clamp(18px,4.5vw,24px)] leading-tight tracking-[0.06em] text-[#f4ecd2] transition-transform group-hover:-translate-x-[5px] group-hover:-translate-y-[5px]">
-              Interested in speaking? Fill out the Session Proposal form!
-              <FaArrowRight size={16} aria-hidden className="shrink-0" />
-            </span>
+            Interested in speaking? Fill out the Session Proposal form!
+            <FaArrowRight size={16} aria-hidden className="shrink-0" />
           </a>
         )}
       </div>
@@ -77,7 +87,7 @@ export default function InterestFollowup({ email }: { email: string }) {
 
   return (
     <div className="flex w-full flex-col gap-3">
-      <p className="text-center text-sm text-[#1b1530]">
+      <p className={`text-center text-sm ${muted}`}>
         Say more about your interest:
       </p>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -88,13 +98,13 @@ export default function InterestFollowup({ email }: { email: string }) {
           {INTEREST_OPTIONS.map((opt) => (
             <label
               key={opt.value}
-              className="flex cursor-pointer items-center gap-2 text-base"
+              className={`flex cursor-pointer items-center gap-2 text-base ${label}`}
             >
               <input
                 type="checkbox"
                 checked={selected.includes(opt.value)}
                 onChange={() => toggle(opt.value)}
-                className="h-4 w-4 accent-[#2b9bf0]"
+                className={`h-4 w-4 ${light ? "accent-meeple" : "accent-tan"}`}
               />
               <span>{opt.label}</span>
             </label>
@@ -107,23 +117,19 @@ export default function InterestFollowup({ email }: { email: string }) {
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Anything else you want us to know"
           aria-label="Anything else you want us to know"
-          className={FIELD}
+          className={field}
         />
 
         <button
           type="submit"
           disabled={empty || status === "submitting"}
-          className="group/btn relative self-center disabled:opacity-60"
+          className={`${BTN_PRIMARY} h-12 self-center px-7 text-base disabled:opacity-60`}
         >
-          {/* blue box behind the button, revealed on hover */}
-          <span aria-hidden className="absolute inset-0 bg-[#2b9bf0]" />
-          <span className="relative flex h-12 items-center justify-center bg-[#1b1530] px-7 font-[family-name:var(--font-bebas)] text-xl leading-[20px] tracking-[0.08em] text-[#f4ecd2] transition-transform group-hover/btn:-translate-x-[5px] group-hover/btn:-translate-y-[5px] group-disabled/btn:translate-x-0! group-disabled/btn:translate-y-0!">
-            {status === "submitting" ? "…" : "Send"}
-          </span>
+          {status === "submitting" ? "…" : "Send"}
         </button>
 
         {status === "error" && (
-          <p className="text-sm text-[#c0392b]">
+          <p className="text-sm text-salmon">
             Something went wrong. Try again.
           </p>
         )}

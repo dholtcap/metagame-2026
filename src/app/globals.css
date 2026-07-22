@@ -11,6 +11,30 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-space-grotesk);
+  --font-grotesk: var(--font-space-grotesk);
+  --font-inter: var(--font-inter);
+  --font-space-mono: var(--font-space-mono);
+}
+
+/* Mock-site palette (designer's names kept: meeple = the orange CTA red) */
+@theme {
+  --color-ink: #1b1b1b;
+  --color-navy: #173059;
+  --color-navy2: #1f3352;
+  --color-brand-blue: #4d9ff7;
+  --color-tan: #e2a85c;
+  --color-cream: #fff5f2;
+  --color-meeple: #d8502b;
+  --color-meeple-dark: #b8431f;
+  --color-salmon: #fa8072;
+  --color-sky: #cee1ff;
+  --color-peach: #ffd8a5;
+  --color-line: rgba(27, 27, 27, 0.12);
+  --color-line-dark: rgba(246, 239, 227, 0.14);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -66,4 +90,10 @@ body {
 .ccy-checking::after {
   content: ".";
   animation: ccy-ellipsis 1.2s infinite;
+}
+
+/* Tailwind v4 preflight keeps the UA default cursor on buttons; we want every
+   enabled button to read as clickable. */
+button:not(:disabled) {
+  cursor: pointer;
 }
