@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
+import LastYearSchedule from "@/components/LastYearSchedule";
 import { EYEBROW, HEADING } from "@/components/site/styles";
-
-const BODY_LINK = "font-semibold text-navy underline underline-offset-2";
 
 export const metadata: Metadata = {
   title: "Children's Programming — Metagame 2026",
@@ -24,17 +23,25 @@ export default function ChildrensProgrammingPage() {
             Metagame welcomes your whole family! Childcare and activity for
             children will be available throughout the conference. Specifics to
             come later, but for now, you can take a look at some of what the
-            kids got up to{" "}
-            <a
-              href="https://2025.metagame.games/schedule?locations=the-family-room&day=1"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={BODY_LINK}
-            >
-              last year
-            </a>
-            .
+            kids got up to last year, below.
           </p>
+        </div>
+
+        <div className="mt-12">
+          <p className={`${EYEBROW} mb-1 text-center text-meeple`}>
+            The Family Room · Metagame 2025
+          </p>
+          <h2
+            className={`${HEADING} mb-6 text-center text-[clamp(24px,3vw,34px)] text-navy`}
+          >
+            Last year in The Family Room
+          </h2>
+          <LastYearSchedule
+            locationNames={["The Family Room"]}
+            variant="sequential"
+            defaultView="list"
+            showViewToggle={false}
+          />
         </div>
       </div>
     </section>

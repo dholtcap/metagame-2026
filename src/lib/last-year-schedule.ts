@@ -124,13 +124,6 @@ const SCHEDULE_LOCATION_ORDER = [
   "The Family Room",
 ];
 
-/** Locations shown in the schedule, in the explicit order above. */
-export const scheduleLocations: Location[] = SCHEDULE_LOCATION_ORDER.map(
-  (name) => data.locations.find((l) => l.name === name),
-).filter((l): l is Location => Boolean(l));
-
-const shownLocationIds = new Set(scheduleLocations.map((l) => l.id));
-
 export interface Day {
   key: string;
   name: string;
@@ -161,27 +154,63 @@ export function startsInSlot(session: Session, slotStart: number): boolean {
   return m >= slotStart && m < slotStart + SLOT_MINUTES;
 }
 
-/** Group sessions into the three conference days, each with its own time span. */
-export const days: Day[] = CONFERENCE_DAYS.map((day) => {
-  const sessions = data.sessions
-    .filter(
-      (s) =>
-        pacificDayKey(s.start_time) === day.key &&
-        s.location_id !== null &&
-        shownLocationIds.has(s.location_id),
-    )
-    .sort((a, b) => a.start_time.localeCompare(b.start_time));
+/**
+ * Build the schedule's locations + days, optionally restricted to a set of
+ * location names. `locationNames` (case-sensitive exact match) filters the
+ * shown locations while preserving SCHEDULE_LOCATION_ORDER ordering; omit it for
+ * all locations. Each day's `slots` are recomputed from its filtered sessions so
+ * a single-location view isn't padded with empty hours, and days with no
+ * matching sessions are dropped (no empty tabs).
+ */
+export function buildSchedule(opts?: { locationNames?: string[] }): {
+  days: Day[];
+  locations: Location[];
+} {
+  let locations = SCHEDULE_LOCATION_ORDER.map((name) =>
+    data.locations.find((l) => l.name === name),
+  ).filter((l): l is Location => Boolean(l));
 
-  const starts = sessions.map((s) => pacificMinutes(s.start_time));
-  const ends = sessions.map((s) => pacificMinutes(s.end_time));
-  const startMin = Math.floor(Math.min(...starts) / 60) * 60;
-  const endMin = Math.ceil(Math.max(...ends) / SLOT_MINUTES) * SLOT_MINUTES;
+  if (opts?.locationNames) {
+    const wanted = new Set(opts.locationNames);
+    locations = locations.filter((l) => wanted.has(l.name));
+  }
 
-  const slots: number[] = [];
-  for (let m = startMin; m < endMin; m += SLOT_MINUTES) slots.push(m);
+  const shownIds = new Set(locations.map((l) => l.id));
 
-  return { ...day, sessions, slots };
-});
+  const builtDays: Day[] = [];
+  for (const day of CONFERENCE_DAYS) {
+    const sessions = data.sessions
+      .filter(
+        (s) =>
+          pacificDayKey(s.start_time) === day.key &&
+          s.location_id !== null &&
+          shownIds.has(s.location_id),
+      )
+      .sort((a, b) => a.start_time.localeCompare(b.start_time));
+
+    if (sessions.length === 0) continue;
+
+    const starts = sessions.map((s) => pacificMinutes(s.start_time));
+    const ends = sessions.map((s) => pacificMinutes(s.end_time));
+    const startMin = Math.floor(Math.min(...starts) / 60) * 60;
+    const endMin = Math.ceil(Math.max(...ends) / SLOT_MINUTES) * SLOT_MINUTES;
+
+    const slots: number[] = [];
+    for (let m = startMin; m < endMin; m += SLOT_MINUTES) slots.push(m);
+
+    builtDays.push({ ...day, sessions, slots });
+  }
+
+  return { days: builtDays, locations };
+}
+
+const defaultSchedule = buildSchedule();
+
+/** Locations shown in the schedule, in the explicit order above. */
+export const scheduleLocations: Location[] = defaultSchedule.locations;
+
+/** The three conference days, each with its own time span. */
+export const days: Day[] = defaultSchedule.days;
 
 export function slotLabel(slotStart: number): string {
   const h = Math.floor(slotStart / 60);
