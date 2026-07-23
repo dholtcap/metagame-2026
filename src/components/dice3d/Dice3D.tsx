@@ -79,7 +79,9 @@ function Scene({
   );
 
   // Fit the whole row to the canvas width: scale down on narrow viewports so
-  // all four dice stay on-screen; cap so they don't balloon on wide ones.
+  // all four dice stay on-screen; cap so they don't balloon on wide ones. The
+  // dice fill the canvas so the roll-in's off-canvas spawn stays hidden — the
+  // takes are baked for this framing, so don't zoom out past it (see Dice.tsx).
   const viewportWidth = useThree((s) => s.viewport.width);
   const canvasHeightPx = useThree((s) => s.size.height);
   // Zoom that makes the STATIC ortho camera cover the same vertical world-height as

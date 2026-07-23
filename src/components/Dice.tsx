@@ -25,7 +25,7 @@ export default function Dice() {
   // behind an edit toggle instead of sitting on the page every dev load.
   const [editing, setEditing] = useState(false);
   return (
-    <div className="relative flex h-[clamp(140px,18vh,210px)] w-[96vw] items-center justify-center md:h-[clamp(280px,34vh,400px)] md:w-[min(1450px,90vw)]">
+    <div className="relative flex h-[clamp(160px,20vh,220px)] w-[96vw] items-center justify-center md:h-[clamp(330px,38vh,440px)] md:w-[min(1200px,88vw)]">
       <Dice3D key={diceKey} />
       {DiceDevPanel && (
         <>

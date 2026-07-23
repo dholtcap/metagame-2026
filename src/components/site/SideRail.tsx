@@ -9,7 +9,7 @@ const RAIL_SIDE: "left" | "right" = "left";
 
 // Apple-dock magnification: an icon's scale falls off as a gaussian of the
 // vertical distance between its center and the pointer. scale = 1 + AMP * e^(-(d/WIDTH)^2).
-const MAG_AMP = 0.9; // nearest icon grows by ~90%
+const MAG_AMP = 0.5; // nearest icon grows by ~50%
 const MAG_WIDTH = 52; // px falloff radius — how far the bulge spreads
 
 export default function SideRail() {
