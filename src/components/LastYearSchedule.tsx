@@ -268,6 +268,20 @@ export default function LastYearSchedule({
     return () => clearTimeout(t);
   }, [showViewToggle]);
 
+  // Below lg the "sequential" variant would stack every day into one tall column
+  // — too much on a phone. Fall back to the tabbed day-switcher there.
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const on = () => setNarrow(mq.matches);
+    const t = setTimeout(on, 0);
+    mq.addEventListener("change", on);
+    return () => {
+      clearTimeout(t);
+      mq.removeEventListener("change", on);
+    };
+  }, []);
+
   const renderDay = (day: Day) => {
     const onOpen: OpenFn = (session) => setOpen({ session, dayName: day.name });
     return view === "grid" ? (
@@ -282,16 +296,20 @@ export default function LastYearSchedule({
     );
   };
 
+  // One day at a time with a day switcher: always for "tabbed", and for
+  // "sequential" once the screen is too narrow to lay the days out side by side.
+  const tabbed = variant === "tabbed" || (variant === "sequential" && narrow);
+
   // Render the controls row only when it holds at least one control — otherwise
-  // (sequential + hidden toggle) it would leave an empty, gap-padded div.
-  const hasControls = variant === "tabbed" || showViewToggle;
+  // (sequential, wide, hidden toggle) it would leave an empty, gap-padded div.
+  const hasControls = tabbed || showViewToggle;
 
   return (
     <div className="flex flex-col gap-5">
       {/* Controls: day tabs (tabbed only) + view toggle */}
       {hasControls && (
         <div className="flex flex-wrap items-center justify-center gap-3">
-          {variant === "tabbed" && (
+          {tabbed && (
             <div
               role="tablist"
               aria-label="Conference day"
@@ -373,7 +391,7 @@ export default function LastYearSchedule({
         ))}
       </div>
 
-      {variant === "tabbed" ? (
+      {tabbed ? (
         renderDay(days[dayIndex])
       ) : (
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-5">

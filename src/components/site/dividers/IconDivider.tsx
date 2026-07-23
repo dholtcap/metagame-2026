@@ -9,8 +9,15 @@ const CHARCOAL = "#4d4d4d";
 export type GameIcon = {
   name: string;
   viewBox: string;
-  d: string;
+  // Single-path sets pass `d`; multi-element sets (Noun Project art with several
+  // paths/polygons/rects) pass `paths` so each shape fills independently — the
+  // safe union, without cross-shape winding turning overlaps into holes.
+  d?: string;
+  paths?: string[];
   fillRule?: "evenodd" | "nonzero";
+  // Optional size override (else GLYPH). Wide glyphs (e.g. the car) need a wider
+  // box so they don't render short next to the square tokens.
+  className?: string;
 };
 
 export default function IconDivider({ icons }: { icons: GameIcon[] }) {
@@ -22,9 +29,11 @@ export default function IconDivider({ icons }: { icons: GameIcon[] }) {
           key={ic.name}
           viewBox={ic.viewBox}
           aria-hidden
-          className={`${GLYPH} ${SHADOW}`}
+          className={`${ic.className ?? GLYPH} ${SHADOW}`}
         >
-          <path d={ic.d} fill={CHARCOAL} fillRule={ic.fillRule} />
+          {(ic.paths ?? [ic.d ?? ""]).map((d, i) => (
+            <path key={i} d={d} fill={CHARCOAL} fillRule={ic.fillRule} />
+          ))}
         </svg>
       ))}
       <span className="h-px max-w-40 flex-1 bg-line" />

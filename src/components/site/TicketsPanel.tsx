@@ -27,7 +27,13 @@ const TILE_LABEL =
 // driven by the shared currency store, with the supporter/BTC flows stacking on
 // top. Renders bare inner content — the navy panel box comes from the modal's
 // DialogContent or the /tickets page wrapper.
-export default function TicketsPanel() {
+export default function TicketsPanel({
+  showHeading = true,
+}: {
+  // The modal shows its own "Tickets" heading; the one-pager section supplies a
+  // SectionHeading above the (now background-less) panel, so it hides this one.
+  showHeading?: boolean;
+}) {
   const standard = getTicket("standard");
   const earlyBirdHref = standard ? ticketUrl(standard) : null;
   const [supporterOpen, setSupporterOpen] = useState(false);
@@ -42,9 +48,11 @@ export default function TicketsPanel() {
 
   return (
     <>
-      <p className={`${HEADING} text-[clamp(20px,2.6vw,26px)] text-cream`}>
-        Tickets
-      </p>
+      {showHeading && (
+        <p className={`${HEADING} text-[clamp(20px,2.6vw,26px)] text-cream`}>
+          Tickets
+        </p>
+      )}
 
       {/* USD/BTC toggle: one currency governs both tiles + the supporter modal.
           The tan knob slides over the active half; the label under it darkens
@@ -88,7 +96,7 @@ export default function TicketsPanel() {
               onClick={() => setBtcOpen(true)}
               className={TILE}
             >
-              <span className={TILE_LABEL}>Early-bird tickets</span>
+              <span className={TILE_LABEL}>Early-bird</span>
               <span className="flex items-baseline gap-2.5 leading-none">
                 <span className="text-[18px] font-bold text-cream/40 line-through">
                   &#8383;{standard.prices.full.btc}
@@ -106,7 +114,7 @@ export default function TicketsPanel() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span className={TILE_LABEL}>Early-bird tickets</span>
+                  <span className={TILE_LABEL}>Early-bird</span>
                   <span className="flex items-baseline gap-2.5 leading-none">
                     <span className="text-[18px] font-bold text-cream/40 line-through">
                       ${standard.prices.full.usd}

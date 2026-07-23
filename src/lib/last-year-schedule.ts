@@ -50,9 +50,9 @@ const data = rawData as unknown as Snapshot;
 // bucketed by the Pacific day they start on; anything outside these three days
 // (e.g. a stray post-conference entry) is dropped — matching the 2025 site.
 export const CONFERENCE_DAYS = [
-  { key: "2025-09-12", name: "Friday", dateLabel: "Sep 12" },
-  { key: "2025-09-13", name: "Saturday", dateLabel: "Sep 13" },
-  { key: "2025-09-14", name: "Sunday", dateLabel: "Sep 14" },
+  { key: "2025-09-12", name: "Friday", dateLabel: "Sep 12, 2025" },
+  { key: "2025-09-13", name: "Saturday", dateLabel: "Sep 13, 2025" },
+  { key: "2025-09-14", name: "Sunday", dateLabel: "Sep 14, 2025" },
 ] as const;
 
 const PACIFIC = "America/Los_Angeles";
