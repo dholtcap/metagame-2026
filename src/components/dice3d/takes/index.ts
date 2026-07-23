@@ -14,7 +14,7 @@ import t1784750824914 from "./take-1784750824914.json";
 import t1784750899683 from "./take-1784750899683.json";
 import t1784760960136 from "./take-1784760960136.json";
 import t1784761016061 from "./take-1784761016061.json";
-import t1784761145205 from "./take-1784761145205.json";
+import t1784768964238 from "./take-1784768964238.json";
 
 export const TAKE_NAMES = [
   "take-1784690348613.json",
@@ -29,7 +29,7 @@ export const TAKE_NAMES = [
   "take-1784750899683.json",
   "take-1784760960136.json",
   "take-1784761016061.json",
-  "take-1784761145205.json",
+  "take-1784768964238.json",
 ];
 
 export const TAKES: RollInTake[] = [
@@ -45,5 +45,5 @@ export const TAKES: RollInTake[] = [
   t1784750899683.take,
   t1784760960136.take,
   t1784761016061.take,
-  t1784761145205.take,
+  t1784768964238.take,
 ];
