@@ -37,13 +37,32 @@ const STATIC_LETTERS: StaticLetters[] = [
 
 const SEQ: Phase[] = ["meta", "game", "year"];
 const PHASE_MS = 2700; // hold each phase ~3.2s — deliberate but not sluggish
+// The very first META hold is shorter: the roll-in already shows META through
+// its oriented rest tableau (and the align into it), so a full hold reads as a
+// pause. Only the first meta→game is shortened; every later phase uses PHASE_MS.
+const FIRST_META_MS = 1200;
 
 // flip to true to bring back the soft ground shadow under the dice (off for now)
 const SHOW_CONTACT_SHADOW: boolean = false;
 
-const GAP = 1.5; // world-space spacing between dice centers
-// row spans the outer dice centers plus a die's worth of half-width each side
-const ROW_WIDTH = (DICE.length - 1) * GAP + 1.6;
+const GAP = 1.5; // default world-space spacing between dice centers (dev-tunable via ?gap)
+const rowWidthFor = (gap: number) => (DICE.length - 1) * gap + 1.6;
+
+// Resting on-screen dice size, decoupled from canvas width (META-447). 1 = the
+// size the dice have today; bump to grow the resting row, drop to shrink it.
+// The full-bleed canvas only adds runway around the dice — it no longer sets
+// their size, so this is the single knob for that.
+const RESTING_SIZE = 1;
+
+// Dev-tunable dice spacing. The curation panel writes ?gap and remounts; a plain
+// load uses GAP. NB the shipped resting layout is GAP — record/keep rolls at the
+// spacing you intend to ship, since the align tail blends each take to these
+// slots.
+function readGap(): number {
+  if (typeof window === "undefined") return GAP;
+  const g = Number(new URLSearchParams(window.location.search).get("gap"));
+  return Number.isFinite(g) && g > 0 ? g : GAP;
+}
 
 // ?record=1 publishes each finished live-sim take here for the dev curation
 // panel to judge and keep.
@@ -73,23 +92,38 @@ function Scene({
   record: boolean;
   onIntroDone: () => void;
 }) {
+  const [gap] = useState(readGap);
+  const rowWidth = rowWidthFor(gap);
   const positions = useMemo(
-    () => DICE.map((_, i) => (i - (DICE.length - 1) / 2) * GAP),
-    [],
+    () => DICE.map((_, i) => (i - (DICE.length - 1) / 2) * gap),
+    [gap],
   );
 
-  // Fit the whole row to the canvas width: scale down on narrow viewports so
-  // all four dice stay on-screen; cap so they don't balloon on wide ones.
-  const viewportWidth = useThree((s) => s.viewport.width);
+  const viewportWidth = useThree((s) => s.viewport.width); // world units at focus plane
+  const canvasWidthPx = useThree((s) => s.size.width);
   const canvasHeightPx = useThree((s) => s.size.height);
   // Zoom that makes the STATIC ortho camera cover the same vertical world-height as
   // the perspective camera (2·dist·tan(fov/2), dist 17, fov 7°), so swapping to it
   // doesn't reframe the dice. Ortho visible height = canvasHeightPx / zoom.
   const orthoZoom =
     canvasHeightPx / (2 * 17 * Math.tan(THREE.MathUtils.degToRad(7) / 2));
-  // fill ~95% of the canvas width so the dice have margin to sweep wider mid-turn
-  // (a cube rotating 90° reaches ~1.4× its width at the diagonal) without clipping.
-  const scale = Math.min(2.4, (viewportWidth * 0.95) / ROW_WIDTH);
+
+  // Resting dice hold a capped on-screen size independent of the (now full-bleed)
+  // canvas width, so the extra width reads as runway for the roll-in rather than
+  // giant dice. We reproduce the size the dice had when they filled 95% of the old
+  // stage box (min(1150px,74vw) desktop / 96vw mobile), converting that target
+  // pixel width to a group scale via px-per-world-unit. Crucially the target is
+  // sized against the row AT THE DEFAULT gap (refRow), NOT the current row width —
+  // so tuning gap changes only the spacing between dice, never their size. Still
+  // capped (2.4) and still shrink-to-fit on phones.
+  const pxPerWorld = canvasWidthPx / viewportWidth;
+  const oldStagePx =
+    canvasWidthPx >= 768
+      ? Math.min(1150, canvasWidthPx * 0.74)
+      : canvasWidthPx * 0.96;
+  const refRow = rowWidthFor(GAP);
+  const targetRowPx = oldStagePx * 0.95 * RESTING_SIZE;
+  const scale = Math.min(2.4, targetRowPx / (refRow * pxPerWorld));
 
   // Roll-in pose driver, built once at mount. Normal loads play back one of the
   // kept physics takes (createPlayback); ?record=1 — or a tree with nothing kept
@@ -194,7 +228,7 @@ function Scene({
       {SHOW_CONTACT_SHADOW && (
         <ContactShadows
           position={[0, 0.1 - 0.95 * scale, 0]}
-          scale={ROW_WIDTH * scale}
+          scale={rowWidth * scale}
           resolution={1024}
           blur={2.5}
           far={2 * scale}
@@ -257,12 +291,19 @@ export default function Dice3D() {
       typeof window !== "undefined" &&
       new URLSearchParams(window.location.search).has("phase");
     if (phase !== "meta" || pinned || !introOver) return;
+    // Recursive timeout (not a fixed interval) so the first hold can differ: the
+    // opening meta→game fires after FIRST_META_MS, every step after at PHASE_MS.
     let step = 0;
-    const id = setInterval(() => {
-      step = (step + 1) % SEQ.length;
-      setPhase(SEQ[step]);
-    }, PHASE_MS);
-    return () => clearInterval(id);
+    let id: ReturnType<typeof setTimeout>;
+    const advance = (delay: number) => {
+      id = setTimeout(() => {
+        step = (step + 1) % SEQ.length;
+        setPhase(SEQ[step]);
+        advance(PHASE_MS);
+      }, delay);
+    };
+    advance(FIRST_META_MS);
+    return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [introOver]);
 

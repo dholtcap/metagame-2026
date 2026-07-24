@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import * as THREE from "three";
 import type { RollInTake } from "./introDriver";
-import type { TakeMeta } from "./physicsRollIn";
+import {
+  DEFAULT_PARAMS,
+  readParams,
+  type RollParams,
+  type TakeMeta,
+} from "./physicsRollIn";
 import {
   SPIN_LABELS,
   matchRetcon,
@@ -36,14 +41,31 @@ type Listed = {
   hz: number;
 };
 
-function writeModeToUrl(mode: Mode, low: boolean) {
+// The roll-shaping params. ?gap lives outside this — it's a layout knob Dice3D
+// reads in every mode, so it's preserved across mode changes rather than
+// rewritten here. (launch/base are stale keys from earlier rigs; kept in the
+// delete-list so an old URL doesn't leave them lingering.)
+const NUM_KEYS = [
+  "speed",
+  "angle",
+  "height",
+  "reach",
+  "spin",
+  "bounce",
+] as const;
+const ROLL_KEYS = ["sim", "record", "launch", "base", "entry", ...NUM_KEYS];
+function writeModeToUrl(mode: Mode, params: RollParams) {
   const p = new URLSearchParams(window.location.search);
-  p.delete("sim");
-  p.delete("record");
-  p.delete("launch");
+  ROLL_KEYS.forEach((k) => p.delete(k));
+  // Only live rolls carry the sim params; a kept/curated roll ignores them. Each
+  // is written only when it differs from the default, keeping URLs short.
   if (mode === "live") {
     p.set("record", "1");
-    if (low) p.set("launch", "low");
+    NUM_KEYS.forEach((k) => {
+      if (params[k] !== DEFAULT_PARAMS[k])
+        p.set(k, String(Math.round(params[k] * 100) / 100));
+    });
+    if (params.entry === "split") p.set("entry", "split");
   }
   const q = p.toString();
   history.replaceState(null, "", q ? `?${q}` : window.location.pathname);
@@ -73,23 +95,25 @@ function halfExtentX(q: number[], o: number): number {
   );
 }
 
-// Every die must be fully on camera from the moment it matters: clear of the
-// right edge once it has reached the floor, and clear of the left edge once it
-// has fully entered — the off-screen-left entry is by design, so measuring
-// every frame (as this check used to) marks every roll as failing.
+// Every die must be fully on camera from the moment it lands: the off-screen
+// entry (left, or right too in split mode) is by design, so we only enforce
+// containment once a die has reached the floor — before that it's allowed to be
+// mid-flight off either edge. After landing it must stay fully inside ±EDGE
+// every frame, and it must have been fully inside at least once (so a die that
+// rests half off-frame fails). Symmetric, so split-entry takes are judged too.
 function onScreen(take: RollInTake): boolean {
   for (const die of take.dice) {
     let touched = false;
-    let entered = false;
+    let enteredFully = false;
     for (let k = 0; k < take.n; k++) {
       const x = die.p[k * 3];
       const h = halfExtentX(die.q, k * 4);
       if (die.p[k * 3 + 1] < 0.55) touched = true;
-      if (touched && x + h > EDGE) return false;
-      if (x - h >= -EDGE) entered = true;
-      else if (entered) return false;
+      const fullyIn = x - h >= -EDGE && x + h <= EDGE;
+      if (touched && !fullyIn) return false;
+      if (fullyIn) enteredFully = true;
     }
-    if (!touched || !entered) return false;
+    if (!touched || !enteredFully) return false;
   }
   return true;
 }
@@ -112,6 +136,27 @@ function judge(meta: TakeMeta, restX: number[], take: RollInTake): Badge[] {
 const shortName = (f: string) => f.replace(/^take-|\.json$/g, "").slice(-6);
 
 const IDENTITY = new THREE.Quaternion();
+
+// Each die's META pick: its blue front letter (the row spells M·E·T·A) turned
+// camera-ward at its most-upright spin. "blue <letter> f" is that face group;
+// spin 0 is most-upright (retconOptions sorts it first). Upright is a first
+// approximation, estimated from the die's tilted rest pose — same as the picker.
+const metaPicks = (groups: RetconFaceGroup[][]) =>
+  groups.map((faces) => {
+    const face = faces.findIndex(
+      (g) => g.label.startsWith("blue") && g.label.endsWith(" f"),
+    );
+    return { face: face >= 0 ? face : 0, spin: 0 };
+  });
+
+// Dimmed stand-in for the judge badges, shown before a roll lands so the toolbar
+// reserves its width instead of jumping when the real ones appear.
+const BADGE_PLACEHOLDER: Badge[] = [
+  { label: "sim clean", ok: false },
+  { label: "near slots", ok: false },
+  { label: "in order", ok: false },
+  { label: "on screen", ok: false },
+];
 
 function Cycler({
   label,
@@ -140,9 +185,15 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
   const [mode, setMode] = useState<Mode>(() =>
     new URLSearchParams(window.location.search).has("record") ? "live" : "kept",
   );
-  const [low, setLow] = useState<boolean>(
-    () => new URLSearchParams(window.location.search).get("launch") === "low",
-  );
+  // Granular roll-shaping params (replaces the old low/high checkbox). Written
+  // to the URL and applied by remounting, so ?record bakes at these values.
+  const [params, setParams] = useState<RollParams>(readParams);
+  // Dice spacing (Dice3D reads ?gap in every mode). Preview-only until the
+  // shipped GAP constant is set to match; kept out of ROLL_KEYS.
+  const [gap, setGap] = useState<number>(() => {
+    const g = Number(new URLSearchParams(window.location.search).get("gap"));
+    return Number.isFinite(g) && g > 0 ? g : 1.5;
+  });
   const [listed, setListed] = useState<Listed[]>([]);
   const [roll, setRoll] = useState<{
     take: RollInTake;
@@ -157,6 +208,13 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
   const [groups, setGroups] = useState<RetconFaceGroup[][] | null>(null);
   const [picks, setPicks] = useState<{ face: number; spin: number }[]>([]);
   const [savedOrient, setSavedOrient] = useState<string | null>(null);
+  // When on, every live roll is oriented to META the instant it lands (no click,
+  // no waiting), so keep bakes it oriented. Off = raw faces / manual orient.
+  const [autoOrient, setAutoOrient] = useState(true);
+  // Whether the per-die orientation cyclers are expanded. Auto-orient sets
+  // `groups` silently (so keep bakes) WITHOUT opening this, so a normal roll
+  // doesn't grow the panel; the picker opens only on an explicit orient/curate.
+  const [showPicker, setShowPicker] = useState(false);
 
   const refreshList = useCallback(
     () =>
@@ -171,6 +229,11 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
   }, [refreshList]);
 
   // The live sim publishes each finished take on window; pick it up for badges.
+  // With auto-orient on, immediately compute + apply the META orientation so the
+  // kept roll bakes oriented and any replay shows it — no wait, no click. It's a
+  // silent apply (the live roll already ends at META via its align tail), so no
+  // extra re-roll; hit the orient button if you want to freeze-inspect the
+  // tableau. `groups`/`picks` are read every frame by playback via tableauPreview.
   useEffect(() => {
     const onTake = () => {
       const t = window.__rollInTake;
@@ -178,10 +241,15 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
       const restX = t.take.dice.map((d) => d.p[(t.take.n - 1) * 3]);
       setRoll({ ...t, badges: judge(t.meta, restX, t.take) });
       setSaved(null);
+      if (autoOrient) {
+        const g = t.take.dice.map((_, i) => retconOptions(t.take, i));
+        setGroups(g);
+        setPicks(metaPicks(g));
+      }
     };
     window.addEventListener("roll-in-take", onTake);
     return () => window.removeEventListener("roll-in-take", onTake);
-  }, []);
+  }, [autoOrient]);
 
   // Queue a take for the next mount and remount, so an arbitrary roll (one kept
   // earlier, or the one just thrown) plays without a page reload.
@@ -195,7 +263,7 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
     setSaved(null);
     setSavedOrient(null);
     setArmed(false);
-    writeModeToUrl({ file }, low);
+    writeModeToUrl({ file }, params);
     try {
       const res = await fetch(
         `/api/dev/keep-take?file=${encodeURIComponent(file)}`,
@@ -215,6 +283,7 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
       );
       setGroups(g);
       setPicks(p);
+      setShowPicker(true); // curating a kept take → open the picker
       setRoll({ ...body, badges: judge(body.meta, restX, body.take) });
       play(body.take);
     } catch {
@@ -223,18 +292,50 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
     }
   };
 
-  const switchTo = (m: "live" | "kept", l: boolean = low) => {
+  const switchTo = (m: "live" | "kept", p: RollParams = params) => {
     delete window.__replayTake; // stop replaying whatever was selected
     setTableauPreview({ hold: false, retcon: null });
     setHold(false);
     setGroups(null);
+    setShowPicker(false);
     setMode(m);
-    setLow(l);
+    setParams(p);
     setRoll(null);
     setSaved(null);
     setSavedOrient(null);
     setArmed(false);
-    writeModeToUrl(m, l);
+    writeModeToUrl(m, p);
+    onRemount();
+  };
+
+  // Change one roll param and re-throw a live roll at the new value.
+  const setParam = <K extends keyof RollParams>(k: K, v: RollParams[K]) =>
+    switchTo("live", { ...params, [k]: v });
+  // Step a numeric roll param by its own increment, re-throwing each time. Angle
+  // may go negative (a downward skid); the rest floor at 0 (reach at 1).
+  const stepParam = (k: (typeof NUM_KEYS)[number], d: number) => {
+    const inc = {
+      speed: 0.1,
+      angle: 3,
+      height: 0.2,
+      reach: 0.5,
+      spin: 0.1,
+      bounce: 0.1,
+    }[k];
+    const floor = k === "angle" ? -60 : k === "reach" ? 1 : 0;
+    setParam(k, Math.max(floor, Math.round((params[k] + d * inc) * 100) / 100));
+  };
+
+  // Dice spacing is a layout knob, not a roll param: write ?gap and remount so
+  // Dice3D re-reads it, without touching the live/kept mode or roll params.
+  const stepGap = (d: number) => {
+    const next = Math.round((gap + d * 0.1) * 100) / 100;
+    if (next < 0.8 || next > 2.6) return;
+    setGap(next);
+    const url = new URLSearchParams(window.location.search);
+    url.set("gap", String(next));
+    history.replaceState(null, "", `?${url.toString()}`);
+    delete window.__replayTake;
     onRemount();
   };
 
@@ -297,14 +398,51 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
     replay();
   };
 
+  // Snap every die to its META letter (the blue front face), most-upright — the
+  // same face×spin the picker offers, chosen automatically. On a live roll this
+  // replays the take held at rest so the oriented tableau shows before you keep;
+  // keep() then bakes whatever orientation is applied. A first approximation:
+  // "upright" is estimated from each die's tilted rest pose, same as the picker.
+  const orientMeta = () => {
+    const take = roll?.take;
+    if (!take) return;
+    const g = take.dice.map((_, i) => retconOptions(take, i));
+    const p = metaPicks(g);
+    setGroups(g);
+    setPicks(p);
+    setShowPicker(true); // clicking orient = "let me inspect/tweak the tableau"
+    setSavedOrient(null);
+    setTableauPreview({
+      hold: true,
+      retcon: p.map((pk, i) => g[i][pk.face].spins[pk.spin]),
+    });
+    setHold(true);
+    window.__replayTake = take;
+    onRemount();
+  };
+
   const keep = async () => {
     if (!roll || busy || mode !== "live") return;
     setBusy(true);
     try {
+      // Bake the applied orientation (if any) into the take so the kept roll
+      // ships oriented, no separate save-orientation pass. Un-oriented rolls
+      // keep their raw symmetries and draw randomly per load, as before.
+      const take =
+        groups && picks.length
+          ? {
+              ...roll.take,
+              retcon: picks.map((p, i) =>
+                groups[i][p.face].spins[p.spin]
+                  .toArray()
+                  .map((v) => Math.round(v * 1e6) / 1e6),
+              ),
+            }
+          : roll.take;
       const res = await fetch("/api/dev/keep-take", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ take: roll.take, meta: roll.meta }),
+        body: JSON.stringify({ take, meta: roll.meta }),
       });
       const body = (await res.json()) as { saved?: string; count?: number };
       setSaved(res.ok ? `saved (${body.count})` : "save failed");
@@ -343,7 +481,7 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
   const selectValue = typeof mode === "object" ? `file:${mode.file}` : mode;
 
   return (
-    <div className="fixed bottom-3 left-3 z-50 flex flex-col gap-2 rounded-lg bg-black/70 px-3 py-2 font-mono text-xs text-white shadow-lg">
+    <div className="relative z-50 mt-2 flex w-fit max-w-[96vw] flex-col gap-2 rounded-lg bg-black/70 px-3 py-2 font-mono text-xs text-white shadow-lg">
       <div className="flex flex-wrap items-center gap-2">
         <select
           className="rounded bg-white/10 px-1 py-0.5"
@@ -388,16 +526,66 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
           </button>
         )}
         {mode === "live" && (
-          <label className="flex cursor-pointer items-center gap-1">
-            <input
-              type="checkbox"
-              checked={low}
-              onChange={(e) => switchTo("live", e.target.checked)}
+          <>
+            {/* entry edge(s) toggle; the steppers throw the cube directly, so
+                each maps straight to the flight. Every change re-throws. */}
+            <button
+              className="rounded bg-white/15 px-2 py-0.5 hover:bg-white/25"
+              onClick={() =>
+                setParam("entry", params.entry === "left" ? "split" : "left")
+              }
+            >
+              {params.entry}
+            </button>
+            <Cycler
+              label={`spd ${params.speed.toFixed(1)}`}
+              width="w-12"
+              onStep={(d) => stepParam("speed", d)}
             />
-            low
-          </label>
+            <Cycler
+              label={`ang ${Math.round(params.angle)}°`}
+              width="w-12"
+              onStep={(d) => stepParam("angle", d)}
+            />
+            <Cycler
+              label={`ht ${params.height.toFixed(1)}`}
+              width="w-12"
+              onStep={(d) => stepParam("height", d)}
+            />
+            <Cycler
+              label={`rch ${params.reach.toFixed(1)}`}
+              width="w-12"
+              onStep={(d) => stepParam("reach", d)}
+            />
+            <Cycler
+              label={`spin ${params.spin.toFixed(1)}`}
+              width="w-14"
+              onStep={(d) => stepParam("spin", d)}
+            />
+            <Cycler
+              label={`bnc ${params.bounce.toFixed(1)}`}
+              width="w-14"
+              onStep={(d) => stepParam("bounce", d)}
+            />
+            {/* back to DEFAULT_PARAMS (gap is a separate layout knob, untouched) */}
+            <button
+              className="rounded bg-white/15 px-2 py-0.5 hover:bg-white/25"
+              onClick={() => switchTo("live", DEFAULT_PARAMS)}
+            >
+              reset
+            </button>
+            <label className="flex cursor-pointer items-center gap-1">
+              <input
+                type="checkbox"
+                checked={autoOrient}
+                onChange={(e) => setAutoOrient(e.target.checked)}
+              />
+              auto-orient
+            </label>
+          </>
         )}
-        {typeof mode === "object" && (
+        <Cycler label={`gap ${gap.toFixed(1)}`} width="w-14" onStep={stepGap} />
+        {(showPicker || typeof mode === "object") && (
           <label className="flex cursor-pointer items-center gap-1">
             <input
               type="checkbox"
@@ -407,20 +595,36 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
             hold at rest
           </label>
         )}
-        {roll && (
+        {/* Badges + actions stay MOUNTED (dimmed/disabled until a roll lands) so
+            the toolbar doesn't jump the moment a roll completes. */}
+        {(mode === "live" || roll) && (
           <>
-            {roll.badges.map((b) => (
+            {(roll?.badges ?? BADGE_PLACEHOLDER).map((b) => (
               <span
                 key={b.label}
-                className={b.ok ? "text-emerald-300" : "text-red-300"}
+                className={
+                  !roll
+                    ? "text-white/30"
+                    : b.ok
+                      ? "text-emerald-300"
+                      : "text-red-300"
+                }
               >
-                {b.ok ? "✓" : "✗"} {b.label}
+                {!roll ? "·" : b.ok ? "✓" : "✗"} {b.label}
               </span>
             ))}
+            {/* snap the whole row to its M·E·T·A letters, upright, before keeping */}
+            <button
+              className="rounded bg-sky-500/30 px-2 py-0.5 hover:bg-sky-500/50 disabled:opacity-40"
+              disabled={busy || !roll}
+              onClick={orientMeta}
+            >
+              orient META
+            </button>
             {mode === "live" && (
               <button
                 className="rounded bg-emerald-500/30 px-2 py-0.5 hover:bg-emerald-500/50 disabled:opacity-40"
-                disabled={busy || saved !== null}
+                disabled={busy || !roll || saved !== null}
                 onClick={keep}
               >
                 {saved ?? "keep"}
@@ -429,7 +633,7 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
           </>
         )}
       </div>
-      {groups && typeof mode === "object" && (
+      {showPicker && groups && (
         <div className="flex flex-col gap-1 border-t border-white/15 pt-2">
           {picks.map((p, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -446,13 +650,17 @@ export default function DiceDevPanel({ onRemount }: { onRemount: () => void }) {
               />
             </div>
           ))}
-          <button
-            className="mt-1 rounded bg-emerald-500/30 px-2 py-0.5 hover:bg-emerald-500/50 disabled:opacity-40"
-            disabled={busy}
-            onClick={saveOrient}
-          >
-            {savedOrient ?? "save orientation"}
-          </button>
+          {typeof mode === "object" ? (
+            <button
+              className="mt-1 rounded bg-emerald-500/30 px-2 py-0.5 hover:bg-emerald-500/50 disabled:opacity-40"
+              disabled={busy}
+              onClick={saveOrient}
+            >
+              {savedOrient ?? "save orientation"}
+            </button>
+          ) : (
+            <span className="mt-1 text-white/40">baked into keep</span>
+          )}
         </div>
       )}
     </div>

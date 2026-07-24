@@ -37,21 +37,20 @@ export type RollInTake = {
 };
 
 // Canonical launch geometry, in the dice group's local units (the group's
-// responsive scale is applied outside, exactly like the old kinematic path).
-// Deliberately viewport-independent so recorded takes replay correctly at any
-// size: the row is width-fitted, so the local canvas width is effectively
-// constant (~ROW_WIDTH / 0.95 ≈ 6.4 → edges at ±3.2) whenever the width
-// constraint binds, which is every realistic viewport. START_Y sits above the
-// tallest local canvas half-height (~1.4 on mobile aspect) plus a die.
-export const START_X = -4.4; // launches draw from START_X - [0, 0.8]
-export const START_Y = 2.4; // high-lob launch height (low profile overrides — physicsRollIn PROFILES)
-// The x walls sit at ±(x + 0.4) with 0.25 half-thickness (physicsRollIn.ts),
-// so their inner faces land at ±3.10, a 0.1 margin inside the ~±3.2 visible
-// edge: a hard wall-impact can transiently penetrate ~0.05–0.1 before the
-// solver pushes back (worst observed reach past the face was +0.095), so the
-// margin is what actually keeps every excursion on-camera. The recorder's
-// keep criterion (DiceDevPanel.tsx) separately requires the landed portion
-// and rest tableau to stay inside ±3.1.
+// display scale is applied outside). The RESTING frame is what BOUNDS describes:
+// where the dice come to rest, dead-center of the window, with the settle walls
+// just outside it so the resting cluster is contained on-camera regardless of
+// how wide the full-bleed canvas is (META-447). Where the cubes SPAWN from — how
+// far off the frame edge they start — is the tunable `reach` param
+// (physicsRollIn.ts), not a fixed constant, so it can be dialed against the
+// framing being recorded.
+//
+// The x settle-walls sit at ±(BOUNDS.x + 0.4) with 0.25 half-thickness
+// (physicsRollIn.ts), so their inner faces land at ±3.10 — just outside the
+// dice's rest slots (±2.25). A hard wall-impact can transiently penetrate
+// ~0.05–0.1 before the solver pushes back, so the resting cluster stays inside
+// ~±3.2. The recorder's keep criterion (DiceDevPanel.tsx) requires the landed
+// portion and rest tableau to stay inside ±3.1.
 export const BOUNDS = { left: -2.95, right: 2.95, halfDepth: 1.4 };
 
 // Rest-to-META tail. The settle detector already holds ~0.25s of stillness

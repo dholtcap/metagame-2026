@@ -2,48 +2,30 @@
 // Every roll kept in the dev curation panel ships, and deleting one there drops
 // it from this list: the kept rolls ARE the shipped set, there is no bake step.
 import type { RollInTake } from "../introDriver";
-import t1784690348613 from "./take-1784690348613.json";
-import t1784692525673 from "./take-1784692525673.json";
-import t1784693542362 from "./take-1784693542362.json";
-import t1784693552815 from "./take-1784693552815.json";
-import t1784694721202 from "./take-1784694721202.json";
-import t1784695434287 from "./take-1784695434287.json";
-import t1784695558040 from "./take-1784695558040.json";
-import t1784750756119 from "./take-1784750756119.json";
-import t1784750824914 from "./take-1784750824914.json";
-import t1784750899683 from "./take-1784750899683.json";
-import t1784760960136 from "./take-1784760960136.json";
-import t1784761016061 from "./take-1784761016061.json";
-import t1784768964238 from "./take-1784768964238.json";
+import t1784849832708 from "./take-1784849832708.json";
+import t1784850377388 from "./take-1784850377388.json";
+import t1784852967997 from "./take-1784852967997.json";
+import t1784853061777 from "./take-1784853061777.json";
+import t1784853101331 from "./take-1784853101331.json";
+import t1784853287933 from "./take-1784853287933.json";
+import t1784853338997 from "./take-1784853338997.json";
 
 export const TAKE_NAMES = [
-  "take-1784690348613.json",
-  "take-1784692525673.json",
-  "take-1784693542362.json",
-  "take-1784693552815.json",
-  "take-1784694721202.json",
-  "take-1784695434287.json",
-  "take-1784695558040.json",
-  "take-1784750756119.json",
-  "take-1784750824914.json",
-  "take-1784750899683.json",
-  "take-1784760960136.json",
-  "take-1784761016061.json",
-  "take-1784768964238.json",
+  "take-1784849832708.json",
+  "take-1784850377388.json",
+  "take-1784852967997.json",
+  "take-1784853061777.json",
+  "take-1784853101331.json",
+  "take-1784853287933.json",
+  "take-1784853338997.json",
 ];
 
 export const TAKES: RollInTake[] = [
-  t1784690348613.take,
-  t1784692525673.take,
-  t1784693542362.take,
-  t1784693552815.take,
-  t1784694721202.take,
-  t1784695434287.take,
-  t1784695558040.take,
-  t1784750756119.take,
-  t1784750824914.take,
-  t1784750899683.take,
-  t1784760960136.take,
-  t1784761016061.take,
-  t1784768964238.take,
+  t1784849832708.take,
+  t1784850377388.take,
+  t1784852967997.take,
+  t1784853061777.take,
+  t1784853101331.take,
+  t1784853287933.take,
+  t1784853338997.take,
 ];
