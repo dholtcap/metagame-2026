@@ -21,20 +21,31 @@ export default function Dice() {
   // Bumping the key remounts Dice3D, which re-reads ?sim/?record at mount —
   // that's how the dev panel rerolls without a page reload.
   const [diceKey, remount] = useReducer((k: number) => k + 1, 0);
-  // Dev-only: the die is the whole hero now, so the curation panel is gated
-  // behind an edit toggle instead of sitting on the page every dev load.
+  // Dev-only: the die is the whole hero, so the curation panel + its per-die
+  // controls are gated behind an edit toggle rather than sitting on the page
+  // every dev load.
   const [editing, setEditing] = useState(false);
+
+  // Full-bleed canvas so the roll-in cubes launch from the true screen edges;
+  // the resting dice hold a capped size (Dice3D), so the extra width is just
+  // transparent runway. The breakout must escape the (site) layout's LEFT RAIL
+  // (md:pl-20 / lg:pl-24) to stay viewport-centered — the hero's px-8 is
+  // symmetric and cancels, but the rail is left-only, so we shift an extra half
+  // its width at md/lg. Requires SiteHero to drop its overflow-hidden. META-447.
   return (
-    <div className="relative flex h-[clamp(160px,20vh,220px)] w-[96vw] items-center justify-center md:h-[clamp(330px,38vh,440px)] md:w-[min(1200px,88vw)]">
-      <Dice3D key={diceKey} />
+    <div className="relative left-1/2 flex w-screen -translate-x-1/2 flex-col items-center md:-translate-x-[calc(50%+2.5rem)] lg:-translate-x-[calc(50%+3rem)]">
+      <div className="flex h-[clamp(160px,20vh,220px)] w-full items-center justify-center md:h-[clamp(330px,38vh,440px)]">
+        <Dice3D key={diceKey} />
+      </div>
+      {/* dev-only edit toggle + panel, BELOW the canvas so they never cover the dice */}
       {DiceDevPanel && (
-        <>
+        <div className="mt-2 flex flex-col items-center gap-2">
           <button
             type="button"
             onClick={() => setEditing((e) => !e)}
             aria-label={editing ? "Close dice editor" : "Edit dice"}
             aria-pressed={editing}
-            className={`absolute top-2 right-2 z-10 rounded-md p-1.5 transition ${
+            className={`rounded-md p-1.5 transition ${
               editing
                 ? "bg-ink text-cream"
                 : "bg-ink/10 text-ink/45 hover:bg-ink/20 hover:text-ink/80"
@@ -43,7 +54,7 @@ export default function Dice() {
             <Pencil size={15} />
           </button>
           {editing && <DiceDevPanel onRemount={remount} />}
-        </>
+        </div>
       )}
     </div>
   );

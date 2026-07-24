@@ -8,7 +8,7 @@ import { EYEBROW } from "./styles";
 // — content pages get just the nav above their own content.
 export default function SiteHero() {
   return (
-    <section className="relative flex min-h-[320px] flex-col items-center justify-center overflow-hidden px-8 pt-10 pb-8 text-center md:min-h-[400px]">
+    <section className="relative flex min-h-[320px] flex-col items-center justify-center px-8 pt-10 pb-8 text-center md:min-h-[400px]">
       <div className="flex w-full justify-center">
         <Dice />
       </div>

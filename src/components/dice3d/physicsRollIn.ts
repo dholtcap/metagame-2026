@@ -3,8 +3,6 @@ import type { RigidBody, World } from "@dimforge/rapier3d-compat";
 import {
   ALIGN_JITTER,
   BOUNDS,
-  START_X,
-  START_Y,
   TAIL_S,
   sampleAlign,
   type IntroDriver,
@@ -12,8 +10,9 @@ import {
 } from "./introDriver";
 
 // Live rigid-body roll-in: the four dice are real Rapier bodies thrown from
-// off-screen top-left at their slots, so mid-air crossings and floor tumbles
-// resolve as genuine collisions — dice jostle instead of interpenetrating.
+// off the screen edge(s) — the left edge, or both edges in split mode — toward
+// their slots, so mid-air crossings and floor tumbles resolve as genuine
+// collisions — dice jostle instead of interpenetrating.
 // The sim only has to get each die to rest *near* its slot in *some*
 // orientation: once every body is still (or a hard timeout fires) the poses are
 // captured, the world is torn down, and the shared beat + align tail carries
@@ -42,92 +41,70 @@ const STEP = 1 / 120; // small fixed step keeps die-vs-die contacts crisp
 // energy, not launch energy, which is what kept flinging dice across the row.
 const LAUNCH_STAGGER = 0.17; // s between launches
 
-// Launch profiles, selected per load with ?launch=low (default stays the
-// original "high" lob, untouched).
+// --- roll parameters (dev-tunable via URL) -----------------------------------
+// The dice curation panel writes each knob below to the query string and
+// remounts, so ?record bakes a take at exactly the values dialed in. Production
+// playback never reads these — it replays kept keyframes — so this is a
+// record-time rig only.
 //
-// The two differ in *kind*, not just in numbers. "high" is a lob: the launch
-// solves for the vy that lands the die on its slot after `flightS` of flight,
-// which always throws the die UP first (it peaks around y 2.8 and drops in).
-// "low" is a throw: vy is solved so the die reaches the FLOOR in `descentS`
-// from a modest height, which comes out negative — the die is thrown downward
-// into the table well short of its slot, then skips and tumbles the rest of
-// the way like a real dice roll.
-export type LaunchProfileName = "high" | "low";
-type LaunchProfile = {
-  startY: number; // launch height; draws + [0, startYJitter]
-  startYJitter: number;
-  // Lob timing: seconds of flight before arriving at the slot (high only).
-  flightS: number;
-  flightJitter: number;
-  // Throw timing (low only): setting these switches the launch solve from lob
-  // to downward throw (see #step). Descent time is derived per die from how
-  // far it has to fly, at ~throwVx, then clamped — otherwise a fixed descent
-  // makes the near die crawl and slings the far one in at 16 u/s, which
-  // detonates the row. The clamp ceiling must stay under sqrt(2·startY/g)
-  // (~0.45s here) or the solve turns the throw back into a lob.
-  descentMinS?: number;
-  descentMaxS?: number;
-  throwVx?: number;
-  // Aim this far short (left) of the slot — for "low" this is where the die
-  // first hits the floor, so it's large: the skip and roll cover the rest.
-  undershoot: number;
-  undershootJitter: number;
-  // Furthest left a die may touch down (low only). The leftmost slot sits only
-  // ~2.5 units from the launch point, so an unclamped undershoot puts die 0's
-  // touchdown behind the visible edge and asks it to cover ~1.7 units of floor
-  // to reach its slot — which it can't: once the skip's momentum is spent,
-  // static friction (μ·m·g ≈ 11) beats the steering force (clamped at 8) and
-  // the die sticks wherever it stopped, resting half out of frame. Stiffening
-  // the spring past friction would just make every die visibly glide, so cap
-  // the ask instead: near dice get a shorter roll, which is honest — they have
-  // less visible floor to roll across.
-  minTouchX?: number;
-  // Seconds of sim before capturing wherever things are. The thrown roll
-  // spends real time travelling on the floor, so it needs a longer leash than
-  // the lob or a quarter of the runs get cut off mid-roll.
-  simTimeout?: number;
-  spin: number; // rad/s launch tumble; draws + [0, spinJitter]
-  spinJitter: number;
+// The launch is DIRECT: each cube is thrown from off the frame edge at a chosen
+// speed + elevation angle, and then plain physics (gravity, bounces, floor
+// friction) plus the slot steering below settle it near its slot. Crucially,
+// nothing solves the arc backward from the landing point. The older scheme did,
+// and that quietly cancelled the speed and height knobs — vy was recomputed to
+// hit the same target height, so turning them up changed almost nothing you
+// could see. Here every knob maps straight to the throw, so they actually bite.
+export type EntryMode = "left" | "split";
+export type RollParams = {
+  speed: number; // × launch velocity (1 = aims to land near the slot)
+  angle: number; // launch elevation, degrees (0 flat · positive lobs up · negative skips down)
+  height: number; // launch height above the row, world units
+  reach: number; // spawn distance from center — how far off-screen cubes start
+  spin: number; // × tumble rate
+  bounce: number; // × restitution
+  entry: EntryMode; // fly in from one edge or both
 };
-const PROFILES: Record<LaunchProfileName, LaunchProfile> = {
-  high: {
-    startY: START_Y,
-    startYJitter: 0.5,
-    flightS: 0.62,
-    flightJitter: 0.18,
-    undershoot: 0.4,
-    undershootJitter: 0,
-    spin: 9,
-    spinJitter: 5,
-  },
-  // Low: a thrown roll. Enters from off-screen left at roughly head height
-  // over the row, angled down hard enough to hit the floor in ~a third of a
-  // second, landing 1.4–2.6 units short of the slot. Restitution then gives a
-  // visible skip, and the ground steering reels the die the rest of the way —
-  // travel it covers tumbling, not gliding, since floor friction converts the
-  // leftover horizontal speed into roll.
-  low: {
-    startY: 1.45,
-    startYJitter: 0.35,
-    flightS: 0, // unused: descentS drives the low launch
-    flightJitter: 0,
-    descentMinS: 0.28,
-    descentMaxS: 0.44,
-    throwVx: 9,
-    undershoot: 1.3,
-    undershootJitter: 1.0,
-    minTouchX: -2.3,
-    simTimeout: 4.3,
-    spin: 7,
-    spinJitter: 6,
-  },
+export const DEFAULT_PARAMS: RollParams = {
+  speed: 1,
+  angle: 20,
+  height: 1.5,
+  reach: 5,
+  spin: 1,
+  bounce: 1,
+  entry: "left",
 };
-function activeProfile(): LaunchProfile {
-  const raw =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("launch")
-      : null;
-  return PROFILES[raw === "low" ? "low" : "high"];
+
+// Each cube is thrown at ITS OWN slot: the horizontal launch velocity is the
+// vector that would carry it from its off-screen spawn to its slot in T_BASE
+// seconds, so the four fan out across the row instead of flying as one clump.
+// `speed` then scales that velocity (over/undershoot the steering mops up) and
+// `angle` sets the elevation on top — both stay visible because neither is
+// solved away. T_BASE is the nominal flight; shorter reads as a harder throw.
+const T_BASE = 0.7;
+const BASE_SPIN = 8; // rad/s launch tumble at spin=1; draws + [0, BASE_SPIN_JITTER]
+const BASE_SPIN_JITTER = 5;
+const SIM_TIMEOUT = 4.2; // s of sim before capturing wherever things are
+
+function num(p: URLSearchParams, k: string, d: number): number {
+  // NB an absent param is null, and Number(null) === 0 (finite!) — so we must
+  // check presence explicitly, or every default silently collapses to 0.
+  const raw = p.get(k);
+  if (raw === null || raw.trim() === "") return d;
+  const v = Number(raw);
+  return Number.isFinite(v) ? v : d;
+}
+export function readParams(): RollParams {
+  if (typeof window === "undefined") return DEFAULT_PARAMS;
+  const p = new URLSearchParams(window.location.search);
+  return {
+    speed: num(p, "speed", DEFAULT_PARAMS.speed),
+    angle: num(p, "angle", DEFAULT_PARAMS.angle),
+    height: num(p, "height", DEFAULT_PARAMS.height),
+    reach: num(p, "reach", DEFAULT_PARAMS.reach),
+    spin: num(p, "spin", DEFAULT_PARAMS.spin),
+    bounce: num(p, "bounce", DEFAULT_PARAMS.bounce),
+    entry: p.get("entry") === "split" ? "split" : "left",
+  };
 }
 
 // Steering: a horizontal spring toward each die's slot (and z toward 0) so
@@ -152,7 +129,6 @@ const TOUCH_Y = 0.55; // "has reached the floor" once the center first dips belo
 const REST_LIN = 0.18;
 const REST_ANG = 0.7;
 const REST_HOLD = 0.25;
-const SIM_TIMEOUT = 3.4; // hard cap (lob); low overrides via profile.simTimeout
 const STACK_Y = 0.8; // resting this high = parked on another die → nudge it off
 const MAX_NUDGES = 3;
 
@@ -217,7 +193,9 @@ type State = "loading" | "sim" | "post" | "done" | "failed";
 
 export class IntroController implements IntroDriver {
   #opts: Options;
-  #profile: LaunchProfile;
+  #params: RollParams;
+  #restitution: number;
+  #side: number[] = []; // per die: -1 launches from the left edge, +1 from the right
   #state: State = "loading";
   #disposed = false;
   #doneFired = false;
@@ -226,9 +204,6 @@ export class IntroController implements IntroDriver {
   #startPos: THREE.Vector3[] = [];
   #startQuat: THREE.Quaternion[] = [];
   #delay: number[] = [];
-  #targetX: number[] = [];
-  #targetZ: number[] = [];
-  #flightT: number[] = [];
   #alignDelay: number[] = [];
 
   #world: World | null = null;
@@ -241,8 +216,16 @@ export class IntroController implements IntroDriver {
   // fixed before the repo was archived), while mid-sim insertion is the
   // ordinary, well-tested path.
   #spawnDie: ((i: number) => RigidBody) | null = null;
+  // A settle-wall exists only on an edge dice come to rest against; the edge a
+  // die FLIES IN across has its wall deferred (added mid-sim once every die on
+  // that side has cleared inward) so the entry isn't blocked. Left-entry always
+  // exists; the right wall is up from the start unless split mode throws dice at
+  // it too. See the deferred-insertion note on #spawnDie for why we add, not
+  // enable-toggle.
   #raiseLeftWall: (() => void) | null = null;
+  #raiseRightWall: (() => void) | null = null;
   #leftWallRaised = false;
+  #rightWallRaised = false;
   #launched: boolean[] = [];
   #touched: boolean[] = [];
   #restT: number[] = [];
@@ -271,44 +254,45 @@ export class IntroController implements IntroDriver {
 
   constructor(opts: Options) {
     this.#opts = opts;
-    const prof = (this.#profile = activeProfile());
+    const params = (this.#params = readParams());
+    this.#restitution = RESTITUTION * params.bounce;
     const n = opts.slots.length;
+
+    // Assign each die an entry edge: left-only throws them all in from -x; split
+    // sends the left half in from -x and the right half in from +x, so they
+    // sweep toward the center from both edges.
     for (let i = 0; i < n; i++) {
+      this.#side.push(params.entry === "split" && i >= n / 2 ? 1 : -1);
+    }
+    // Launch order, per side, is edge-outward-first: the die whose slot sits
+    // FURTHEST from its entry edge launches first and lands deepest, so every
+    // later die on that side (aimed shorter, toward the edge) stays behind the
+    // ones already down and never plows through a landed die at launch speed.
+    const launchRank = (i: number): number => {
+      const side = this.#side[i];
+      const peers = [...Array(n).keys()].filter((j) => this.#side[j] === side);
+      // Furthest from the edge = largest x for left entry, smallest x for right.
+      peers.sort((a, b) =>
+        side < 0
+          ? opts.slots[b] - opts.slots[a]
+          : opts.slots[a] - opts.slots[b],
+      );
+      return peers.indexOf(i);
+    };
+
+    for (let i = 0; i < n; i++) {
+      const side = this.#side[i];
+      // Spawn off the frame edge at `reach` from center (± a little jitter), at
+      // `height` above the row. The throw itself is applied at launch (#step).
       this.#startPos.push(
         new THREE.Vector3(
-          START_X - Math.random() * 0.8,
-          prof.startY + Math.random() * prof.startYJitter,
+          side * (params.reach + Math.random() * 0.6),
+          params.height + Math.random() * 0.4,
           (Math.random() - 0.5) * 0.5,
         ),
       );
       this.#startQuat.push(new THREE.Quaternion().random());
-      this.#delay.push((n - 1 - i) * LAUNCH_STAGGER + Math.random() * 0.06);
-      // Floor on where this die may touch down. Die 0 gets the absolute bound
-      // (it has no left neighbour, only the frame edge); every other die may
-      // not land left of its left neighbour's slot, which keeps the four
-      // landing zones ordered and stops two dice from being clamped onto the
-      // same patch of floor — that pileup is what stalls the settle.
-      const touchFloor =
-        i === 0 ? (prof.minTouchX ?? -Infinity) : opts.slots[i - 1] + 0.2;
-      this.#targetX.push(
-        Math.max(
-          opts.slots[i] -
-            prof.undershoot -
-            Math.random() * prof.undershootJitter +
-            (Math.random() - 0.5) * 0.5,
-          touchFloor,
-        ),
-      );
-      this.#targetZ.push((Math.random() - 0.5) * 0.5);
-      this.#flightT.push(
-        prof.throwVx !== undefined
-          ? THREE.MathUtils.clamp(
-              Math.abs(this.#targetX[i] - this.#startPos[i].x) / prof.throwVx,
-              prof.descentMinS ?? 0.28,
-              prof.descentMaxS ?? 0.44,
-            )
-          : prof.flightS + Math.random() * prof.flightJitter,
-      );
+      this.#delay.push(launchRank(i) * LAUNCH_STAGGER + Math.random() * 0.06);
       this.#alignDelay.push(Math.random() * ALIGN_JITTER);
       this.#bodies.push(null);
       this.#launched.push(false);
@@ -341,18 +325,18 @@ export class IntroController implements IntroDriver {
       );
       world.createCollider(
         RAPIER.ColliderDesc.cuboid(40, 0.5, BOUNDS.halfDepth + 3)
-          .setRestitution(RESTITUTION)
+          .setRestitution(this.#restitution)
           .setFriction(FRICTION),
         ground,
       );
 
-      // Invisible containment with x-wall inner faces *inside* the visible
-      // edge (±3.10 vs ~±3.2 — see the BOUNDS comment for why the margin is
-      // this wide) so an unlucky bounce can't send a die out of view. The
-      // right and z walls are always up; the left wall doesn't exist yet (the
-      // dice fly in across its line) and is added in #step once every die has
-      // cleared it — added, not enable-toggled, per the setEnabled
-      // broad-phase bug noted on #spawnDie.
+      // Invisible settle-walls with x-wall inner faces just outside the rest
+      // slots (±3.10 — see the BOUNDS comment) so an unlucky bounce can't send
+      // a resting die out of the centered cluster. The z walls are always up.
+      // An x-wall on an edge dice FLY IN across is deferred (added in #step once
+      // every die on that side has cleared it — added, not enable-toggled, per
+      // the setEnabled broad-phase bug noted on #spawnDie): the left wall always
+      // (dice always enter from the left), and the right wall too in split mode.
       const wall = (x: number, y: number, z: number, hx: number, hz: number) =>
         world.createCollider(
           RAPIER.ColliderDesc.cuboid(hx, 3, hz)
@@ -361,12 +345,19 @@ export class IntroController implements IntroDriver {
             .setFriction(FRICTION),
           world.createRigidBody(RAPIER.RigidBodyDesc.fixed()),
         );
-      wall(BOUNDS.right + 0.4, 2.5, 0, 0.25, BOUNDS.halfDepth + 3);
       wall(0, 2.5, BOUNDS.halfDepth + 0.25, 40, 0.25);
       wall(0, 2.5, -(BOUNDS.halfDepth + 0.25), 40, 0.25);
       this.#raiseLeftWall = () => {
         wall(BOUNDS.left - 0.4, 2.5, 0, 0.25, BOUNDS.halfDepth + 3);
       };
+      this.#raiseRightWall = () => {
+        wall(BOUNDS.right + 0.4, 2.5, 0, 0.25, BOUNDS.halfDepth + 3);
+      };
+      // The right wall is up front unless split mode flies dice in across it.
+      if (this.#params.entry !== "split") {
+        this.#raiseRightWall();
+        this.#rightWallRaised = true;
+      }
 
       // Dice: each body is created at its staggered launch moment (see
       // #spawnDie note above), thrown ballistically at its slot. Rounded
@@ -385,7 +376,7 @@ export class IntroController implements IntroDriver {
         );
         world.createCollider(
           RAPIER.ColliderDesc.roundCuboid(0.44, 0.44, 0.44, 0.06)
-            .setRestitution(RESTITUTION)
+            .setRestitution(this.#restitution)
             .setFriction(FRICTION),
           body,
         );
@@ -432,34 +423,42 @@ export class IntroController implements IntroDriver {
     }
   }
 
+  // True for every launched die that entered from `side` (-1 left, +1 right).
+  #sideEvery(side: number, pred: (b: RigidBody) => boolean): boolean {
+    for (let i = 0; i < this.#bodies.length; i++) {
+      if (this.#side[i] !== side) continue;
+      const b = this.#bodies[i];
+      if (!b || !pred(b)) return false;
+    }
+    return true;
+  }
+
   #step() {
     const world = this.#world!;
     this.#elapsed += STEP;
     this.#stepCount++;
 
     for (let i = 0; i < this.#bodies.length; i++) {
-      // Staggered launch: create the body and throw it at its target x/z in T
-      // seconds, solving vy for the height it should be at when it gets there.
-      // The lob profile aims for bounce height (0.55), which needs an upward
-      // vy; the thrown profile aims for the floor (0), which comes out
-      // negative — the die is driven down into the table and skips onward.
+      // Staggered launch: create the body and throw it at ITS slot. The
+      // horizontal velocity fans the die from its off-screen spawn toward its
+      // own slot (scaled by `speed`); vy comes from `angle` applied to that
+      // horizontal speed, so a bigger angle lobs higher without touching where
+      // it aims. Gravity, bounces and the slot steering below finish the job, so
+      // speed/angle/height each stay visible instead of cancelling out.
       if (!this.#launched[i]) {
         if (this.#elapsed < this.#delay[i]) continue;
         this.#launched[i] = true;
         const body = (this.#bodies[i] = this.#spawnDie!(i));
         const s = this.#startPos[i];
-        const T = this.#flightT[i];
-        const arriveY = this.#profile.throwVx !== undefined ? 0 : 0.55;
-        body.setLinvel(
-          {
-            x: (this.#targetX[i] - s.x) / T,
-            y: (arriveY - s.y + 0.5 * GRAVITY * T * T) / T,
-            z: (this.#targetZ[i] - s.z) / T,
-          },
-          true,
-        );
+        const vx = ((this.#opts.slots[i] - s.x) / T_BASE) * this.#params.speed;
+        const vz = (-s.z / T_BASE) * this.#params.speed; // ease toward the row's z-center
+        const vy =
+          Math.hypot(vx, vz) *
+          Math.tan(THREE.MathUtils.degToRad(this.#params.angle));
+        body.setLinvel({ x: vx, y: vy, z: vz }, true);
         const axis = new THREE.Vector3().randomDirection();
-        const w = this.#profile.spin + Math.random() * this.#profile.spinJitter;
+        const w =
+          (BASE_SPIN + Math.random() * BASE_SPIN_JITTER) * this.#params.spin;
         body.setAngvel({ x: axis.x * w, y: axis.y * w, z: axis.z * w }, true);
         continue;
       }
@@ -496,23 +495,36 @@ export class IntroController implements IntroDriver {
       );
     }
 
-    // Raise the left wall once every die has fully cleared it, sealing the
-    // box. "Cleared" uses the die's true rotated reach (not a worst-case
-    // center threshold) so the wall goes up as early as geometry allows —
-    // waiting on worst-case corner reach let a die that settled just left of
-    // its slot keep the wall down for the whole take, leaving the left edge
-    // open to rest poses that hang off-screen. 0.03 spawn margin past the
-    // wall's inner face at BOUNDS.left - 0.15.
+    // Raise each deferred settle-wall once every die that flew in across it has
+    // fully cleared inward, sealing that edge. "Cleared" uses the die's true
+    // rotated reach (not a worst-case center threshold) so the wall goes up as
+    // early as geometry allows — waiting on worst-case corner reach let a die
+    // that settled just inside its slot keep the wall down for the whole take,
+    // leaving the edge open to rest poses that hang off-screen. Only dice on the
+    // wall's side gate it (right-entry dice never approach the left wall, and
+    // vice-versa). 0.12 margin past the wall's inner face.
+    const launched = this.#launched.every(Boolean);
     if (
       !this.#leftWallRaised &&
-      this.#launched.every(Boolean) &&
-      this.#bodies.every((b) => {
-        const p = b!.translation();
-        return p.x - xReach(b!.rotation()) > BOUNDS.left - 0.12;
+      launched &&
+      this.#sideEvery(-1, (b) => {
+        const p = b.translation();
+        return p.x - xReach(b.rotation()) > BOUNDS.left - 0.12;
       })
     ) {
       this.#raiseLeftWall?.();
       this.#leftWallRaised = true;
+    }
+    if (
+      !this.#rightWallRaised &&
+      launched &&
+      this.#sideEvery(1, (b) => {
+        const p = b.translation();
+        return p.x + xReach(b.rotation()) < BOUNDS.right + 0.12;
+      })
+    ) {
+      this.#raiseRightWall?.();
+      this.#rightWallRaised = true;
     }
 
     world.step();
@@ -535,7 +547,7 @@ export class IntroController implements IntroDriver {
       if (this.#restT[i] < REST_HOLD) allResting = false;
     }
 
-    if (this.#elapsed >= (this.#profile.simTimeout ?? SIM_TIMEOUT)) {
+    if (this.#elapsed >= SIM_TIMEOUT) {
       this.#timedOut = true;
       this.#capture();
       return;
