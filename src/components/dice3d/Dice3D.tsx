@@ -122,7 +122,14 @@ function Scene({
       ? Math.min(1150, canvasWidthPx * 0.74)
       : canvasWidthPx * 0.96;
   const refRow = rowWidthFor(GAP);
-  const targetRowPx = oldStagePx * 0.95 * RESTING_SIZE;
+  // Target on-screen width for the resting row, but never wider than 95% of the
+  // actual canvas — so RESTING_SIZE can grow the dice on roomy screens without
+  // letting the row overflow a narrow one (it shrinks to fit instead). A no-op
+  // at RESTING_SIZE 1 (the row is already ~91% of width); only binds when scaled up.
+  const targetRowPx = Math.min(
+    oldStagePx * 0.95 * RESTING_SIZE,
+    canvasWidthPx * 0.95,
+  );
   const scale = Math.min(2.4, targetRowPx / (refRow * pxPerWorld));
 
   // Roll-in pose driver, built once at mount. Normal loads play back one of the
