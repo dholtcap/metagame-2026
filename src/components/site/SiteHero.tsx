@@ -9,9 +9,7 @@ import { EYEBROW } from "./styles";
 export default function SiteHero() {
   return (
     <section className="relative flex min-h-[320px] flex-col items-center justify-center px-8 pt-10 pb-8 text-center md:min-h-[400px]">
-      <div className="flex w-full justify-center">
-        <Dice />
-      </div>
+      <Dice />
       <p className={`${EYEBROW} mt-4 text-meeple`}>
         Nov 6-8, 2026 &middot; Berkeley, California
       </p>

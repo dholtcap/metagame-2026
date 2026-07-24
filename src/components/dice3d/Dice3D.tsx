@@ -52,7 +52,7 @@ const rowWidthFor = (gap: number) => (DICE.length - 1) * gap + 1.6;
 // size the dice have today; bump to grow the resting row, drop to shrink it.
 // The full-bleed canvas only adds runway around the dice — it no longer sets
 // their size, so this is the single knob for that.
-const RESTING_SIZE = 1;
+const RESTING_SIZE = 1.25;
 
 // Dev-tunable dice spacing. The curation panel writes ?gap and remounts; a plain
 // load uses GAP. NB the shipped resting layout is GAP — record/keep rolls at the
@@ -122,7 +122,13 @@ function Scene({
       ? Math.min(1150, canvasWidthPx * 0.74)
       : canvasWidthPx * 0.96;
   const refRow = rowWidthFor(GAP);
-  const targetRowPx = oldStagePx * 0.95 * RESTING_SIZE;
+  // Target on-screen width for the resting row, but never wider than 95% of the
+  // actual canvas — so RESTING_SIZE can grow the dice on roomy screens without
+  // letting the row overflow a narrow one (it shrinks to fit instead).
+  const targetRowPx = Math.min(
+    oldStagePx * 0.95 * RESTING_SIZE,
+    canvasWidthPx * 0.95,
+  );
   const scale = Math.min(2.4, targetRowPx / (refRow * pxPerWorld));
 
   // Roll-in pose driver, built once at mount. Normal loads play back one of the

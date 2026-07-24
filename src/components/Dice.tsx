@@ -28,12 +28,14 @@ export default function Dice() {
 
   // Full-bleed canvas so the roll-in cubes launch from the true screen edges;
   // the resting dice hold a capped size (Dice3D), so the extra width is just
-  // transparent runway. The breakout must escape the (site) layout's LEFT RAIL
-  // (md:pl-20 / lg:pl-24) to stay viewport-centered — the hero's px-8 is
-  // symmetric and cancels, but the rail is left-only, so we shift an extra half
-  // its width at md/lg. Requires SiteHero to drop its overflow-hidden. META-447.
+  // transparent runway. To span the real viewport it must escape the (site)
+  // layout's LEFT RAIL (md:pl-20 / lg:pl-24) AND the hero's px-8: we opt out of
+  // the hero's flex centering (self-start) and pull the left edge back to the
+  // viewport edge with a negative margin = rail + px. w-screen then reaches the
+  // right edge. SiteHero drops its overflow-hidden so this isn't clipped, and
+  // the layout's overflow-x-clip hides the off-screen runway. META-447.
   return (
-    <div className="relative left-1/2 flex w-screen -translate-x-1/2 flex-col items-center md:-translate-x-[calc(50%+2.5rem)] lg:-translate-x-[calc(50%+3rem)]">
+    <div className="relative -ml-[2rem] flex w-screen flex-col items-center self-start md:-ml-[7rem] lg:-ml-[8rem]">
       <div className="flex h-[clamp(160px,20vh,220px)] w-full items-center justify-center md:h-[clamp(330px,38vh,440px)]">
         <Dice3D key={diceKey} />
       </div>
