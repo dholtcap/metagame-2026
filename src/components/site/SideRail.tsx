@@ -22,18 +22,14 @@ const OVERLAY_SIDE: "left" | "right" = "right";
 const OVERLAY_BAND = 300;
 
 type SideRailProps = {
-  showOnMobile?: boolean;
   // Summoned full-screen over the page (mobile hamburger): labels and wash are
   // forced open and a finger drag drives the same magnification the mouse does.
+  // Otherwise the rail is the permanent desktop fixture, hidden below md.
   overlay?: boolean;
   onClose?: () => void;
 };
 
-export default function SideRail({
-  showOnMobile = true,
-  overlay = false,
-  onClose,
-}: SideRailProps) {
+export default function SideRail({ overlay = false, onClose }: SideRailProps) {
   const side = overlay ? OVERLAY_SIDE : RAIL_SIDE;
   const railRef = useRef<HTMLElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -136,9 +132,9 @@ export default function SideRail({
           ? `pointer-events-auto fixed inset-0 z-50 flex flex-col justify-center ${
               side === "left" ? "pl-3" : "pr-3"
             }`
-          : `pointer-events-none fixed inset-y-0 z-40 flex-col justify-center md:flex ${
-              showOnMobile ? "flex" : "hidden"
-            } ${side === "left" ? "left-3 lg:left-5" : "right-3 lg:right-5"}`
+          : `pointer-events-none fixed inset-y-0 z-40 hidden flex-col justify-center md:flex ${
+              side === "left" ? "left-3 lg:left-5" : "right-3 lg:right-5"
+            }`
       }
     >
       {/* Wash behind the rail: one gradient rectangle spanning the full page
@@ -176,12 +172,12 @@ export default function SideRail({
                 onClick={overlay ? undefined : () => goTo(id)}
                 aria-label={label}
                 aria-current={isActive ? "true" : undefined}
-                // Inline on mobile: gap-0, since labels never reveal there and
-                // the gap would pad the collapsed span into the content gutter.
-                // The ::after bleeds the touch target out to ~44px vertically
-                // without widening the rail's lane — the icons stay small.
-                className={`group relative flex items-center rounded-md px-2 py-2 outline-none after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] focus-visible:ring-2 focus-visible:ring-brand-blue md:gap-2.5 md:px-1 md:py-1 md:after:hidden ${
-                  overlay ? "gap-2.5" : "gap-0"
+                // Overlay is touch-only, so it pads out and bleeds an ::after
+                // hit area to ~44px; the desktop rail is a mouse target.
+                className={`group relative flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+                  overlay
+                    ? "px-2 py-2 after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-['']"
+                    : "px-1 py-1"
                 } ${side === "right" ? "flex-row-reverse" : ""}`}
                 style={{
                   touchAction: "manipulation",
@@ -195,13 +191,9 @@ export default function SideRail({
                 <Icon
                   size={22}
                   strokeWidth={isActive ? 2.4 : 2}
-                  // CSS size beats the svg width/height attrs, so this is what
-                  // actually sets the glyph — `size={22}` is only the fallback.
                   // Resting: muted gray blending into the beige. Active: full ink
                   // and enlarged, legible even when the rail isn't hovered.
-                  className={`shrink-0 transition-colors duration-200 md:size-[22px] ${
-                    overlay ? "size-[22px]" : "size-[18px]"
-                  } ${
+                  className={`shrink-0 transition-colors duration-200 ${
                     isActive
                       ? "scale-110 text-ink"
                       : "text-ink/35 group-hover:text-ink"

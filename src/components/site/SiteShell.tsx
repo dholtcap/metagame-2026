@@ -1,19 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import MobileHandleRail from "./MobileHandleRail";
 import MobileTopBar from "./MobileTopBar";
-import { useMobileNavVariant } from "./navVariant";
 import SideRail from "./SideRail";
 
-// Owns the nav variants and the content padding that keeps clear of them.
+// Section nav: a permanent rail on desktop; on mobile a top bar whose hamburger
+// summons that same rail as an overlay.
 export default function SiteShell({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const variant = useMobileNavVariant();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // The overlay rail is a mobile affordance; widening past md hands back to the
+  // The overlay is a mobile affordance; widening past md hands back to the
   // permanent desktop rail, so close rather than leave both on screen.
   //
   // Deliberately no body scroll-lock: the overlay releases by scrolling to the
@@ -31,17 +29,10 @@ export default function SiteShell({
 
   return (
     <>
-      {variant === "bar" && (
-        <MobileTopBar onOpenMenu={() => setMenuOpen(true)} />
-      )}
-      <SideRail
-        showOnMobile={variant === "rail"}
-        overlay={variant === "bar" && menuOpen}
-        onClose={() => setMenuOpen(false)}
-      />
-      {variant === "handle" && <MobileHandleRail />}
-      {/* The rails are fixed-position, so this padding only keeps content from
-          sliding under them — symmetric so it never shifts the page's center. */}
+      <MobileTopBar onOpenMenu={() => setMenuOpen(true)} />
+      <SideRail overlay={menuOpen} onClose={() => setMenuOpen(false)} />
+      {/* The rail is fixed-position, so this padding only keeps content from
+          sliding under it — symmetric so it never shifts the page's center. */}
       <main className="flex-1 overflow-x-clip md:px-20 lg:px-24">
         {children}
       </main>
