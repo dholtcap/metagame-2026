@@ -60,7 +60,10 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-cream/15 bg-navy text-cream shadow-2xl duration-100 outline-none data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
+          // Width, not max-width, carries the side gutter: every modal overrides
+          // max-w with its own desktop cap, which would clobber a max-w clamp
+          // here and let it go edge-to-edge on a phone.
+          "fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-cream/15 bg-navy text-cream shadow-2xl duration-100 outline-none data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
           className,
         )}
         {...props}

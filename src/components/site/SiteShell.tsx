@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import MobileTopBar from "./MobileTopBar";
+import MobileNavCorner from "./MobileNavCorner";
 import SideRail from "./SideRail";
 
-// Section nav: a permanent rail on desktop; on mobile a top bar whose hamburger
+// Section nav: a permanent rail on desktop; on mobile a corner hamburger that
 // summons that same rail as an overlay.
 export default function SiteShell({
   children,
@@ -29,7 +29,7 @@ export default function SiteShell({
 
   return (
     <>
-      <MobileTopBar onOpenMenu={() => setMenuOpen(true)} />
+      <MobileNavCorner onOpenMenu={() => setMenuOpen(true)} />
       <SideRail overlay={menuOpen} onClose={() => setMenuOpen(false)} />
       {/* The rail is fixed-position, so this padding only keeps content from
           sliding under it — symmetric so it never shifts the page's center. */}
