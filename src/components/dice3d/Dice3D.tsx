@@ -124,7 +124,8 @@ function Scene({
   const refRow = rowWidthFor(GAP);
   // Target on-screen width for the resting row, but never wider than 95% of the
   // actual canvas — so RESTING_SIZE can grow the dice on roomy screens without
-  // letting the row overflow a narrow one (it shrinks to fit instead).
+  // letting the row overflow a narrow one (it shrinks to fit instead). A no-op
+  // at RESTING_SIZE 1 (the row is already ~91% of width); only binds when scaled up.
   const targetRowPx = Math.min(
     oldStagePx * 0.95 * RESTING_SIZE,
     canvasWidthPx * 0.95,
