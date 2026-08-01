@@ -1,14 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import InterestFollowup from "./InterestFollowup";
+import { FIELD_LIGHT } from "./site/styles";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-const FIELD =
-  "h-12 border-[1.5px] border-[#1b1530]/35 bg-[#f4ecd2] px-4 text-base text-[#1b1530] outline-none transition-colors placeholder:text-[#1b1530]/40 focus:border-[#2b9bf0]";
-
-export default function SignupForm() {
+export default function SignupForm({ light = false }: { light?: boolean }) {
+  // <Input> is dark by default; the `light` cream-section variant overrides it.
+  // min-w-0 lets the fields shrink in the row; the row itself is a container
+  // query (see the form) so it stacks in a narrow modal and only goes side-by-
+  // side when its own width allows — not based on the viewport.
+  const field = cn(light && FIELD_LIGHT, "min-w-0 @lg:w-auto @lg:flex-1");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   // Remembered after success so the interest follow-up can patch the same row.
@@ -38,27 +44,32 @@ export default function SignupForm() {
   if (status === "success") {
     return (
       <div className="flex w-full flex-col items-center gap-4">
-        <p className="text-center text-base text-[#1b1530]">
+        <p
+          className={`text-center text-base ${light ? "text-ink/80" : "text-cream/90"}`}
+        >
           Thanks — you&apos;re on the list. We&apos;ll be in touch.
         </p>
-        <InterestFollowup email={submittedEmail} />
+        <InterestFollowup email={submittedEmail} light={light} />
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-3">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <input
+    <form
+      onSubmit={handleSubmit}
+      className="@container flex w-full flex-col gap-3"
+    >
+      <div className="flex flex-col gap-3 @lg:flex-row">
+        <Input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Name (optional)"
-          aria-label="Name (optional)"
+          placeholder="Name"
+          aria-label="Name"
           autoComplete="name"
-          className={`${FIELD} w-full`}
+          className={field}
         />
-        <input
+        <Input
           type="email"
           required
           value={email}
@@ -66,24 +77,18 @@ export default function SignupForm() {
           placeholder="you@example.com*"
           aria-label="Email address"
           autoComplete="email"
-          className={`${FIELD} w-full sm:w-auto sm:flex-1`}
+          className={field}
         />
-        <button
+        <Button
           type="submit"
           disabled={status === "submitting"}
-          className="group relative disabled:opacity-60"
+          className="h-12 px-7 text-base"
         >
-          {/* blue box behind the button, revealed on hover */}
-          <span aria-hidden className="absolute inset-0 bg-[#2b9bf0]" />
-          <span className="relative flex h-12 items-center justify-center bg-[#1b1530] px-7 font-[family-name:var(--font-bebas)] text-xl leading-[20px] tracking-[0.08em] text-[#f4ecd2] transition-transform group-hover:-translate-x-[5px] group-hover:-translate-y-[5px] group-disabled:translate-x-0! group-disabled:translate-y-0!">
-            {status === "submitting" ? "…" : "Notify me"}
-          </span>
-        </button>
+          {status === "submitting" ? "…" : "Notify me"}
+        </Button>
       </div>
       {status === "error" && (
-        <p className="text-sm text-[#c0392b]">
-          Something went wrong. Try again.
-        </p>
+        <p className="text-sm text-salmon">Something went wrong. Try again.</p>
       )}
     </form>
   );

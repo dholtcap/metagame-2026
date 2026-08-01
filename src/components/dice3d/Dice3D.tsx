@@ -52,7 +52,7 @@ const rowWidthFor = (gap: number) => (DICE.length - 1) * gap + 1.6;
 // size the dice have today; bump to grow the resting row, drop to shrink it.
 // The full-bleed canvas only adds runway around the dice — it no longer sets
 // their size, so this is the single knob for that.
-const RESTING_SIZE = 1;
+const RESTING_SIZE = 1.25;
 
 // Dev-tunable dice spacing. The curation panel writes ?gap and remounts; a plain
 // load uses GAP. NB the shipped resting layout is GAP — record/keep rolls at the

@@ -1,19 +1,22 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
-import { FaBitcoin, FaTimes } from "react-icons/fa";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { FaBitcoin } from "react-icons/fa";
 import { supporterTier, supporterChipUrl } from "@/lib/tickets";
 import {
   subscribeCurrency,
   getCurrencySnapshot,
   getCurrencyServerSnapshot,
 } from "@/lib/currency-store";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { HEADING } from "./site/styles";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -30,15 +33,11 @@ function isOpenNodeCheckoutUrl(url: string): boolean {
   }
 }
 
-const FIELD =
-  "h-12 w-full border-[1.5px] border-[#1b1530]/35 bg-[#f4ecd2] px-4 text-base text-[#1b1530] outline-none transition-colors placeholder:text-[#1b1530]/40 focus:border-[#eaa35a]";
-
 // Mirrors the server cap so over-long input fails fast in the browser too.
 const MAX_FIELD_LEN = 200;
 
 export default function SupporterModal({ onClose }: { onClose: () => void }) {
   const { floor, defaultChipUsd, chips } = supporterTier;
-  const titleId = useId();
   const currency = useSyncExternalStore(
     subscribeCurrency,
     getCurrencySnapshot,
@@ -63,7 +62,6 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
   const [belowFloor, setBelowFloor] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
 
   // Clicking a chip selects it and (BTC mode) sets the editable amount to its value.
   function pickChip(i: number) {
@@ -148,10 +146,10 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
             type="button"
             aria-pressed={active}
             onClick={() => pickChip(i)}
-            className={`border-[1.5px] px-4 py-2 font-[family-name:var(--font-bebas)] text-lg tracking-[0.06em] transition-colors ${
+            className={`rounded-lg border-[1.5px] px-4 py-2 font-space-mono text-base tracking-[0.04em] transition-colors ${
               active
-                ? "border-[#1b1530] bg-[#1b1530] text-[#f4ecd2]"
-                : "border-[#1b1530]/35 text-[#1b1530] hover:border-[#eaa35a]"
+                ? "border-tan bg-tan font-bold text-navy"
+                : "border-cream/30 text-cream hover:border-tan"
             }`}
           >
             {isBtc ? <>&#8383;{c.btc}</> : <>${c.usd}</>}
@@ -162,36 +160,20 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
   );
 
   return (
-    <div
-      ref={overlayRef}
-      onMouseDown={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#1b1530]/70 p-4 font-[family-name:var(--font-space-grotesk)]"
-    >
-      <div className="relative flex w-full max-w-[460px] flex-col gap-5 bg-[#fff5e4] p-6 text-[#1b1530] shadow-2xl sm:p-8">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center text-[#1b1530]/50 transition-colors hover:text-[#1b1530]"
-        >
-          <FaTimes size={18} />
-        </button>
-
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-w-[460px] flex-col gap-5 p-6 sm:p-8">
         <div className="flex flex-col gap-1 pr-6">
-          <h2
-            id={titleId}
-            className="flex items-center gap-2 font-[family-name:var(--font-bebas)] text-[clamp(26px,6vw,34px)] leading-tight tracking-[0.04em]"
+          <DialogTitle
+            className={`${HEADING} flex items-center gap-2 text-[clamp(24px,6vw,30px)]`}
           >
-            {isBtc && <FaBitcoin aria-hidden className="text-[#eaa35a]" />}
-            Supporter Tier
-          </h2>
+            {isBtc && <FaBitcoin aria-hidden className="text-tan" />}
+            Supporter tier
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Support Metagame 2026 with a supporter-tier ticket.
+          </DialogDescription>
           {!isBtc && (
-            <p className="text-base text-[#1b1530]/80">
+            <p className="text-base text-cream/80">
               Help make Metagame 2026 even better!
             </p>
           )}
@@ -199,7 +181,7 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
 
         {isBtc ? (
           <form onSubmit={payWithBtc} className="flex flex-col gap-3">
-            <p className="text-sm text-[#1b1530]/75">
+            <p className="text-sm text-cream/75">
               Help make Metagame 2026 even better! Pay-what-you-want,
               &ge;&#8383;{floor.btc}. There may be benefits/perks for
               Supporters, but we haven&rsquo;t decided if/what those might be
@@ -207,17 +189,17 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
               reach out to{" "}
               <a
                 href="mailto:team@metagame.games"
-                className="underline transition-colors hover:text-[#eaa35a]"
+                className="underline transition-colors hover:text-tan"
               >
                 team@metagame.games
               </a>
               .
             </p>
             <div className="flex flex-col gap-1">
-              <label className="text-xs tracking-wide text-[#1b1530]/60 uppercase">
+              <label className="font-space-mono text-xs tracking-wide text-cream/60 uppercase">
                 Amount (BTC)
               </label>
-              <input
+              <Input
                 type="number"
                 inputMode="decimal"
                 step="0.0001"
@@ -225,16 +207,15 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
                 value={btcAmount}
                 onChange={(e) => setBtcAmount(e.target.value)}
                 aria-label="BTC amount"
-                className={FIELD}
               />
               {belowFloor && (
-                <p className="text-xs text-[#c0392b]">
+                <p className="text-xs text-salmon">
                   Minimum is &#8383;{floor.btc}.
                 </p>
               )}
             </div>
             {chipRow}
-            <input
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -243,9 +224,8 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
               autoComplete="name"
               maxLength={MAX_FIELD_LEN}
               required
-              className={FIELD}
             />
-            <input
+            <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -254,59 +234,51 @@ export default function SupporterModal({ onClose }: { onClose: () => void }) {
               autoComplete="email"
               maxLength={MAX_FIELD_LEN}
               required
-              className={FIELD}
             />
-            <input
+            <Input
               type="text"
               value={discord}
               onChange={(e) => setDiscord(e.target.value)}
               placeholder="Discord handle (optional)"
               aria-label="Discord handle (optional)"
               maxLength={MAX_FIELD_LEN}
-              className={FIELD}
             />
-            {error && <p className="text-sm text-[#c0392b]">{error}</p>}
-            <button
+            {error && <p className="text-sm text-salmon">{error}</p>}
+            <Button
               type="submit"
               disabled={submitting}
-              className="group relative disabled:opacity-60"
+              className="h-12 w-full text-base"
             >
-              <span aria-hidden className="absolute inset-0 bg-[#eaa35a]" />
-              <span className="relative flex h-12 items-center justify-center bg-[#1b1530] px-7 font-[family-name:var(--font-bebas)] text-xl tracking-[0.08em] text-[#f4ecd2] transition-transform group-hover:-translate-x-[5px] group-hover:-translate-y-[5px] group-disabled:translate-x-0! group-disabled:translate-y-0!">
-                {submitting ? "Starting checkout…" : "Pay with BTC"}
-              </span>
-            </button>
+              {submitting ? "Starting checkout…" : "Pay with BTC"}
+            </Button>
           </form>
         ) : (
           <div className="flex flex-col gap-3">
             {chipRow}
-            <p className="text-xs text-[#1b1530]/55">
+            <p className="text-xs text-cream/55">
               You can set any custom amount &ge;$525 at the Stripe checkout
               page.
             </p>
-            <p className="text-sm text-[#1b1530]/75">
+            <p className="text-sm text-cream/75">
               Interested in a formal sponsorship? Reach out to{" "}
               <a
                 href="mailto:team@metagame.games"
-                className="underline transition-colors hover:text-[#eaa35a]"
+                className="underline transition-colors hover:text-tan"
               >
                 team@metagame.games
               </a>
               !
             </p>
-            <button
+            <Button
               type="button"
               onClick={checkoutAtStripe}
-              className="group relative"
+              className="h-12 w-full text-base"
             >
-              <span aria-hidden className="absolute inset-0 bg-[#eaa35a]" />
-              <span className="relative flex h-12 items-center justify-center bg-[#1b1530] px-7 font-[family-name:var(--font-bebas)] text-xl tracking-[0.08em] text-[#f4ecd2] transition-transform group-hover:-translate-x-[5px] group-hover:-translate-y-[5px]">
-                Checkout at Stripe
-              </span>
-            </button>
+              Checkout at Stripe
+            </Button>
           </div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

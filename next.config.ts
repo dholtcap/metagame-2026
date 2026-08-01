@@ -6,7 +6,7 @@ validateEnv();
 
 const nextConfig: NextConfig = {
   // Let LAN devices (phones) load /_next dev assets; without this the Network URL serves HTML but never hydrates.
-  allowedDevOrigins: ["10.*.*.*", "192.168.*.*"],
+  allowedDevOrigins: ["10.*.*.*", "192.168.*.*", "157.230.177.203"],
 };
 
 export default nextConfig;

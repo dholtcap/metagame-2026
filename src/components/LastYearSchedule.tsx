@@ -1,31 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { FaThLarge, FaListUl } from "react-icons/fa";
 import LastYearSessionModal from "./LastYearSessionModal";
 import {
-  days,
+  buildSchedule,
   formatPacificTime,
   hostNames,
   offsetPx,
-  scheduleLocations,
   slotLabel,
   startsInSlot,
   heightPx,
   SLOT_PX,
+  type Ages,
   type Day,
+  type Location,
   type Session,
 } from "@/lib/last-year-schedule";
 import { LEGEND, sessionStyle } from "@/lib/schedule-styles";
 
 type View = "grid" | "list";
 type OpenFn = (s: Session) => void;
-
-// Grid template: a narrow sticky time column + one min-width column per location.
-// Column/time widths come from CSS vars so they can shrink on phones (set on the
-// scroll container below) — narrower columns let more venues fit on a small screen.
-const GRID_COLS = `var(--time-w) repeat(${scheduleLocations.length}, minmax(var(--col-w), 1fr))`;
 
 function AgeMark({ ages }: { ages: Session["ages"] }) {
   if (ages === "ADULTS")
@@ -78,7 +74,17 @@ function SessionBlock({
   );
 }
 
-function GridDay({ day, onOpen }: { day: Day; onOpen: OpenFn }) {
+function GridDay({
+  day,
+  locations,
+  gridCols,
+  onOpen,
+}: {
+  day: Day;
+  locations: Location[];
+  gridCols: string;
+  onOpen: OpenFn;
+}) {
   return (
     /* Column + time widths are CSS vars so phones get narrower columns (more
        venues visible at once) than wider screens. */
@@ -87,10 +93,10 @@ function GridDay({ day, onOpen }: { day: Day; onOpen: OpenFn }) {
         {/* Location header row (sticky on vertical scroll) */}
         <div
           className="sticky top-0 z-30 grid bg-[#efe4c6]"
-          style={{ gridTemplateColumns: GRID_COLS }}
+          style={{ gridTemplateColumns: gridCols }}
         >
           <div className="sticky left-0 z-40 border-r border-b border-[#1b1530]/15 bg-[#efe4c6]" />
-          {scheduleLocations.map((loc) => (
+          {locations.map((loc) => (
             <div
               key={loc.id}
               className="border-r border-b border-[#1b1530]/15 px-2 py-2 last:border-r-0"
@@ -122,7 +128,7 @@ function GridDay({ day, onOpen }: { day: Day; onOpen: OpenFn }) {
         </div>
 
         {/* Time-slot rows */}
-        <div className="grid" style={{ gridTemplateColumns: GRID_COLS }}>
+        <div className="grid" style={{ gridTemplateColumns: gridCols }}>
           {day.slots.map((slotStart) => (
             <div key={slotStart} className="contents">
               <div
@@ -131,7 +137,7 @@ function GridDay({ day, onOpen }: { day: Day; onOpen: OpenFn }) {
               >
                 {slotLabel(slotStart)}
               </div>
-              {scheduleLocations.map((loc) => {
+              {locations.map((loc) => {
                 const inSlot = day.sessions.filter(
                   (s) => s.location_id === loc.id && startsInSlot(s, slotStart),
                 );
@@ -213,12 +219,37 @@ function ListDay({ day, onOpen }: { day: Day; onOpen: OpenFn }) {
 export default function LastYearSchedule({
   variant = "tabbed",
   defaultView = "grid",
+  locationNames,
+  ages,
+  showViewToggle = true,
 }: {
   /** "tabbed": one day at a time with a day switcher (the /last-year page).
-   *  "sequential": all three days stacked in order (the home-page section). */
+   *  "sequential": every day at once — side by side on wide screens, stacked on
+   *  narrow (the single-location /children view). */
   variant?: "tabbed" | "sequential";
   defaultView?: View;
+  /** Restrict to these location names (exact match); omit for all locations. */
+  locationNames?: string[];
+  /** Restrict to these age flags (e.g. ["KIDS"] for the children view). */
+  ages?: Ages[];
+  /** Show the grid/list toggle. When false, the view is pinned to defaultView. */
+  showViewToggle?: boolean;
 }) {
+  // Stable primitive keys so the memo only recomputes when the filters actually
+  // change (a new array identity each render otherwise would not).
+  const locationNamesKey = locationNames?.join("|");
+  const agesKey = ages?.join("|");
+  const { days, locations } = useMemo(
+    () => buildSchedule({ locationNames, ages }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locationNamesKey, agesKey],
+  );
+
+  // Grid template: a narrow sticky time column + one min-width column per
+  // location. Column/time widths come from CSS vars so they can shrink on
+  // phones (set on the scroll container) — narrower columns let more venues fit.
+  const gridCols = `var(--time-w) repeat(${locations.length}, minmax(var(--col-w), 1fr))`;
+
   const [dayIndex, setDayIndex] = useState(0);
   const [view, setView] = useState<View>(defaultView);
   const [open, setOpen] = useState<{
@@ -229,89 +260,122 @@ export default function LastYearSchedule({
   // Default to the list view on phones (grid is cramped on a narrow screen).
   // Runs once after mount so server + first client render stay in sync; the
   // setState is deferred into a timer so the react-hooks linter doesn't flag it.
+  // Skipped when the toggle is hidden — the view is pinned to defaultView.
   useEffect(() => {
+    if (!showViewToggle) return;
     if (!window.matchMedia("(max-width: 767px)").matches) return;
     const t = setTimeout(() => setView("list"), 0);
     return () => clearTimeout(t);
+  }, [showViewToggle]);
+
+  // Below lg the "sequential" variant would stack every day into one tall column
+  // — too much on a phone. Fall back to the tabbed day-switcher there.
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const on = () => setNarrow(mq.matches);
+    const t = setTimeout(on, 0);
+    mq.addEventListener("change", on);
+    return () => {
+      clearTimeout(t);
+      mq.removeEventListener("change", on);
+    };
   }, []);
 
   const renderDay = (day: Day) => {
     const onOpen: OpenFn = (session) => setOpen({ session, dayName: day.name });
     return view === "grid" ? (
-      <GridDay day={day} onOpen={onOpen} />
+      <GridDay
+        day={day}
+        locations={locations}
+        gridCols={gridCols}
+        onOpen={onOpen}
+      />
     ) : (
       <ListDay day={day} onOpen={onOpen} />
     );
   };
 
+  // One day at a time with a day switcher: always for "tabbed", and for
+  // "sequential" once the screen is too narrow to lay the days out side by side.
+  const tabbed = variant === "tabbed" || (variant === "sequential" && narrow);
+
+  // Render the controls row only when it holds at least one control — otherwise
+  // (sequential, wide, hidden toggle) it would leave an empty, gap-padded div.
+  const hasControls = tabbed || showViewToggle;
+
   return (
     <div className="flex flex-col gap-5">
       {/* Controls: day tabs (tabbed only) + view toggle */}
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        {variant === "tabbed" && (
-          <div
-            role="tablist"
-            aria-label="Conference day"
-            className="inline-flex border-[1.5px] border-[#1b1530]/25"
-          >
-            {days.map((d, i) => {
-              const active = i === dayIndex;
-              return (
-                <button
-                  key={d.key}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setDayIndex(i)}
-                  className={`px-4 py-2 font-[family-name:var(--font-bebas)] text-lg tracking-[0.06em] transition-colors sm:px-6 sm:text-xl ${
-                    active
-                      ? "bg-[#1b1530] text-[#f4ecd2]"
-                      : "text-[#1b1530]/70 hover:bg-[#1b1530]/5"
-                  } ${i > 0 ? "border-l-[1.5px] border-[#1b1530]/25" : ""}`}
-                >
-                  {d.name}
-                  {/* keep "Sep 12" as one unit — wrap to its own line rather
+      {hasControls && (
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {tabbed && (
+            <div
+              role="tablist"
+              aria-label="Conference day"
+              className="inline-flex border-[1.5px] border-[#1b1530]/25"
+            >
+              {days.map((d, i) => {
+                const active = i === dayIndex;
+                return (
+                  <button
+                    key={d.key}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setDayIndex(i)}
+                    className={`px-4 py-2 font-[family-name:var(--font-bebas)] text-lg tracking-[0.06em] transition-colors sm:px-6 sm:text-xl ${
+                      active
+                        ? "bg-[#1b1530] text-[#f4ecd2]"
+                        : "text-[#1b1530]/70 hover:bg-[#1b1530]/5"
+                    } ${i > 0 ? "border-l-[1.5px] border-[#1b1530]/25" : ""}`}
+                  >
+                    {d.name}
+                    {/* keep "Sep 12" as one unit — wrap to its own line rather
                       than splitting between the month and the day */}
-                  <span className="ml-1.5 inline-block text-sm whitespace-nowrap opacity-70">
-                    {d.dateLabel}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+                    <span className="ml-1.5 inline-block text-sm whitespace-nowrap opacity-70">
+                      {d.dateLabel}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
-        <div
-          role="group"
-          aria-label="View"
-          className="inline-flex border-[1.5px] border-[#1b1530]/25"
-        >
-          {(
-            [
-              { id: "grid", label: "Grid", Icon: FaThLarge },
-              { id: "list", label: "List", Icon: FaListUl },
-            ] as const
-          ).map(({ id, label, Icon }, i) => {
-            const active = view === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setView(id)}
-                className={`flex items-center gap-2 px-3 py-2.5 text-xs tracking-[0.12em] uppercase transition-colors ${
-                  active
-                    ? "bg-[#1b1530] text-[#f4ecd2]"
-                    : "text-[#1b1530]/70 hover:bg-[#1b1530]/5"
-                } ${i > 0 ? "border-l-[1.5px] border-[#1b1530]/25" : ""}`}
-              >
-                <Icon size={12} />
-                {label}
-              </button>
-            );
-          })}
+          {showViewToggle && (
+            <div
+              role="group"
+              aria-label="View"
+              className="inline-flex border-[1.5px] border-[#1b1530]/25"
+            >
+              {(
+                [
+                  { id: "grid", label: "Grid", Icon: FaThLarge },
+                  { id: "list", label: "List", Icon: FaListUl },
+                ] as const
+              ).map(({ id, label, Icon }, i) => {
+                const active = view === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setView(id)}
+                    className={`flex items-center gap-2 px-3 py-2.5 text-xs tracking-[0.12em] uppercase transition-colors ${
+                      active
+                        ? "bg-[#1b1530] text-[#f4ecd2]"
+                        : "text-[#1b1530]/70 hover:bg-[#1b1530]/5"
+                    } ${i > 0 ? "border-l-[1.5px] border-[#1b1530]/25" : ""}`}
+                  >
+                    <Icon size={12} />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Legend */}
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
@@ -327,12 +391,15 @@ export default function LastYearSchedule({
         ))}
       </div>
 
-      {variant === "tabbed" ? (
+      {tabbed ? (
         renderDay(days[dayIndex])
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-5">
           {days.map((d) => (
-            <section key={d.key} className="flex flex-col gap-2.5">
+            <section
+              key={d.key}
+              className="flex min-w-0 flex-1 flex-col gap-2.5"
+            >
               <h3 className="font-[family-name:var(--font-bebas)] text-2xl tracking-[0.04em]">
                 {d.name}
                 <span className="ml-2 text-[#1b1530]/55">{d.dateLabel}</span>

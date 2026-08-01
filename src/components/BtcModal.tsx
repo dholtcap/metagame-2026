@@ -1,8 +1,17 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
-import { FaBitcoin, FaTimes } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { FaBitcoin } from "react-icons/fa";
 import type { TicketTier } from "@/lib/tickets";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { HEADING } from "./site/styles";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -19,9 +28,6 @@ function isOpenNodeCheckoutUrl(url: string): boolean {
   }
 }
 
-const FIELD =
-  "h-12 w-full border-[1.5px] border-[#1b1530]/35 bg-[#f4ecd2] px-4 text-base text-[#1b1530] outline-none transition-colors placeholder:text-[#1b1530]/40 focus:border-[#eaa35a]";
-
 // Mirrors the server cap so over-long input fails fast in the browser too.
 const MAX_FIELD_LEN = 200;
 
@@ -33,7 +39,6 @@ export default function BtcModal({
   onClose: () => void;
 }) {
   const { full } = ticket.prices;
-  const titleId = useId();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -50,7 +55,6 @@ export default function BtcModal({
   }>({ validating: true, valid: false, test: false, btcPrice: null });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
 
   // Live-validate the discount code (on mount + on change, debounced) so the
   // displayed price reflects what the server would actually charge. The charge
@@ -106,6 +110,10 @@ export default function BtcModal({
 
   const codeEmpty = !discountCode.trim();
   const discounted = codeState.valid && codeState.btcPrice != null;
+  const discountOff =
+    codeState.btcPrice != null
+      ? Number((full.btc - codeState.btcPrice).toFixed(8))
+      : null;
   const isTestCode = !codeEmpty && !codeState.validating && codeState.test;
   const codeInvalid =
     !codeEmpty && !codeState.validating && !codeState.valid && !codeState.test;
@@ -156,53 +164,35 @@ export default function BtcModal({
   }
 
   return (
-    <div
-      ref={overlayRef}
-      onMouseDown={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#1b1530]/70 p-4 font-[family-name:var(--font-space-grotesk)]"
-    >
-      <div className="relative flex w-full max-w-[460px] flex-col gap-6 bg-[#fff5e4] p-6 text-[#1b1530] shadow-2xl sm:p-8">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center text-[#1b1530]/50 transition-colors hover:text-[#1b1530]"
-        >
-          <FaTimes size={18} />
-        </button>
-
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-w-[460px] flex-col gap-6 p-6 sm:p-8">
         <div className="flex items-center justify-between gap-2 pr-6">
-          <h2
-            id={titleId}
-            className="flex items-center gap-2 font-[family-name:var(--font-bebas)] text-[clamp(26px,6vw,34px)] leading-tight tracking-[0.04em]"
+          <DialogTitle
+            className={`${HEADING} flex items-center gap-2 text-[clamp(24px,6vw,30px)]`}
           >
-            <FaBitcoin aria-hidden className="text-[#eaa35a]" /> Pay with BTC
-          </h2>
+            <FaBitcoin aria-hidden className="text-tan" /> Pay with BTC
+          </DialogTitle>
           <span className="flex items-center gap-2 text-lg">
             {discounted ? (
               <>
-                <span className="text-[#1b1530]/45 line-through">
+                <span className="text-cream/45 line-through">
                   &#8383;{full.btc}
                 </span>
-                <span className="font-semibold text-[#eaa35a]">
+                <span className="font-semibold text-tan">
                   &#8383;{codeState.btcPrice}
                 </span>
               </>
             ) : (
-              <span className="font-semibold text-[#eaa35a]">
-                &#8383;{full.btc}
-              </span>
+              <span className="font-semibold text-tan">&#8383;{full.btc}</span>
             )}
           </span>
         </div>
+        <DialogDescription className="sr-only">
+          Pay for your Metagame 2026 ticket with Bitcoin.
+        </DialogDescription>
 
         <form onSubmit={payWithBtc} className="flex flex-col gap-3">
-          <input
+          <Input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -211,9 +201,8 @@ export default function BtcModal({
             autoComplete="name"
             maxLength={MAX_FIELD_LEN}
             required
-            className={FIELD}
           />
-          <input
+          <Input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -222,19 +211,17 @@ export default function BtcModal({
             autoComplete="email"
             maxLength={MAX_FIELD_LEN}
             required
-            className={FIELD}
           />
-          <input
+          <Input
             type="text"
             value={discord}
             onChange={(e) => setDiscord(e.target.value)}
             placeholder="Discord handle (optional)"
             aria-label="Discord handle (optional)"
             maxLength={MAX_FIELD_LEN}
-            className={FIELD}
           />
           <div className="flex flex-col gap-1">
-            <input
+            <Input
               type="text"
               value={discountCode}
               onChange={(e) => setDiscountCode(e.target.value)}
@@ -242,42 +229,45 @@ export default function BtcModal({
               aria-label="Discount code"
               autoCapitalize="characters"
               maxLength={MAX_FIELD_LEN}
-              className={FIELD}
+              className={
+                discounted
+                  ? "border-[#22c55e]/60! text-[#4ade80]! focus:border-[#22c55e]!"
+                  : undefined
+              }
             />
             {!codeEmpty && codeState.validating && (
-              <p className="ccy-checking text-xs text-[#1b1530]/60">Checking</p>
+              <p className="text-xs text-cream/70">Checking</p>
             )}
             {discounted && !codeState.validating && (
-              <p className="text-xs text-[#1b1530]/60">
-                {codeState.label ?? "Discount applied"}
+              <p className="text-xs text-[#4ade80]">
+                Valid Code: {codeState.label ?? "Discount applied"}{" "}
+                &minus;&#8383;
+                {discountOff}
               </p>
             )}
             {codeInvalid && (
-              <p className="text-xs text-[#c0392b]">
+              <p className="text-xs text-salmon">
                 {codeState.exhausted
                   ? "This code has reached its redemption limit."
                   : "Code not found"}
               </p>
             )}
             {isTestCode && (
-              <p className="text-xs text-[#c0392b]">
+              <p className="text-xs text-salmon">
                 That&rsquo;s a test code &mdash; it won&rsquo;t apply here.
               </p>
             )}
           </div>
-          {error && <p className="text-sm text-[#c0392b]">{error}</p>}
-          <button
+          {error && <p className="text-sm text-salmon">{error}</p>}
+          <Button
             type="submit"
             disabled={submitting || isTestCode}
-            className="group relative disabled:opacity-60"
+            className="h-12 w-full text-base"
           >
-            <span aria-hidden className="absolute inset-0 bg-[#eaa35a]" />
-            <span className="relative flex h-12 items-center justify-center bg-[#1b1530] px-7 font-[family-name:var(--font-bebas)] text-xl tracking-[0.08em] text-[#f4ecd2] transition-transform group-hover:-translate-x-[5px] group-hover:-translate-y-[5px] group-disabled:translate-x-0! group-disabled:translate-y-0!">
-              {submitting ? "Starting checkout…" : "Pay with BTC"}
-            </span>
-          </button>
+            {submitting ? "Starting checkout…" : "Pay with BTC"}
+          </Button>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

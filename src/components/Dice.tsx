@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
+import { Pencil } from "lucide-react";
 
 // True-3D dice (three.js + R3F). Client-only: the WebGL canvas can't render on the
 // server, and ssr:false keeps three out of the initial HTML payload. (ssr:false is
@@ -20,19 +21,42 @@ export default function Dice() {
   // Bumping the key remounts Dice3D, which re-reads ?sim/?record at mount —
   // that's how the dev panel rerolls without a page reload.
   const [diceKey, remount] = useReducer((k: number) => k + 1, 0);
-  // Full-bleed: the canvas spans the whole viewport width (breaking out of the
-  // page's centered, padded column via left-1/2 + -translate-x-1/2) so the
-  // roll-in cubes can launch from the true screen edges. Height is unchanged, so
-  // the resting dice keep their size — the extra width is transparent runway,
-  // not bigger dice (Dice3D caps the resting size independently). META-447.
-  // The dev curation panel renders BELOW the canvas (in flow, not a fixed
-  // overlay) so it never covers the dice when its per-die controls expand.
+  // Dev-only: the die is the whole hero, so the curation panel + its per-die
+  // controls are gated behind an edit toggle rather than sitting on the page
+  // every dev load.
+  const [editing, setEditing] = useState(false);
+
+  // Full-bleed canvas so the roll-in cubes launch from the true screen edges;
+  // the resting dice hold a capped size (Dice3D), so the extra width is just
+  // transparent runway. No breakout offset needed: the hero centers this
+  // over-wide box with align-items, which overflows it evenly, and every
+  // ancestor's padding is symmetric — so 100vw lands on the viewport. SiteHero
+  // drops its overflow-hidden so this isn't clipped, and the layout's
+  // overflow-x-clip hides the off-screen runway. META-447.
   return (
-    <div className="relative left-1/2 flex w-screen -translate-x-1/2 flex-col items-center">
-      <div className="flex h-[clamp(120px,17vh,185px)] w-full items-center justify-center md:h-[clamp(250px,36vh,380px)]">
+    <div className="relative flex w-screen flex-col items-center">
+      <div className="flex h-[clamp(160px,20vh,220px)] w-full items-center justify-center md:h-[clamp(330px,38vh,440px)]">
         <Dice3D key={diceKey} />
       </div>
-      {DiceDevPanel && <DiceDevPanel onRemount={remount} />}
+      {/* dev-only edit toggle + panel, BELOW the canvas so they never cover the dice */}
+      {DiceDevPanel && (
+        <div className="mt-2 flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setEditing((e) => !e)}
+            aria-label={editing ? "Close dice editor" : "Edit dice"}
+            aria-pressed={editing}
+            className={`rounded-md p-1.5 transition ${
+              editing
+                ? "bg-ink text-cream"
+                : "bg-ink/10 text-ink/45 hover:bg-ink/20 hover:text-ink/80"
+            }`}
+          >
+            <Pencil size={15} />
+          </button>
+          {editing && <DiceDevPanel onRemount={remount} />}
+        </div>
+      )}
     </div>
   );
 }
