@@ -82,7 +82,10 @@ function DiceGlyph({ id, silhouette, seams, pips }: Die) {
 
 export default function DiceDivider() {
   return (
-    <div className="flex items-center justify-center gap-[22px] py-10">
+    <div
+      data-section-divider
+      className="flex scroll-mt-16 items-center justify-center gap-[22px] py-6 md:scroll-mt-24 md:py-10"
+    >
       <span className="h-px max-w-40 flex-1 bg-line" />
       {DICE.map((d) => (
         <DiceGlyph key={d.id} {...d} />
