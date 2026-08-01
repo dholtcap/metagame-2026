@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { SECTIONS } from "./sections";
+import { useSectionSpy } from "./useSectionSpy";
 
 // Flip the rail to the right edge: change this to "right" (and nothing else —
 // label side + magnification are edge-agnostic).
@@ -12,41 +13,41 @@ const RAIL_SIDE: "left" | "right" = "left";
 const MAG_AMP = 0.5; // nearest icon grows by ~50%
 const MAG_WIDTH = 52; // px falloff radius — how far the bulge spreads
 
-export default function SideRail() {
+// The summoned overlay sits on the right so it comes from under the hamburger
+// that opened it; the permanent desktop rail stays on RAIL_SIDE.
+const OVERLAY_SIDE: "left" | "right" = "right";
+
+// Overlay mode: releasing inside this band off the rail edge counts as picking
+// the nearest item; releasing beyond it just dismisses. Matches the wash width.
+const OVERLAY_BAND = 300;
+
+type SideRailProps = {
+  showOnMobile?: boolean;
+  // Summoned full-screen over the page (mobile hamburger): labels and wash are
+  // forced open and a finger drag drives the same magnification the mouse does.
+  overlay?: boolean;
+  onClose?: () => void;
+};
+
+export default function SideRail({
+  showOnMobile = true,
+  overlay = false,
+  onClose,
+}: SideRailProps) {
+  const side = overlay ? OVERLAY_SIDE : RAIL_SIDE;
   const railRef = useRef<HTMLElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const [active, setActive] = useState<string>(SECTIONS[0].id);
+  const { active, goTo, reducedMotion } = useSectionSpy();
   const [hovering, setHovering] = useState(false);
   // Per-icon magnification scales, driven by pointer Y via rAF.
   const [scales, setScales] = useState<number[]>(() => SECTIONS.map(() => 1));
   const rafRef = useRef<number | null>(null);
-  const reducedMotion = useRef(false);
+  // Touch devices fire pointerenter/move on tap, which would latch the rail into
+  // hover mode (labels + wash) on a plain nav tap — so hover is fine-pointer only.
+  const finePointer = useRef(false);
 
   useEffect(() => {
-    reducedMotion.current = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-  }, []);
-
-  // Scroll-spy: the section whose center is nearest the viewport center wins.
-  useEffect(() => {
-    const els = SECTIONS.map(({ id }) => document.getElementById(id)).filter(
-      (el): el is HTMLElement => el !== null,
-    );
-    if (els.length === 0) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      // Shrink the root to a horizontal band across the vertical middle so the
-      // "active" section is the one occupying the viewport center.
-      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    finePointer.current = window.matchMedia("(pointer: fine)").matches;
   }, []);
 
   const applyMagnification = (pointerY: number) => {
@@ -61,62 +62,107 @@ export default function SideRail() {
     setScales(next);
   };
 
-  // Structured so a future touch layer can call the same handlers: press-and-
-  // hold → onPointerEnter/Move (hover mode), release → click item under finger.
   const handlePointerMove = (e: React.PointerEvent) => {
+    if (!overlay && !finePointer.current) return;
     const y = e.clientY;
     if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(() => applyMagnification(y));
   };
 
-  const handlePointerEnter = () => setHovering(true);
+  const handlePointerEnter = () => {
+    if (!finePointer.current) return;
+    setHovering(true);
+  };
   const handlePointerLeave = () => {
+    if (overlay) return;
     setHovering(false);
     if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     setScales(SECTIONS.map(() => 1));
   };
 
-  const goTo = (id: string) => {
-    setActive(id);
-    document.getElementById(id)?.scrollIntoView({
-      behavior: reducedMotion.current ? "auto" : "smooth",
-      block: "start",
+  const nearestIndex = (y: number) => {
+    let best = 0;
+    let bestDistance = Infinity;
+    itemRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const d = Math.abs(y - (r.top + r.height / 2));
+      if (d < bestDistance) {
+        bestDistance = d;
+        best = i;
+      }
     });
+    return best;
   };
 
-  // TODO(mobile): rail is hidden below md. Intended touch analog to desktop
-  // hover→click: press-and-HOLD the rail enters "hover" mode (set `hovering`,
-  // feed touch.clientY to applyMagnification); RELEASE fires goTo() on the item
-  // under the finger. State (hovering/active/scales) is already shared so a
-  // touch layer can drive it — wire onTouchStart/Move/End to the handlers above.
+  // Overlay: the whole screen is the drag surface, so press anywhere starts
+  // scrubbing and release picks whatever the finger ended up nearest.
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (!overlay) return;
+    applyMagnification(e.clientY);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!overlay) return;
+    const withinBand =
+      side === "left"
+        ? e.clientX <= OVERLAY_BAND
+        : e.clientX >= window.innerWidth - OVERLAY_BAND;
+    if (withinBand) goTo(SECTIONS[nearestIndex(e.clientY)].id);
+    onClose?.();
+  };
+
+  // Labels, wash and dock-magnification key off `hovering`, which touch never
+  // sets — so the inline mobile rail is plain tap-to-scroll, while the overlay
+  // forces the expanded look and drives it from the finger instead.
+  const expanded = hovering || overlay;
+
   return (
     <nav
       ref={railRef}
       aria-label="Section navigation"
       onPointerEnter={handlePointerEnter}
+      onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerLeave}
-      // pointer-events-none on the fixed wrapper band; re-enabled on the rail
-      // itself so only the rail is interactive, not the invisible column.
-      className={`pointer-events-none fixed inset-y-0 z-40 hidden flex-col justify-center md:flex ${
-        RAIL_SIDE === "left" ? "left-3 lg:left-5" : "right-3 lg:right-5"
-      }`}
+      // touch-none so scrubbing the rail doesn't scroll the page underneath.
+      style={overlay ? { touchAction: "none" } : undefined}
+      // Normal: pointer-events-none on the fixed wrapper band, re-enabled on the
+      // rail itself so only the rail is interactive, not the invisible column.
+      // Overlay: the whole screen is live, so a drag can start anywhere.
+      className={
+        overlay
+          ? `pointer-events-auto fixed inset-0 z-50 flex flex-col justify-center ${
+              side === "left" ? "pl-3" : "pr-3"
+            }`
+          : `pointer-events-none fixed inset-y-0 z-40 flex-col justify-center md:flex ${
+              showOnMobile ? "flex" : "hidden"
+            } ${side === "left" ? "left-3 lg:left-5" : "right-3 lg:right-5"}`
+      }
     >
       {/* Wash behind the rail: one gradient rectangle spanning the full page
           height (the nav is full-height; the icon list below is what's limited to
           75vh), fading in on hover so labels stay legible over page content, and
-          tapering off to the side (opaque → ~60% → transparent). */}
+          tapering off to the side. The overlay runs wider and more opaque — it's
+          a deliberate mode you opened, not a hover hint. */}
       <span
         aria-hidden
-        className={`absolute inset-y-0 -z-10 w-[240px] transition-opacity duration-200 ${
-          RAIL_SIDE === "left"
+        className={`absolute inset-y-0 -z-10 transition-opacity duration-200 ${
+          side === "left"
             ? "left-0 bg-gradient-to-r"
             : "right-0 bg-gradient-to-l"
-        } from-background/95 via-background/60 to-transparent ${
-          hovering ? "opacity-100" : "opacity-0"
-        }`}
+        } ${
+          overlay
+            ? "w-[300px] from-background via-background/90 to-transparent"
+            : "w-[240px] from-background/95 via-background/60 to-transparent"
+        } ${expanded ? "opacity-100" : "opacity-0"}`}
       />
-      <ul className="pointer-events-auto flex h-[75vh] flex-col items-start justify-between">
+      <ul
+        className={`pointer-events-auto flex h-[75vh] flex-col justify-between ${
+          side === "left" ? "items-start" : "items-end"
+        }`}
+      >
         {SECTIONS.map(({ id, label, icon: Icon }, i) => {
           const isActive = active === id;
           const scale = scales[i] ?? 1;
@@ -127,16 +173,21 @@ export default function SideRail() {
                 ref={(el) => {
                   itemRefs.current[i] = el;
                 }}
-                onClick={() => goTo(id)}
+                onClick={overlay ? undefined : () => goTo(id)}
                 aria-label={label}
                 aria-current={isActive ? "true" : undefined}
-                className={`group flex items-center gap-2.5 rounded-md px-1 py-1 outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
-                  RAIL_SIDE === "right" ? "flex-row-reverse" : ""
-                }`}
+                // Inline on mobile: gap-0, since labels never reveal there and
+                // the gap would pad the collapsed span into the content gutter.
+                // The ::after bleeds the touch target out to ~44px vertically
+                // without widening the rail's lane — the icons stay small.
+                className={`group relative flex items-center rounded-md px-2 py-2 outline-none after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] focus-visible:ring-2 focus-visible:ring-brand-blue md:gap-2.5 md:px-1 md:py-1 md:after:hidden ${
+                  overlay ? "gap-2.5" : "gap-0"
+                } ${side === "right" ? "flex-row-reverse" : ""}`}
                 style={{
+                  touchAction: "manipulation",
                   transform: `scale(${scale})`,
-                  transformOrigin: RAIL_SIDE === "left" ? "left" : "right",
-                  transition: hovering
+                  transformOrigin: side,
+                  transition: expanded
                     ? "transform 60ms linear"
                     : "transform 200ms ease-out",
                 }}
@@ -144,9 +195,13 @@ export default function SideRail() {
                 <Icon
                   size={22}
                   strokeWidth={isActive ? 2.4 : 2}
+                  // CSS size beats the svg width/height attrs, so this is what
+                  // actually sets the glyph — `size={22}` is only the fallback.
                   // Resting: muted gray blending into the beige. Active: full ink
                   // and enlarged, legible even when the rail isn't hovered.
-                  className={`shrink-0 transition-colors duration-200 ${
+                  className={`shrink-0 transition-colors duration-200 md:size-[22px] ${
+                    overlay ? "size-[22px]" : "size-[18px]"
+                  } ${
                     isActive
                       ? "scale-110 text-ink"
                       : "text-ink/35 group-hover:text-ink"
@@ -158,7 +213,7 @@ export default function SideRail() {
                 {i !== 0 && (
                   <span
                     className={`text-sm font-medium whitespace-nowrap text-ink/60 transition-all duration-200 group-hover:text-ink ${
-                      hovering
+                      expanded
                         ? "translate-x-0 opacity-100"
                         : "pointer-events-none w-0 -translate-x-1 overflow-hidden opacity-0"
                     }`}
@@ -171,7 +226,9 @@ export default function SideRail() {
               {i < SECTIONS.length - 1 && (
                 <span
                   aria-hidden
-                  className="my-0.5 ml-2 h-1 w-1 rounded-full bg-ink/15"
+                  className={`my-0.5 h-1 w-1 rounded-full bg-ink/15 ${
+                    side === "left" ? "ml-2" : "mr-2"
+                  }`}
                 />
               )}
             </li>
