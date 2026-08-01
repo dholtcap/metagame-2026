@@ -18,6 +18,7 @@ import { HEADING, NEWSLETTER_LINK } from "@/components/site/styles";
 import TicketsPanel from "@/components/site/TicketsPanel";
 import UpdatesButton from "@/components/site/UpdatesButton";
 import { Button } from "@/components/ui/button";
+import { TESTIMONIALS } from "@/data/testimonials";
 import { RFP_FORM_URL } from "@/lib/links";
 import lighthavenMap from "../../../public/images/lighthaven.png";
 import weirdchess1 from "../../../public/images/weirdchess1.png";
@@ -30,24 +31,6 @@ export const metadata: Metadata = {
   description:
     "A convention of games, designs, and puzzles. Nov 6-8, 2026 at Lighthaven, Berkeley, California.",
 };
-
-const TESTIMONIALS = [
-  {
-    quote:
-      '"By far the most fun I had was arriving on the first day and discovering the puzzle hunt stuff. As I explored the campus, I felt an amazing mixture of excitement and whimsy, in trying to discover all the secrets hidden about."',
-    name: "A person, in attendence",
-  },
-  {
-    quote:
-      '"Metagame is pretty good for people who like games. All games there are fun and enjoyable. I liked playing Ultimate Tic-Tac-Toe. That is all the things I have to say."',
-    name: "Vasili, Age 8",
-  },
-  {
-    quote:
-      '"Every person I interacted with on the team was amazing, there was so much enthusiasm and welcoming attitude, which really brought the conference to life."',
-    name: "Another",
-  },
-] as const;
 
 const FAQ_BODY_LINK = "font-semibold text-navy underline underline-offset-2";
 
@@ -346,29 +329,33 @@ export default function Home() {
 
       <MonopolyDivider />
 
-      {/* Testimonials */}
-      <section id="testimonials" className="scroll-mt-24 py-[88px]">
-        <div className="mx-auto max-w-[1180px] px-8">
-          <SectionHeading
-            eyebrow="What did they make of it?"
-            title="What people said"
-            className="mb-12"
-          />
-          <div className="grid min-w-0 grid-cols-3 gap-5 max-[900px]:grid-cols-1">
-            {TESTIMONIALS.map(({ quote, name }) => (
-              <div
-                key={name}
-                className="min-w-0 rounded-[14px] border border-navy/[0.16] bg-white px-6 py-[26px] shadow-[0_8px_24px_rgba(23,48,89,0.08)]"
-              >
-                <p className="mb-[18px] text-[15px] text-ink/80">{quote}</p>
-                <p className="text-sm font-semibold text-meeple">{name}</p>
+      {/* Testimonials — the trailing divider goes with it so two dividers don't stack */}
+      {TESTIMONIALS.length > 0 && (
+        <>
+          <section id="testimonials" className="scroll-mt-24 py-[88px]">
+            <div className="mx-auto max-w-[1180px] px-8">
+              <SectionHeading
+                eyebrow="What did they make of it?"
+                title="What people said"
+                className="mb-12"
+              />
+              <div className="grid min-w-0 grid-cols-3 gap-5 max-[900px]:grid-cols-1">
+                {TESTIMONIALS.map(({ quote, name }) => (
+                  <div
+                    key={name}
+                    className="min-w-0 rounded-[14px] border border-navy/[0.16] bg-white px-6 py-[26px] shadow-[0_8px_24px_rgba(23,48,89,0.08)]"
+                  >
+                    <p className="mb-[18px] text-[15px] text-ink/80">{quote}</p>
+                    <p className="text-sm font-semibold text-meeple">{name}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </div>
+          </section>
 
-      <PacmanDivider />
+          <PacmanDivider />
+        </>
+      )}
 
       {/* tickets — replaces the old top-nav "Buy tickets" button */}
       <section id="tickets" className="scroll-mt-24 py-16 sm:py-24">
