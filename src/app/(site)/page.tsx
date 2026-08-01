@@ -14,7 +14,12 @@ import SetCardDivider from "@/components/site/dividers/set-cards";
 import { GLYPH, SHADOW } from "@/components/site/dividers/sizing";
 import SectionHeading from "@/components/site/SectionHeading";
 import SiteHero from "@/components/site/SiteHero";
-import { HEADING, NEWSLETTER_LINK } from "@/components/site/styles";
+import {
+  HEADING,
+  NEWSLETTER_LINK,
+  SECTION,
+  SECTION_ANCHOR,
+} from "@/components/site/styles";
 import TicketsPanel from "@/components/site/TicketsPanel";
 import UpdatesButton from "@/components/site/UpdatesButton";
 import { Button } from "@/components/ui/button";
@@ -149,12 +154,12 @@ export default function Home() {
   return (
     <>
       {/* home */}
-      <div id="home" className="scroll-mt-24">
+      <div id="home" className={SECTION_ANCHOR}>
         <SiteHero />
       </div>
 
       {/* about */}
-      <section id="about" className="scroll-mt-24 pt-11 pb-[88px]">
+      <section id="about" className={`${SECTION} md:pt-11 md:pb-[88px]`}>
         <div className="mx-auto max-w-[1180px] px-8">
           <div className="mb-12 max-w-[600px]">
             <SectionHeading
@@ -195,7 +200,7 @@ export default function Home() {
       </div>
 
       {/* schedule */}
-      <section id="schedule" className="scroll-mt-24 pt-14 pb-[88px]">
+      <section id="schedule" className={`${SECTION} md:pt-14 md:pb-[88px]`}>
         <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-8">
           <div className="max-w-[820px]">
             <SectionHeading eyebrow="What's going on?" title="Schedule" />
@@ -216,7 +221,7 @@ export default function Home() {
       <DiceDivider />
 
       {/* speakers */}
-      <section id="speakers" className="scroll-mt-24 pt-14 pb-[88px]">
+      <section id="speakers" className={`${SECTION} md:pt-14 md:pb-[88px]`}>
         <div className="mx-auto max-w-[1180px] px-8">
           <SectionHeading
             eyebrow="Who will I see?"
@@ -252,7 +257,7 @@ export default function Home() {
       <SetCardDivider />
 
       {/* children */}
-      <section id="children" className="scroll-mt-24 pt-[72px] pb-[54px]">
+      <section id="children" className={`${SECTION} md:pt-[72px] md:pb-[54px]`}>
         <div className="mx-auto max-w-[1180px] px-8">
           <div className="max-w-[820px]">
             <SectionHeading
@@ -288,7 +293,7 @@ export default function Home() {
       <BloodOnTheClocktowerDivider />
 
       {/* night-market — compact teaser only; the full experience is its own route */}
-      <section id="night-market" className="scroll-mt-24 py-[88px]">
+      <section id="night-market" className={`${SECTION} md:py-[88px]`}>
         <div className="mx-auto max-w-[1180px] px-8">
           <SectionHeading
             eyebrow="What happens in the dark?"
@@ -311,7 +316,7 @@ export default function Home() {
       <DungeonCrawlDivider />
 
       {/* Mailing list */}
-      <section id="mailing" className="scroll-mt-24 py-[72px]">
+      <section id="mailing" className={`${SECTION} md:py-[72px]`}>
         <div className="mx-auto max-w-[1180px] px-8">
           <SectionHeading
             eyebrow="Want to keep up?"
@@ -332,7 +337,7 @@ export default function Home() {
       {/* Testimonials — the trailing divider goes with it so two dividers don't stack */}
       {TESTIMONIALS.length > 0 && (
         <>
-          <section id="testimonials" className="scroll-mt-24 py-[88px]">
+          <section id="testimonials" className={`${SECTION} md:py-[88px]`}>
             <div className="mx-auto max-w-[1180px] px-8">
               <SectionHeading
                 eyebrow="What did they make of it?"
@@ -358,7 +363,7 @@ export default function Home() {
       )}
 
       {/* tickets — replaces the old top-nav "Buy tickets" button */}
-      <section id="tickets" className="scroll-mt-24 py-16 sm:py-24">
+      <section id="tickets" className={`${SECTION} sm:py-16 md:py-24`}>
         <div className="mx-auto max-w-[1180px] px-8">
           <SectionHeading
             eyebrow="Ready to play?"
@@ -374,7 +379,7 @@ export default function Home() {
       <CardSuitsDivider />
 
       {/* faq */}
-      <section id="faq" className="scroll-mt-24 pt-14 pb-[88px]">
+      <section id="faq" className={`${SECTION} md:pt-14 md:pb-[88px]`}>
         <div className="mx-auto max-w-[1180px] px-8">
           <SectionHeading
             eyebrow="But what about…"

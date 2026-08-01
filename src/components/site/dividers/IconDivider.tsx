@@ -22,7 +22,7 @@ export type GameIcon = {
 
 export default function IconDivider({ icons }: { icons: GameIcon[] }) {
   return (
-    <div className="flex items-center justify-center gap-[22px] py-10">
+    <div className="flex items-center justify-center gap-[22px] py-6 md:py-10">
       <span className="h-px max-w-40 flex-1 bg-line" />
       {icons.map((ic) => (
         <svg
