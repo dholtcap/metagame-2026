@@ -409,11 +409,11 @@ export default function Home() {
 
           <div className="mt-11">
             <p className="max-w-[620px] text-ink/70">
-              Wish to read more words? Email{" "}
+              Have more questions? Email{" "}
               <a href="mailto:team@metagame.games" className={FAQ_BODY_LINK}>
                 team@metagame.games
               </a>{" "}
-              and we shall respond.
+              .
             </p>
           </div>
         </div>
