@@ -41,7 +41,7 @@ const FAQ_BODY_LINK = "font-semibold text-navy underline underline-offset-2";
 
 const NewsletterCta = () => (
   <UpdatesButton className={`${NEWSLETTER_LINK} align-baseline`}>
-    Subscribe to our newsletter
+    Sign up for updates
   </UpdatesButton>
 );
 
@@ -205,13 +205,10 @@ export default function Home() {
           <div className="max-w-[820px]">
             <SectionHeading eyebrow="What's going on?" title="Schedule" />
             <p className="mt-3.5 text-base text-ink/70">
-              The 2026 schedule is still coming together —{" "}
-              <UpdatesButton className={NEWSLETTER_LINK}>
-                subscribe to our newsletter
-              </UpdatesButton>{" "}
-              for updates. Until then, here is the complete program from
-              Metagame 2025: talks, workshops, games, and megagames across three
-              days. Tap any session for details.
+              The 2026 schedule is still coming together. In the meantime, here
+              is the complete program from Metagame 2025: talks, workshops,
+              games, and megagames across three days. Tap any session for
+              details.
             </p>
           </div>
           <LastYearSchedule />
@@ -371,7 +368,7 @@ export default function Home() {
             className="mb-8"
           />
           <div className="mx-auto flex max-w-[560px] flex-col items-center gap-[22px]">
-            <TicketsPanel showHeading={false} />
+            <TicketsPanel showHeading={false} surface="light" />
           </div>
         </div>
       </section>

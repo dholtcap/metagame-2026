@@ -5,6 +5,7 @@ import BtcModal from "@/components/BtcModal";
 import SupporterModal from "@/components/SupporterModal";
 import { Button } from "@/components/ui/button";
 import { getTicket, supporterTier, ticketUrl } from "@/lib/tickets";
+import UpdatesButton from "@/components/site/UpdatesButton";
 import {
   subscribeCurrency,
   getCurrencySnapshot,
@@ -29,11 +30,16 @@ const TILE_LABEL =
 // DialogContent or the /tickets page wrapper.
 export default function TicketsPanel({
   showHeading = true,
+  surface = "dark",
 }: {
   // The modal shows its own "Tickets" heading; the one-pager section supplies a
   // SectionHeading above the (now background-less) panel, so it hides this one.
   showHeading?: boolean;
+  // The tiles carry their own navy face, but bare text has to match what's behind
+  // the panel: navy in the modal, the cream page background in the section.
+  surface?: "dark" | "light";
 }) {
+  const onDark = surface === "dark";
   const standard = getTicket("standard");
   const earlyBirdHref = standard ? ticketUrl(standard) : null;
   const [supporterOpen, setSupporterOpen] = useState(false);
@@ -142,6 +148,17 @@ export default function TicketsPanel({
             )}
           </span>
         </Button>
+        <span
+          className={`text-center text-sm ${onDark ? "text-cream/70" : "text-ink/70"}`}
+        >
+          Volunteer and Financial Assistance ticket details coming soon!{" "}
+          <UpdatesButton
+            className={`font-bold underline underline-offset-2 ${onDark ? "text-tan" : "text-meeple"}`}
+          >
+            Sign up for updates
+          </UpdatesButton>{" "}
+          to hear when they do.
+        </span>
       </div>
       {supporterOpen && (
         <SupporterModal onClose={() => setSupporterOpen(false)} />
