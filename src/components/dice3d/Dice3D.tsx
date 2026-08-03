@@ -304,6 +304,9 @@ export default function Dice3D() {
     let id: ReturnType<typeof setTimeout>;
     const advance = (delay: number) => {
       id = setTimeout(() => {
+        // hidden tabs keep running timers but not frames — hold the cycle here
+        // rather than turning phases nobody is watching
+        if (document.hidden) return advance(500);
         step = (step + 1) % SEQ.length;
         setPhase(SEQ[step]);
         advance(PHASE_MS);

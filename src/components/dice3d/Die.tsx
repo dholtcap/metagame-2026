@@ -215,10 +215,15 @@ export default function Die({
     wait.current = index * STAGGER;
   }, [phase, index]);
 
-  useFrame((_, dt) => {
+  useFrame((_, rawDt) => {
     const g = group.current;
     const m = mover.current;
     if (!g || !m) return;
+
+    // Cap the step: returning to a hidden tab delivers the whole away-stretch as
+    // one delta, which would run unstaggered die 0 straight to its target while
+    // the others spent it all on their stagger wait.
+    const dt = Math.min(rawDt, 0.1);
 
     // Roll-in owns the pose until it settles; the phase machine takes over from
     // the exact rest pose it lands in. The driver is ticked once per frame by
