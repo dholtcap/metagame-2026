@@ -1,3 +1,4 @@
+import DividerRow from "../DividerRow";
 import { CARD as CARD_SIZE, SHADOW } from "../sizing";
 import { SUITS, type Suit } from "./suits";
 
@@ -42,15 +43,10 @@ function SuitCard({ name, d, cx, cy, w, h }: Suit) {
 
 export default function CardSuitsDivider() {
   return (
-    <div
-      data-section-divider
-      className="flex scroll-mt-16 items-center justify-center gap-[22px] py-6 md:scroll-mt-24 md:py-10"
-    >
-      <span className="h-px max-w-40 flex-1 bg-line" />
+    <DividerRow>
       {SUITS.map((s) => (
         <SuitCard key={s.name} {...s} />
       ))}
-      <span className="h-px max-w-40 flex-1 bg-line" />
-    </div>
+    </DividerRow>
   );
 }

@@ -3,6 +3,7 @@
 // drop in b/w — shape (diamond/oval/squiggle), count (1–3) and shading
 // (solid = cut, open = cut outline, striped = cut stripes) carry it. Decorative;
 // no wired-up use yet.
+import DividerRow from "../DividerRow";
 import { CARD as CARD_SIZE, SHADOW } from "../sizing";
 
 const CHARCOAL = "#4d4d4d";
@@ -145,15 +146,10 @@ function CardGlyph({ id, shape, count, shading }: Card) {
 
 export default function SetCardDivider() {
   return (
-    <div
-      data-section-divider
-      className="flex scroll-mt-16 items-center justify-center gap-[22px] py-6 md:scroll-mt-24 md:py-10"
-    >
-      <span className="h-px max-w-40 flex-1 bg-line" />
+    <DividerRow>
       {CARDS.map((c) => (
         <CardGlyph key={c.id} {...c} />
       ))}
-      <span className="h-px max-w-40 flex-1 bg-line" />
-    </div>
+    </DividerRow>
   );
 }
