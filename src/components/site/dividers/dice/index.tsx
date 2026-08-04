@@ -2,6 +2,7 @@
 // transparent facet seams (cut via mask, so the page bg shows through) — the
 // same solid-with-negative-space language as the weirdchess divider. Purely
 // decorative; separates the mailing-list and testimonials sections.
+import DividerRow from "../DividerRow";
 import { GLYPH, SHADOW } from "../sizing";
 
 const CHARCOAL = "#4d4d4d";
@@ -82,15 +83,10 @@ function DiceGlyph({ id, silhouette, seams, pips }: Die) {
 
 export default function DiceDivider() {
   return (
-    <div
-      data-section-divider
-      className="flex scroll-mt-16 items-center justify-center gap-[22px] py-6 md:scroll-mt-24 md:py-10"
-    >
-      <span className="h-px max-w-40 flex-1 bg-line" />
+    <DividerRow>
       {DICE.map((d) => (
         <DiceGlyph key={d.id} {...d} />
       ))}
-      <span className="h-px max-w-40 flex-1 bg-line" />
-    </div>
+    </DividerRow>
   );
 }
