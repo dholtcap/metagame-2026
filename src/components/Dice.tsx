@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
 
 // True-3D dice (three.js + R3F). Client-only: the WebGL canvas can't render on the
@@ -26,6 +26,29 @@ export default function Dice() {
   // every dev load.
   const [editing, setEditing] = useState(false);
 
+  // Distance from the stage box to the top of the page. The canvas overlay
+  // extends by this much both up (so roll-in bounces stay in frame all the way
+  // to the page top) and down (symmetric, so the canvas center — where the dice
+  // rest — stays pinned to the stage box). Dice3D's width-based scale keeps the
+  // dice the same on-screen size, so the extra height is pure runway.
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [runwayPx, setRunwayPx] = useState(0);
+  useEffect(() => {
+    const measure = () => {
+      const el = stageRef.current;
+      if (!el) return;
+      setRunwayPx(
+        Math.max(
+          0,
+          Math.round(el.getBoundingClientRect().top + window.scrollY),
+        ),
+      );
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
   // Full-bleed canvas so the roll-in cubes launch from the true screen edges;
   // the resting dice hold a capped size (Dice3D), so the extra width is just
   // transparent runway. No breakout offset needed: the hero centers this
@@ -35,8 +58,18 @@ export default function Dice() {
   // overflow-x-clip hides the off-screen runway. META-447.
   return (
     <div className="relative flex w-screen flex-col items-center">
-      <div className="flex h-[clamp(160px,20vh,220px)] w-full items-center justify-center md:h-[clamp(330px,38vh,440px)]">
-        <Dice3D key={diceKey} />
+      <div
+        ref={stageRef}
+        className="relative h-[clamp(160px,20vh,220px)] w-full md:h-[clamp(330px,38vh,440px)]"
+      >
+        {/* transparent + pointer-events-none, so the overrun neither hides nor
+            blocks the content it overlaps */}
+        <div
+          className="pointer-events-none absolute inset-x-0"
+          style={{ top: -runwayPx, bottom: -runwayPx }}
+        >
+          <Dice3D key={diceKey} />
+        </div>
       </div>
       {/* dev-only edit toggle + panel, BELOW the canvas so they never cover the dice */}
       {DiceDevPanel && (
