@@ -121,6 +121,10 @@ export default function SideRail({ overlay = false, onClose }: SideRailProps) {
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
+      // The overlay closes on pointerup, so the click the browser synthesizes
+      // after touchend would hit-test whatever was underneath (e.g. a schedule
+      // card). preventDefault on touchend suppresses that compat click.
+      onTouchEnd={overlay ? (e) => e.preventDefault() : undefined}
       onPointerLeave={handlePointerLeave}
       // touch-none so scrubbing the rail doesn't scroll the page underneath.
       style={overlay ? { touchAction: "none" } : undefined}
