@@ -100,6 +100,16 @@ export default function SideRail({ overlay = false, onClose }: SideRailProps) {
 
   const handlePointerUp = (e: React.PointerEvent) => {
     if (!overlay) return;
+    // Closing re-renders the overlay away before the browser synthesizes the
+    // tap's click, which then hit-tests whatever was underneath (ghost click).
+    // A React onTouchEnd prop is also gone by then, so cancel the upcoming
+    // touchend natively — that stops the click from being generated at all.
+    if (e.pointerType === "touch") {
+      document.addEventListener("touchend", (te) => te.preventDefault(), {
+        capture: true,
+        once: true,
+      });
+    }
     const withinBand =
       side === "left"
         ? e.clientX <= OVERLAY_BAND
