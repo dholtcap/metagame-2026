@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,20 @@ export default function SignupForm({ light = false }: { light?: boolean }) {
   // Remembered after success so the interest follow-up can patch the same row.
   const [submittedEmail, setSubmittedEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
+
+  // Prefill from ?name=…&email=… so external links (e.g. the ticket-confirmation
+  // email) can land on a filled form. Prefill only, never auto-submit — link
+  // scanners follow GETs. Deferred: lint forbids synchronous setState in effects.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const params = new URLSearchParams(window.location.search);
+      const name = params.get("name");
+      const email = params.get("email");
+      if (name) setName((v) => v || name);
+      if (email) setEmail((v) => v || email);
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
