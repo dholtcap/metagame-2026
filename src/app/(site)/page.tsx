@@ -22,6 +22,7 @@ import {
 } from "@/components/site/styles";
 import TicketsPanel from "@/components/site/TicketsPanel";
 import UpdatesButton from "@/components/site/UpdatesButton";
+import UpdatesHashModal from "@/components/site/UpdatesHashModal";
 import { Button } from "@/components/ui/button";
 import { TESTIMONIALS } from "@/data/testimonials";
 import { RFP_FORM_URL } from "@/lib/links";
@@ -153,6 +154,8 @@ const FAQS: {
 export default function Home() {
   return (
     <>
+      <UpdatesHashModal />
+
       {/* home */}
       <div id="home" className={SECTION_ANCHOR}>
         <SiteHero />
@@ -313,7 +316,7 @@ export default function Home() {
       <DungeonCrawlDivider />
 
       {/* Mailing list */}
-      <section id="mailing" className={`${SECTION} md:py-[72px]`}>
+      <section id="mailing-list" className={`${SECTION} md:py-[72px]`}>
         <div className="mx-auto max-w-[1180px] px-8">
           <SectionHeading
             eyebrow="Want to keep up?"

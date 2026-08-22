@@ -31,7 +31,7 @@ const ALL_SECTIONS: readonly Section[] = [
   { id: "speakers", label: "Speakers", icon: UserRound },
   { id: "children", label: "Children", icon: RubberDuck },
   { id: "night-market", label: "Night Market", icon: Moon },
-  { id: "mailing", label: "Mailing List", icon: Mail },
+  { id: "mailing-list", label: "Mailing List", icon: Mail },
   { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
   { id: "tickets", label: "Tickets", icon: Ticket },
   { id: "faq", label: "FAQ", icon: MessageCircleQuestion },
