@@ -127,6 +127,18 @@ const FAQS: {
     ),
   },
   {
+    question: "Can I transfer my ticket?",
+    answer: (
+      <>
+        Yes, as long as your ticket wasn&apos;t a special personal comp. Email{" "}
+        <a href="mailto:team@metagame.games" className={FAQ_BODY_LINK}>
+          team@metagame.games
+        </a>{" "}
+        if you&apos;d like to transfer your ticket to someone else.
+      </>
+    ),
+  },
+  {
     question: "What will I eat?",
     answer: (
       <>
