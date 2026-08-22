@@ -324,7 +324,7 @@ export default function Home() {
           />
           <p className="mt-3 mb-7 max-w-[520px] text-base text-ink/70">
             Get notified about ticket sales, updates, volunteer opportunities,
-            and more.
+            future events, and more.
           </p>
           <div className="max-w-[600px]">
             <SignupForm light />

@@ -25,7 +25,7 @@ export default function UpdatesModal({ onClose }: { onClose: () => void }) {
           </DialogTitle>
           <DialogDescription className="mt-1.5 text-[15px] text-cream/80">
             Get notified about ticket sales, updates, volunteer opportunities,
-            and more
+            future events, and more
           </DialogDescription>
         </div>
         <SignupForm />
