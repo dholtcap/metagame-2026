@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { env } from "@/env";
 import { SOCIAL_LINKS } from "@/lib/urls";
+import { formatTicketCode } from "@/lib/ticket-code";
 
 let cached: Resend | null = null;
 
@@ -26,14 +27,20 @@ export type TicketConfirmationEmail = {
   to: string;
   purchaserName?: string;
   tierLabel: string;
-  /** Dollars paid. 0 renders as a comped ticket. */
+  /** Dollars paid (0 for comps). Ignored when btcPaid is set. */
   usdPaid?: number;
   /** Pre-discount price (struck through when it differs from usdPaid). */
   usdFull?: number;
+  /** Whole BTC paid — set on BTC purchases, which charge fixed BTC amounts. */
+  btcPaid?: number;
+  /** Pre-discount BTC price (struck through when it differs from btcPaid). */
+  btcFull?: number;
   /** Stripe-hosted receipt page (charge.receipt_url). */
   receiptUrl?: string;
   /** Promotion code redeemed at checkout. */
   discountCode?: string;
+  /** 6-char ticket code (dashless; rendered as XXX-XXX). */
+  ticketCode?: string;
   test?: boolean;
 };
 
@@ -48,14 +55,21 @@ export function renderTicketConfirmationEmail(
     tierLabel,
     usdPaid,
     usdFull,
+    btcPaid,
+    btcFull,
     receiptUrl,
     discountCode,
+    ticketCode,
     test = false,
   }: TicketConfirmationEmail,
   assetBase: string = SITE,
 ) {
-  const comped = !usdPaid;
-  const discounted = usdFull != null && usdFull > (usdPaid ?? 0);
+  const isBtc = btcPaid != null;
+  const discounted = isBtc
+    ? btcFull != null && btcFull > btcPaid
+    : usdFull != null && usdFull > (usdPaid ?? 0);
+  const paid = isBtc ? `\u20BF${btcPaid}` : `$${(usdPaid ?? 0).toFixed(2)}`;
+  const full = isBtc ? `\u20BF${btcFull}` : `$${(usdFull ?? 0).toFixed(2)}`;
 
   // Prefill the mailing-list form (modal opens via #updates; params must precede
   // the hash). Signup stays an explicit submit — the link only fills the fields.
@@ -64,10 +78,9 @@ export function renderTicketConfirmationEmail(
     ...(purchaserName ? { name: purchaserName } : {}),
   }).toString();
   const mailingListUrl = `${SITE}/${prefill ? `?${prefill}` : ""}#updates`;
-  const paidLine = `Amount paid: $${(usdPaid ?? 0).toFixed(2)}${
+  const paidLine = `Amount paid: ${paid}${
     discounted
-      ? ` (was $${usdFull.toFixed(2)}` +
-        (discountCode ? `, code ${discountCode})` : ")")
+      ? ` (was ${full}` + (discountCode ? `, code ${discountCode})` : ")")
       : ""
   }`;
 
@@ -99,8 +112,9 @@ export function renderTicketConfirmationEmail(
           <p><strong>Name:</strong> ${purchaserName || "—"}</p>
           <p><strong>Email:</strong> ${to}</p>
           <p><strong>Type:</strong> ${tierLabel}</p>
-          <p><strong>Amount Paid:</strong> ${discounted ? `<span style="text-decoration: line-through; color: #999;">$${usdFull.toFixed(2)}</span> ` : ""}$${(usdPaid ?? 0).toFixed(2)}${discountCode && discounted ? ` (<strong>${discountCode}</strong>)` : ""}</p>
-          ${receiptUrl ? `<p><a href="${receiptUrl}">View your Stripe receipt</a></p>` : ""}
+          ${ticketCode ? `<p><strong>Ticket code:</strong> <span style="font-family: monospace; font-size: 15px;">${formatTicketCode(ticketCode)}</span></p>` : ""}
+          <p><strong>Amount Paid:</strong> ${discounted ? `<span style="text-decoration: line-through; color: #999;">${full}</span> ` : ""}${paid}${discountCode && discounted ? ` (<strong>${discountCode}</strong>)` : ""}</p>
+          ${receiptUrl ? `<p><a href="${receiptUrl}">View your receipt</a></p>` : ""}
         </div>
 
         <div style="background-color: #f9fafb; border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -137,6 +151,7 @@ Ticket Details
 - Name: ${purchaserName || "—"}
 - Email: ${to}
 - Type: ${tierLabel}
+${ticketCode ? `- Ticket code: ${formatTicketCode(ticketCode)}` : ""}
 - ${paidLine}
 ${receiptUrl ? `- Receipt: ${receiptUrl}` : ""}
 
