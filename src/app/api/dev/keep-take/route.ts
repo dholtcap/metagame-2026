@@ -3,13 +3,21 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 // Dev-only store behind the dice curation panel. POST saves a live roll as raw
-// JSON under src/components/dice3d/takes/, PATCH pins a saved roll's scattered
+// JSON under src/v2/components/dice/dice3d/takes/, PATCH pins a saved roll's scattered
 // tableau, DELETE drops one, GET lists what's saved (metadata only, so the
 // dropdown stays cheap) or returns one take in full for replay. Every write regenerates the sibling index.ts, which is what the
 // playback driver imports — so keeping a roll ships it and deleting one unships
 // it, with no bake step in between. Commit the JSON + index.ts together.
 
-const DIR = path.join(process.cwd(), "src", "components", "dice3d", "takes");
+const DIR = path.join(
+  process.cwd(),
+  "src",
+  "v2",
+  "components",
+  "dice",
+  "dice3d",
+  "takes",
+);
 const isTakeFile = (f: string) => /^take-\d+\.json$/.test(f);
 
 const devOnly = () =>

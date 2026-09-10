@@ -34,6 +34,7 @@ import weirdchess4 from "../../../public/images/weirdchess4.png";
 
 export const metadata: Metadata = {
   title: "Metagame — Nov 6-8, 2026",
+  robots: { index: false },
   description:
     "A convention of games, designs, and puzzles. Nov 6-8, 2026 at Lighthaven, Berkeley, California.",
 };
