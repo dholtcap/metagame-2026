@@ -340,21 +340,6 @@ export default function Home() {
             <TicketsPanel showHeading={false} surface="light" align="start" />
           </div>
 
-          <div className="mt-14 max-w-[640px]">
-            <h3 className={`${HEADING} text-[clamp(24px,3vw,34px)] text-navy`}>
-              Need housing?
-            </h3>
-            <p className={PROSE}>
-              On-site housing at Lighthaven is now available, so you can stay
-              where the games are. Rooms are booked directly with the venue.
-            </p>
-            <Button asChild variant="navy" className="mt-5">
-              <a href={HOUSING_URL} target="_blank" rel="noopener noreferrer">
-                Book on-site housing <span aria-hidden="true">&rarr;</span>
-              </a>
-            </Button>
-          </div>
-
           <div className="mt-14 grid max-w-[820px] gap-8 sm:grid-cols-2">
             <div>
               <h3 className={`${HEADING} text-2xl text-navy`}>Sponsoring?</h3>
