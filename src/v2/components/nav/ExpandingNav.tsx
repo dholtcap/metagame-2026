@@ -8,10 +8,11 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { NAV_LINKS } from "./links";
 import { NavLogo, Pips, TopIcon } from "./LogoDice";
-import { SECTIONS } from "./sections";
 import { useMediaQuery } from "./useMediaQuery";
-import { useSectionSpy } from "./useSectionSpy";
 
 // Collapsed, this is just the single MG die in the corner. Desktop: clicking it
 // unfolds the die into the full METAGAME wordmark while the section links slide
@@ -37,7 +38,18 @@ const withDelay = (parts: string[], delayMs: number) =>
   parts.map((t) => `${t} ${Math.round(delayMs)}ms`).join(", ");
 
 // Home is the logo itself, so it doesn't get a link.
-const LINKS = SECTIONS.filter((s) => s.id !== "home");
+const LINKS = NAV_LINKS.filter((s) => s.id !== "home");
+
+// Which nav entry the current route belongs to: null for pages not in the
+// nav (/credits, /thanks, …), which get the Home link but no "current" mark.
+function useActiveLink(): string | null {
+  const pathname = usePathname();
+  if (pathname === "/") return "home";
+  return (
+    NAV_LINKS.find((l) => l.id !== "home" && pathname.startsWith(l.href))?.id ??
+    null
+  );
+}
 
 // Backdrop outline: the die's isometric hexagon (pointy top/bottom, cos 30°
 // half-width, sized from the die row height `hex`) whose vertices stretch into
@@ -106,31 +118,14 @@ function registerGrow() {
   }
 }
 
-// The trigger stays out of the way on a fresh load and fades in once you've
-// scrolled at all; it never hides again.
-const REVEAL_SCROLL_PX = 40;
-let scrolledOnce = false;
-function useScrolledOnce() {
-  return useSyncExternalStore(
-    (onChange) => {
-      const check = () => {
-        if (!scrolledOnce && window.scrollY > REVEAL_SCROLL_PX) {
-          scrolledOnce = true;
-          onChange();
-        }
-      };
-      check();
-      window.addEventListener("scroll", check, { passive: true });
-      return () => window.removeEventListener("scroll", check);
-    },
-    () => scrolledOnce,
-    () => false,
-  );
-}
-
 export default function ExpandingNav() {
   const desktop = useMediaQuery("(min-width: 768px)");
-  const revealed = useScrolledOnce();
+  const active = useActiveLink();
+  // On the home page the logo *is* home, so the link list starts at Tickets;
+  // everywhere else a Home link leads the list.
+  const links = active === "home" ? LINKS : NAV_LINKS;
+  // The die's top face: the current page's icon, or home's pips off-nav.
+  const topIcon = active ?? "home";
   useEffect(registerGrow, []);
   const [expanded, setExpanded] = useState(false);
   // Mobile opens sideways then down, and closes down then sideways — so the
@@ -148,14 +143,14 @@ export default function ExpandingNav() {
   // Mobile column is exactly as wide as the die button (wordmark + its rim),
   // so the box stays symmetric about the logo; labels are narrower anyway.
   const [dieWidth, setDieWidth] = useState(0);
-  const { active, goTo } = useSectionSpy();
-  // Scrolling down, underlines sweep left→right (in and out); up, right→left.
-  const [prevActive, setPrevActive] = useState(active);
+  // Moving right along the list, underlines sweep left→right (in and out);
+  // moving left, right→left.
+  const [prevActive, setPrevActive] = useState(topIcon);
   const [fromLeft, setFromLeft] = useState(true);
-  if (active !== prevActive) {
-    const idx = (id: string) => SECTIONS.findIndex((s) => s.id === id);
-    setFromLeft(idx(active) > idx(prevActive));
-    setPrevActive(active);
+  if (topIcon !== prevActive) {
+    const idx = (id: string) => NAV_LINKS.findIndex((s) => s.id === id);
+    setFromLeft(idx(topIcon) > idx(prevActive));
+    setPrevActive(topIcon);
   }
 
   useLayoutEffect(() => {
@@ -252,12 +247,10 @@ export default function ExpandingNav() {
       // The backdrop's margin around the die grows a touch on hover; the open
       // bar keeps that grown size. Offsetting top/left by half keeps the die
       // fixed in place while the hexagon swells around it.
-      className={`fixed z-40 flex items-start [--bar-h:calc(66px+var(--grow))] [--nav-h:54px] md:[--bar-h:calc(76px+var(--grow))] md:[--nav-h:64px] ${revealed ? "" : "pointer-events-none opacity-0"}`}
+      className={`fixed z-40 flex items-start [--bar-h:calc(66px+var(--grow))] [--nav-h:54px] md:[--bar-h:calc(76px+var(--grow))] md:[--nav-h:64px]`}
       style={{
         ["--grow" as string]: grow ? "6px" : "0px",
-        // (opacity here too — an inline `transition` replaces any class one.)
-        transition:
-          "--grow 350ms cubic-bezier(0.45,0,0.55,1), opacity 1000ms ease",
+        transition: "--grow 350ms cubic-bezier(0.45,0,0.55,1)",
         // Half-width of a hexagon this tall (cos 30°).
         ["--hex" as string]: "calc(var(--bar-h) * 0.433)",
         top: "calc(0.75rem - var(--grow) / 2)",
@@ -312,14 +305,14 @@ export default function ExpandingNav() {
             durationMs={sidewaysMs}
             easing={sidewaysEase}
             className="h-(--nav-h)"
-            // Top face shows where you are: the section's icon, crossfading
-            // as scroll-spy moves. Home, and the unfolded wordmark (where the
-            // "2" is part of METAGAME 2026), keep the die's own 2 pips.
-            top={SECTIONS.map(({ id, icon: Icon }) => (
+            // Top face shows where you are: the page's icon, crossfading on
+            // navigation. Home, and the unfolded wordmark (where the "2" is
+            // part of METAGAME 2026), keep the die's own 2 pips.
+            top={NAV_LINKS.map(({ id, icon: Icon }) => (
               <g
                 key={id}
                 style={{
-                  opacity: (unfold ? "home" : active) === id ? 1 : 0,
+                  opacity: (unfold ? "home" : topIcon) === id ? 1 : 0,
                   transition: "opacity 250ms ease",
                 }}
               >
@@ -339,7 +332,7 @@ export default function ExpandingNav() {
             viewport. */}
         <nav
           id="expanding-nav-links"
-          aria-label="Section navigation"
+          aria-label="Site navigation"
           aria-hidden={!unfold}
           className={`hidden min-w-0 [scrollbar-width:none] md:block ${unfold ? "overflow-x-auto" : "overflow-hidden"}`}
           style={{
@@ -351,13 +344,12 @@ export default function ExpandingNav() {
             ref={rowRef}
             className="flex w-max items-center gap-4 pr-(--hex) pl-2"
           >
-            {LINKS.map(({ id, label }, i) => (
+            {links.map(({ id, label, href }, i) => (
               <li key={id}>
-                <button
-                  type="button"
+                <Link
+                  href={href}
                   tabIndex={unfold ? 0 : -1}
-                  onClick={() => goTo(id)}
-                  aria-current={active === id ? "true" : undefined}
+                  aria-current={active === id ? "page" : undefined}
                   className={linkClass(active === id)}
                   style={{
                     opacity: unfold ? 1 : 0,
@@ -372,12 +364,12 @@ export default function ExpandingNav() {
                       ],
                       unfold
                         ? 200 + i * LINK_STAGGER_MS
-                        : (LINKS.length - 1 - i) * LINK_STAGGER_MS * 0.5,
+                        : (links.length - 1 - i) * LINK_STAGGER_MS * 0.5,
                     ),
                   }}
                 >
                   {label}
-                </button>
+                </Link>
               </li>
             ))}
           </ul>
@@ -390,7 +382,7 @@ export default function ExpandingNav() {
             the menu, since it's covering content. Bottom padding clears the
             hex cap. */}
         <nav
-          aria-label="Section navigation"
+          aria-label="Site navigation"
           aria-hidden={!dropDown}
           className="min-h-0 flex-1 overflow-hidden md:hidden"
           style={{
@@ -401,16 +393,13 @@ export default function ExpandingNav() {
           }}
         >
           <ul className="flex h-[calc(100dvh-1.5rem-var(--bar-h))] w-max flex-col items-start justify-around pb-[calc(var(--bar-h)/4)] pl-2">
-            {LINKS.map(({ id, label }, i) => (
+            {links.map(({ id, label, href }, i) => (
               <li key={id}>
-                <button
-                  type="button"
+                <Link
+                  href={href}
                   tabIndex={dropDown ? 0 : -1}
-                  onClick={() => {
-                    goTo(id);
-                    setOpen(false);
-                  }}
-                  aria-current={active === id ? "true" : undefined}
+                  onClick={() => setOpen(false)}
+                  aria-current={active === id ? "page" : undefined}
                   className={linkClass(active === id)}
                   style={{
                     opacity: dropDown ? 1 : 0,
@@ -421,13 +410,13 @@ export default function ExpandingNav() {
                       ["opacity 1000ms ease", "color 200ms ease"],
                       dropDown
                         ? sidewaysMs +
-                            ((i + 0.5) / LINKS.length) * MOBILE_DROP_MS * 0.8
+                            ((i + 0.5) / links.length) * MOBILE_DROP_MS * 0.8
                         : MOBILE_COLLAPSE_MS,
                     ),
                   }}
                 >
                   {label}
-                </button>
+                </Link>
               </li>
             ))}
           </ul>

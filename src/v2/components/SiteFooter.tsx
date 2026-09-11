@@ -1,18 +1,32 @@
 import Link from "next/link";
-import { FaEnvelope } from "react-icons/fa";
+import { FaDiscord, FaEnvelope } from "react-icons/fa";
+import { TEAM_EMAIL } from "@/v2/lib/links";
+import { SOCIAL_LINKS } from "@/v2/lib/urls";
+import { NAV_LINKS } from "./nav/links";
+
+const CONTACT =
+  "flex items-center gap-2.5 text-[15px] font-semibold text-navy hover:text-meeple";
 
 export default function SiteFooter() {
   return (
     <footer className="border-t border-line py-8 text-ink/70">
       <div className="mx-auto max-w-[1180px] px-8 max-[760px]:px-6">
         <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
-          <a
-            href="mailto:team@metagame.games"
-            className="flex items-center gap-2.5 text-[15px] font-semibold text-navy hover:text-meeple"
-          >
-            <FaEnvelope aria-hidden />
-            team@metagame.games
-          </a>
+          <div className="flex flex-wrap items-center gap-x-7 gap-y-3">
+            <a href={`mailto:${TEAM_EMAIL}`} className={CONTACT}>
+              <FaEnvelope aria-hidden />
+              {TEAM_EMAIL}
+            </a>
+            <a
+              href={SOCIAL_LINKS.DISCORD}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={CONTACT}
+            >
+              <FaDiscord aria-hidden />
+              Discord
+            </a>
+          </div>
           <div
             aria-label="Event details"
             className="flex items-center gap-3 font-space-mono text-xs tracking-[0.08em] text-ink/60 uppercase"
@@ -25,6 +39,20 @@ export default function SiteFooter() {
             <span>Berkeley, California</span>
           </div>
         </div>
+
+        {/* Same pages as the corner nav, in the same order. */}
+        <nav aria-label="Footer navigation" className="mt-7">
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
+            {NAV_LINKS.map(({ id, label, href }) => (
+              <li key={id}>
+                <Link href={href} className="hover:text-navy hover:underline">
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
         <p className="mt-7 text-center text-[12.5px] text-ink/45">
           &copy; 2026 Metagame LLC{" · "}
           <Link href="/credits" className="underline hover:text-ink/70">

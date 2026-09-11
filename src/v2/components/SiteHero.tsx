@@ -1,22 +1,42 @@
-import dynamic from "next/dynamic";
+import Link from "next/link";
+import { Button } from "@/v2/components/ui/button";
 import Dice from "./dice/Dice";
+import HeroBackdrop from "./HeroBackdrop";
+import { EYEBROW } from "./styles";
 
-// Dev-only backdrop lab (drop an image, tune the wash); the conditional
-// dynamic() keeps it out of production bundles entirely.
-const HeroBackdropLab =
-  process.env.NODE_ENV === "development"
-    ? dynamic(() => import("./dev/HeroBackdropLab"))
-    : null;
-
-// The above-the-fold banner: just the rolling-dice METAGAME wordmark for now.
-// No background of its own — it shares the layout's cream so the page reads as
-// one continuous surface. `isolate` so the lab's -z-10 backdrop stays inside
-// this section's stacking context (behind the dice, above the page cream).
+// The above-the-fold banner: exactly one viewport tall, so the photo ends
+// where the next section starts. The library photo (washed) sits behind the
+// rolling-dice METAGAME wordmark, then the tagline, date and tickets CTA on
+// a cream card so they read against the photo. Content hangs from the top
+// (pt-[12vh]) rather than centring, so HeroBackdrop can place its wash on the
+// dice with a fixed formula. `isolate` keeps the backdrop's -z-10 inside this
+// section's stacking context: behind the dice, above the cream.
 export default function SiteHero() {
   return (
-    <section className="relative isolate flex min-h-[320px] flex-col items-center justify-center px-8 pt-10 pb-8 text-center md:min-h-[400px]">
-      {HeroBackdropLab && <HeroBackdropLab />}
+    <section className="relative isolate flex min-h-dvh flex-col items-center px-8 pt-[12vh] pb-8 text-center">
+      <HeroBackdrop />
       <Dice />
+      <div className="mt-4 flex max-w-[52ch] flex-col items-center rounded-2xl border border-navy/10 bg-cream/85 px-7 py-5 shadow-[0_8px_24px_rgba(23,48,89,0.12)] backdrop-blur-sm">
+        <p className="text-lg text-ink">
+          Metagame is a conference for game design, strategy, narrative, and
+          play.
+        </p>
+        {/* Two deliberate lines on narrow screens instead of a ragged wrap. */}
+        <p className={`${EYEBROW} mt-3 text-lg text-meeple md:text-xl`}>
+          <span className="whitespace-nowrap">Nov 6-8, 2026</span>
+          <span className="hidden lg:inline"> &middot; </span>
+          <br className="lg:hidden" />
+          <span className="whitespace-nowrap">Lighthaven, Berkeley, CA</span>
+        </p>
+        <Button
+          asChild
+          variant="raised"
+          size="lg"
+          className="mt-5 h-auto px-7 py-3 text-xl"
+        >
+          <Link href="/#tickets">Get Tickets</Link>
+        </Button>
+      </div>
     </section>
   );
 }
