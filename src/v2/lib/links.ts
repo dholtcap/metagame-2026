@@ -4,8 +4,9 @@
 export const RFP_FORM_URL =
   "https://airtable.com/appROpPV6XUP4CSqX/pagVuzTEXODlUwoi0/form";
 
-// TODO(team): volunteer sign-up form — no form existed on the 2025 site.
-export const VOLUNTEER_FORM_URL = "https://airtable.com/PLACEHOLDER-volunteer";
+// Volunteer sign-up Airtable form.
+export const VOLUNTEER_FORM_URL =
+  "https://airtable.com/appROpPV6XUP4CSqX/pag6QeXN6XYI1SwYf/form";
 
 // On-site housing at Lighthaven. The password in the URL is public now that
 // tickets are on sale.
