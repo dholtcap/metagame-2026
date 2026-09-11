@@ -31,6 +31,13 @@ export function getCurrencyServerSnapshot(): Currency {
   return "usd";
 }
 
+// Re-stamp html[data-currency] from storage — the boot script does this
+// before first paint, but React strips <html>'s attributes if it ever
+// client-renders the root, so BootSync calls this again on mount.
+export function applyCurrency() {
+  document.documentElement.dataset.currency = getCurrencySnapshot();
+}
+
 export function setCurrency(next: Currency) {
   try {
     localStorage.setItem(CURRENCY_KEY, next);

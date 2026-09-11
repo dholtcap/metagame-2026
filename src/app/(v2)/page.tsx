@@ -13,6 +13,7 @@ import FaqItem from "@/v2/components/FaqItem";
 import SectionHeading from "@/v2/components/SectionHeading";
 import SignupForm from "@/v2/components/signup/SignupForm";
 import SiteHero from "@/v2/components/SiteHero";
+import TeamCarousel from "@/v2/components/TeamCarousel";
 import Testimonials from "@/v2/components/Testimonials";
 import {
   HEADING,
@@ -260,19 +261,24 @@ export default function Home() {
 
       {/* about us */}
       <section id="about-us" className={`${SECTION} md:py-14`}>
-        <div className={CONTAINER}>
-          <SectionHeading eyebrow="Who's behind this?" title="About us" />
-          {/* TODO(team): real about-us blurb */}
-          <p className={`${PROSE} max-w-[600px]`}>
-            [Placeholder] Metagame is put on by a small crew of people who like
-            games a little too much, with help from a lot of volunteers who like
-            them just as much.
-          </p>
-          <p className={`${PROSE} max-w-[600px]`}>
-            <Link href="/team" className={NEWSLETTER_LINK}>
-              Meet the team &rarr;
-            </Link>
-          </p>
+        <div
+          className={`${CONTAINER} grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-center`}
+        >
+          <div>
+            <SectionHeading eyebrow="Who's behind this?" title="About us" />
+            {/* TODO(team): real about-us blurb */}
+            <p className={`${PROSE} max-w-[600px]`}>
+              [Placeholder] Metagame is put on by a small crew of people who
+              like games a little too much, with help from a lot of volunteers
+              who like them just as much.
+            </p>
+            <p className={`${PROSE} max-w-[600px]`}>
+              <Link href="/team" className={NEWSLETTER_LINK}>
+                Meet the team &rarr;
+              </Link>
+            </p>
+          </div>
+          <TeamCarousel className="mx-auto w-full max-w-[400px]" />
         </div>
       </section>
 

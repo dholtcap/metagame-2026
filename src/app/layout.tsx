@@ -6,7 +6,7 @@ import {
   Space_Grotesk,
   Space_Mono,
 } from "next/font/google";
-import Script from "next/script";
+import BootSync from "@/v2/components/BootSync";
 import { PUZZLE_BOOT_SCRIPT } from "@/v2/puzzle/boot";
 import "./globals.css";
 
@@ -60,27 +60,28 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${bebasNeue.variable} ${spaceGrotesk.variable} ${inter.variable} ${spaceMono.variable} ${roboto.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
-        {/* Before-first-paint boot scripts. next/script beforeInteractive
-            (root-layout only) injects them into the initial HTML and never
-            recreates them client-side — a raw <script> in a React tree only
-            runs on a full load, so client navigation into a layout would skip
-            it (and React warns). */}
-        {/* Saved ticket currency (localStorage is client-only, so the server
-            can't know it) — keeps the tickets toggle from flashing USD→BTC. */}
-        <Script
-          id="currency-boot"
-          strategy="beforeInteractive"
+      <head>
+        {/* Before-first-paint boot: a plain inline script is the only thing
+            that runs synchronously before paint (next/script's
+            beforeInteractive is executed by an async client chunk). React
+            reuses this node on hydration. If hydration ever *fails* and React
+            client-renders the root, it recreates (but can't run) the script,
+            logs "Encountered a script tag while rendering", and strips every
+            attribute off <html> — BootSync (below) restores them. */}
+        <script
           dangerouslySetInnerHTML={{
-            __html: `try{var c=localStorage.getItem('ticket-currency');document.documentElement.dataset.currency=c==='btc'?'btc':'usd'}catch(e){document.documentElement.dataset.currency='usd'}`,
+            __html:
+              // Saved ticket currency (localStorage is client-only, so the
+              // server can't know it) — keeps the tickets toggle from
+              // flashing USD→BTC.
+              `try{var c=localStorage.getItem('ticket-currency');document.documentElement.dataset.currency=c==='btc'?'btc':'usd'}catch(e){document.documentElement.dataset.currency='usd'}` +
+              // Hero puzzle pick — see src/v2/puzzle/boot.ts.
+              PUZZLE_BOOT_SCRIPT,
           }}
         />
-        {/* Hero puzzle pick — see src/v2/puzzle/boot.ts. */}
-        <Script
-          id="puzzle-boot"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: PUZZLE_BOOT_SCRIPT }}
-        />
+      </head>
+      <body className="flex min-h-full flex-col">
+        <BootSync />
         {children}
       </body>
     </html>

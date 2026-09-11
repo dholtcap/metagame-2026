@@ -38,16 +38,24 @@ const DEFAULT: PuzzleState = { stars: zeroStars(), current: FALLBACK_GAME };
 // --- useSyncExternalStore plumbing ---------------------------------------
 let state: PuzzleState | null = null;
 
+declare global {
+  interface Window {
+    __puzzleGame?: string;
+  }
+}
+
 export function getSnapshot(): PuzzleState {
   if (!state) {
-    // First read on the client: adopt the boot script's pick.
-    const stamped = document.documentElement.dataset.game;
+    // First read on the client: adopt the boot script's pick (the global
+    // survives React re-rendering <html>; the dataset stamp may not).
+    const stamped =
+      window.__puzzleGame ?? document.documentElement.dataset.game;
     const current =
       stamped === "win" || GAMES.includes(stamped as Game)
         ? (stamped as Current)
         : FALLBACK_GAME;
     state = { stars: zeroStars(), current };
-    if (stamped !== current) applyGame(current);
+    applyGame(current);
   }
   return state;
 }
@@ -63,7 +71,9 @@ export function subscribe(fn: () => void): () => void {
 }
 
 // Point the hero backdrop at a game's image (HeroBackdrop reads the var).
+// Idempotent: BootSync calls it again after any client render of <html>.
 export function applyGame(g: Current) {
+  window.__puzzleGame = g;
   const el = document.documentElement;
   el.dataset.game = g;
   el.style.setProperty("--puzzle-image", `url(${imageFor(g)})`);
