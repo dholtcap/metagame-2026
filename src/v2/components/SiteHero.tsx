@@ -36,6 +36,9 @@ export default function SiteHero() {
         >
           <Link href="/#tickets">Get Tickets</Link>
         </Button>
+        <p className="mt-4 text-base text-ink/60 italic">
+          I never met a game I didn&apos;t like
+        </p>
       </div>
     </section>
   );

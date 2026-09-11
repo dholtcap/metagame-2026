@@ -52,7 +52,6 @@ const FAQS: {
 }[] = [
   {
     id: "first-faq",
-    open: true,
     question: "What is Metagame?",
     answer: (
       <>
