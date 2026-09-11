@@ -36,9 +36,6 @@ const LINK_STAGGER_MS = 50;
 const withDelay = (parts: string[], delayMs: number) =>
   parts.map((t) => `${t} ${Math.round(delayMs)}ms`).join(", ");
 
-// Home is the logo itself, so it doesn't get a link.
-const LINKS = NAV_LINKS.filter((s) => s.id !== "home");
-
 // Which nav entry the current route belongs to: null for pages not in the
 // nav (/credits, /thanks, …), which get the Home link but no "current" mark.
 function useActiveLink(): string | null {
@@ -120,11 +117,18 @@ function registerGrow() {
 export default function ExpandingNav() {
   const desktop = useMediaQuery("(min-width: 768px)");
   const active = useActiveLink();
-  // On the home page the logo *is* home, so the link list starts at Tickets;
-  // everywhere else a Home link leads the list.
-  const links = active === "home" ? LINKS : NAV_LINKS;
+  const links = NAV_LINKS;
   // The die's top face: the current page's icon, or home's pips off-nav.
   const topIcon = active ?? "home";
+  // Home while already on "/" (or "/#tickets"): Next would treat it as a
+  // no-op, so scroll to the top ourselves.
+  const onLinkClick = (id: string) => (e: React.MouseEvent) => {
+    if (id === "home" && active === "home") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (window.location.hash) history.replaceState(null, "", "/");
+    }
+  };
   useEffect(registerGrow, []);
   const [expanded, setExpanded] = useState(false);
   // Mobile opens sideways then down, and closes down then sideways — so the
@@ -348,6 +352,7 @@ export default function ExpandingNav() {
                 <Link
                   href={href}
                   tabIndex={unfold ? 0 : -1}
+                  onClick={onLinkClick(id)}
                   aria-current={active === id ? "page" : undefined}
                   className={linkClass(active === id)}
                   style={{
@@ -397,7 +402,10 @@ export default function ExpandingNav() {
                 <Link
                   href={href}
                   tabIndex={dropDown ? 0 : -1}
-                  onClick={() => setOpen(false)}
+                  onClick={(e) => {
+                    onLinkClick(id)(e);
+                    setOpen(false);
+                  }}
                   aria-current={active === id ? "page" : undefined}
                   className={linkClass(active === id)}
                   style={{

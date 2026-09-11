@@ -40,10 +40,30 @@ const roboto = Roboto({
   variable: "--font-roboto",
 });
 
+const DESCRIPTION =
+  "A convention of games, designs, and puzzles. Nov 6-8, 2026 at Lighthaven, Berkeley, California.";
+
 export const metadata: Metadata = {
+  // Absolute URLs for the social preview image (src/app/opengraph-image.jpg
+  // + twitter-image.jpg, picked up by file convention) — Discord, Slack and
+  // Twitter need them absolute.
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://metagame.games",
+  ),
   title: "Metagame — Nov 6-8, 2026",
-  description:
-    "Metagame 2026 — a convention of games, designs, and puzzles. Nov 6-8, 2026 at Lighthaven, Berkeley, California.",
+  description: DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: "Metagame",
+    title: "Metagame 2026 — Nov 6-8, Berkeley",
+    description: DESCRIPTION,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Metagame 2026 — Nov 6-8, Berkeley",
+    description: DESCRIPTION,
+  },
 };
 
 export default function RootLayout({

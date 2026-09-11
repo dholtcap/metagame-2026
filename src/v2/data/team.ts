@@ -2,6 +2,7 @@ import type { StaticImageData } from "next/image";
 import ben from "../../../public/images/team/ben.jpg";
 import brendan from "../../../public/images/team/brendan.jpg";
 import jisk from "../../../public/images/team/jisk.jpg";
+import patrick from "../../../public/images/team/patrick.jpg";
 import ricki from "../../../public/images/team/ricki.jpg";
 import sparr from "../../../public/images/team/sparr.jpg";
 import tommy from "../../../public/images/team/tommy.jpg";
@@ -38,4 +39,5 @@ export const ADVISORS: Person[] = [
   // TODO(team): advisor titles
   { name: "Brendan Hurst", title: "Advisor", photo: brendan },
   { name: "Tommy Honton", title: "Advisor", photo: tommy },
+  { name: "Patrick McKenzie", title: "Advisor", photo: patrick },
 ];
