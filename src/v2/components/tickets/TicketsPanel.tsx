@@ -11,7 +11,7 @@ import {
   supporterTier,
   ticketUrl,
 } from "@/v2/lib/tickets";
-import UpdatesButton from "@/v2/components/signup/UpdatesButton";
+import { FINANCIAL_AID_FORM_URL, VOLUNTEER_FORM_URL } from "@/v2/lib/links";
 import {
   subscribeCurrency,
   getCurrencySnapshot,
@@ -200,17 +200,34 @@ export default function TicketsPanel({
             )}
           </span>
         </Button>
-        <span
-          className={`text-sm ${start ? "text-left" : "text-center"} ${onDark ? "text-cream/70" : "text-ink/70"}`}
+        {/* Volunteer + financial aid: plain application links, deliberately not
+            styled like the purchase tiles. */}
+        <div
+          className={`w-full text-sm ${start ? "text-left" : "text-center"} ${onDark ? "text-cream/70" : "text-ink/70"} flex flex-col gap-1.5`}
         >
-          Volunteer and Financial Assistance ticket details coming soon!{" "}
-          <UpdatesButton
-            className={`font-bold underline underline-offset-2 ${onDark ? "text-tan" : "text-meeple"}`}
-          >
-            Sign up for updates
-          </UpdatesButton>{" "}
-          to hear when they do.
-        </span>
+          <span>
+            A limited supply of volunteer tickets are available.{" "}
+            <a
+              href={VOLUNTEER_FORM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`font-bold underline underline-offset-2 ${onDark ? "text-tan" : "text-meeple"}`}
+            >
+              Apply to volunteer <span aria-hidden="true">&rarr;</span>
+            </a>
+          </span>
+          <span>
+            Ticket price out of reach?{" "}
+            <a
+              href={FINANCIAL_AID_FORM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`font-bold underline underline-offset-2 ${onDark ? "text-tan" : "text-meeple"}`}
+            >
+              Apply for financial aid <span aria-hidden="true">&rarr;</span>
+            </a>
+          </span>
+        </div>
       </div>
       {supporterOpen && (
         <SupporterModal onClose={() => setSupporterOpen(false)} />

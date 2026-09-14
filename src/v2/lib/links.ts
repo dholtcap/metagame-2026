@@ -17,6 +17,10 @@ export const CHILD_REGISTRATION_FORM_URL =
 export const JOIN_TEAM_FORM_URL =
   "https://airtable.com/appROpPV6XUP4CSqX/pagtwwDizijHH6FkB/form";
 
+// Financial aid application Airtable form, linked from the tickets panel.
+export const FINANCIAL_AID_FORM_URL =
+  "https://airtable.com/appROpPV6XUP4CSqX/pagNpxewXARLObldc/form";
+
 // On-site housing at Lighthaven. The password in the URL is public now that
 // tickets are on sale.
 export const HOUSING_URL =

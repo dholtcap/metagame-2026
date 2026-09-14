@@ -324,17 +324,7 @@ export default function Home() {
             <TicketsPanel showHeading={false} surface="light" align="start" />
           </div>
 
-          <div className="mt-14 grid max-w-[820px] gap-8 sm:grid-cols-2">
-            <div>
-              <h3 className={`${HEADING} text-2xl text-navy`}>Sponsoring?</h3>
-              <p className="mt-2 text-base text-ink/70">
-                Sponsor tiers include tickets, booths, and talk slots.{" "}
-                <Link href="/sponsor" className={BODY_LINK}>
-                  See the sponsor page
-                </Link>
-                .
-              </p>
-            </div>
+          <div className="mt-14 max-w-[820px]">
             <div>
               <h3 className={`${HEADING} text-2xl text-navy`}>
                 Want to help run it?
@@ -363,11 +353,11 @@ export default function Home() {
           />
           <div className="mt-10 flex flex-col items-center gap-10">
             {[
-              { label: "Gold", sponsors: GOLD_SPONSORS, logo: "h-20 md:h-24" },
+              { label: "Gold", sponsors: GOLD_SPONSORS, logo: "h-24 md:h-32" },
               {
                 label: "Patron",
                 sponsors: PATRON_SPONSORS,
-                logo: "h-14 md:h-16",
+                logo: "h-16 md:h-[84px]",
               },
             ].map(({ label, sponsors, logo }) => (
               <div key={label} className="flex flex-col items-center gap-4">
@@ -391,6 +381,16 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+          <div className="mt-14 text-center">
+            <h3 className="font-grotesk text-xl font-semibold text-navy">
+              Interested in helping make Metagame 2026 happen?
+            </h3>
+            <Button asChild variant="navy" size="lg" className="mt-5 text-lg">
+              <Link href="/sponsor">
+                Sponsor Metagame <span aria-hidden="true">&rarr;</span>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
