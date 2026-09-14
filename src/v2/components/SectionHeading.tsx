@@ -9,7 +9,7 @@ export default function SectionHeading({
   className = "",
 }: {
   eyebrow: string;
-  title: string;
+  title: React.ReactNode;
   align?: "left" | "center";
   className?: string;
 }) {

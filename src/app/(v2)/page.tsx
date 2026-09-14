@@ -257,42 +257,54 @@ export default function Home() {
       {/* venue */}
       <section id="venue" className={`${SECTION} md:py-14`}>
         <div className={CONTAINER}>
-          <SectionHeading
-            eyebrow="Where is it?"
-            title="Lighthaven Campus, Berkeley CA"
-          />
-          <div className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
+          {/* Single grid so the image top-aligns with the title on wide screens. */}
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
             <div className="max-w-[560px]">
-              <p className="text-base text-ink/70">
+              <SectionHeading
+                eyebrow="Where is it?"
+                title={
+                  <a
+                    href={LIGHTHAVEN_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-meeple"
+                  >
+                    Lighthaven Campus
+                  </a>
+                }
+              />
+              <p className="mt-2 text-base text-ink/60">
+                2740 Telegraph Ave, Berkeley, CA 94705
+              </p>
+              <p className="mt-6 text-base text-ink/70">
                 Lighthaven Campus is a puzzle-seeker&apos;s paradise, with
                 easter eggs wedged into every nook and cranny and games mid-play
-                concealed behind secret doors. Onsite housing is available for
-                the weekend, so you can roll out of bed and into a game at any
-                moment. Rooms can be booked directly with Lighthaven.
+                concealed behind secret doors.
+              </p>
+              <p className={PROSE}>
+                Onsite housing is available for the weekend, so you can roll out
+                of bed and into a game at any moment. Rooms can be booked
+                directly with Lighthaven.
               </p>
               <Button asChild variant="navy" className="mt-5">
                 <a href={HOUSING_URL} target="_blank" rel="noopener noreferrer">
                   Book your rooms <span aria-hidden="true">&rarr;</span>
                 </a>
               </Button>
-              <p className={PROSE}>
-                2740 Telegraph Ave, Berkeley, CA 94705 &middot;{" "}
-                <a
-                  href={LIGHTHAVEN_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={BODY_LINK}
-                >
-                  lighthaven.space
-                </a>
-              </p>
             </div>
-            <Image
-              src={lighthavenCutout}
-              alt="Aerial view of the Lighthaven campus"
-              className="h-auto w-full max-w-[560px]"
-              sizes="(min-width: 1024px) 560px, 100vw"
-            />
+            <a
+              href={LIGHTHAVEN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full max-w-[560px] transition-transform duration-300 hover:scale-[1.04]"
+            >
+              <Image
+                src={lighthavenCutout}
+                alt="Aerial view of the Lighthaven campus"
+                className="h-auto w-full"
+                sizes="(min-width: 1024px) 560px, 100vw"
+              />
+            </a>
           </div>
         </div>
       </section>
