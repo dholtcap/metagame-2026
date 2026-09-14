@@ -34,6 +34,7 @@ import {
 } from "@/v2/lib/links";
 import { EARLY_BIRD_DEADLINE } from "@/v2/lib/tickets";
 import lighthavenMap from "../../../public/images/lighthaven.png";
+import lighthavenCutout from "../../../public/images/lighthaven_cutout.png";
 
 export const metadata: Metadata = {
   title: "Metagame — Nov 6-8, 2026",
@@ -256,16 +257,24 @@ export default function Home() {
       {/* venue */}
       <section id="venue" className={`${SECTION} md:py-14`}>
         <div className={CONTAINER}>
-          <SectionHeading eyebrow="Where is it?" title="Lighthaven" />
+          <SectionHeading
+            eyebrow="Where is it?"
+            title="Lighthaven Campus, Berkeley CA"
+          />
           <div className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
             <div className="max-w-[560px]">
-              {/* TODO(team): real venue blurb */}
               <p className="text-base text-ink/70">
-                [Placeholder] Lighthaven is a campus of connected buildings and
-                gardens on Telegraph Avenue in Berkeley: lecture halls, nooks, a
-                great lawn, and rooms enough to get lost in. Metagame takes over
-                the whole thing for the weekend.
+                Lighthaven Campus is a puzzle-seeker&apos;s paradise, with
+                easter eggs wedged into every nook and cranny and games mid-play
+                concealed behind secret doors. Onsite housing is available for
+                the weekend, so you can roll out of bed and into a game at any
+                moment. Rooms can be booked directly with Lighthaven.
               </p>
+              <Button asChild variant="navy" className="mt-5">
+                <a href={HOUSING_URL} target="_blank" rel="noopener noreferrer">
+                  Book your rooms <span aria-hidden="true">&rarr;</span>
+                </a>
+              </Button>
               <p className={PROSE}>
                 2740 Telegraph Ave, Berkeley, CA 94705 &middot;{" "}
                 <a
@@ -277,24 +286,11 @@ export default function Home() {
                   lighthaven.space
                 </a>
               </p>
-              <h3 className="mt-8 text-xl font-bold text-navy">
-                Staying on site
-              </h3>
-              <p className={PROSE}>
-                Housing is available on the Lighthaven campus for the weekend,
-                so you can roll out of bed and into a game. Rooms are booked
-                directly with Lighthaven.
-              </p>
-              <Button asChild variant="navy" className="mt-5">
-                <a href={HOUSING_URL} target="_blank" rel="noopener noreferrer">
-                  Book on-site housing <span aria-hidden="true">&rarr;</span>
-                </a>
-              </Button>
             </div>
             <Image
-              src={lighthavenMap}
-              alt="Map of the Lighthaven campus"
-              className="h-auto w-full max-w-[560px] rounded-2xl border border-navy/10 shadow-[0_8px_24px_rgba(23,48,89,0.08)]"
+              src={lighthavenCutout}
+              alt="Aerial view of the Lighthaven campus"
+              className="h-auto w-full max-w-[560px]"
               sizes="(min-width: 1024px) 560px, 100vw"
             />
           </div>
