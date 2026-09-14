@@ -325,6 +325,28 @@
       }
     },
     {
+      "id": "beee9d2a-c07a-40cf-a5e5-9fc068ff587c",
+      "title": "TASK Party",
+      "description": "TASK Party is an improvisational community experience that follows a very simple structure of drawing a task to do from the TASK Box, completing said task in any style manner or interpretation, and then adding a task of your own back into the TASK Box. Beyond that, every task is up to your own interpretation - there is no failure or incorrect approaches, only losing yourself in the flow of experimentation and play. Trust us - it is more fun and less scary than it sounds and you will create things you would have never dreamed of otherwise.",
+      "start_time": "2025-09-13T11:00:00-07:00",
+      "end_time": "2025-09-13T11:45:00-07:00",
+      "location_id": "ac4cc8ce-f7b7-4b13-8332-2c65ffadc691",
+      "category": "other",
+      "ages": "KIDS",
+      "megagame": false,
+      "min_capacity": null,
+      "max_capacity": null,
+      "host_1": {
+        "last_name": "Collins-Laine",
+        "first_name": "Ursula"
+      },
+      "host_2": null,
+      "host_3": null,
+      "location": {
+        "name": "The Family Room"
+      }
+    },
+    {
       "id": "206fa279-1079-450b-8abc-fc03adfee89e",
       "title": "Movie night",
       "description": "Watch a movie together — movie TBD! Will be appropriate for kids ages 5-12.",

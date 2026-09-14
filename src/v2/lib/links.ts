@@ -8,6 +8,11 @@ export const RFP_FORM_URL =
 export const VOLUNTEER_FORM_URL =
   "https://airtable.com/appROpPV6XUP4CSqX/pag6QeXN6XYI1SwYf/form";
 
+// Child registration Airtable form — required for every attending child
+// (childcare or not), due October 15.
+export const CHILD_REGISTRATION_FORM_URL =
+  "https://airtable.com/appROpPV6XUP4CSqX/pagZ9WbXLji0eBqDU/form";
+
 // On-site housing at Lighthaven. The password in the URL is public now that
 // tickets are on sale.
 export const HOUSING_URL =

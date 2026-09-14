@@ -3,8 +3,9 @@ import ContentPage from "@/v2/components/ContentPage";
 import LastYearSchedule from "@/v2/components/schedule/LastYearSchedule";
 import { HEADING } from "@/v2/components/styles";
 import Testimonials from "@/v2/components/Testimonials";
+import { Button } from "@/v2/components/ui/button";
 import { CHILDCARE_TESTIMONIALS } from "@/v2/data/childcare-testimonials";
-import { TEAM_EMAIL } from "@/v2/lib/links";
+import { CHILD_REGISTRATION_FORM_URL, TEAM_EMAIL } from "@/v2/lib/links";
 
 export const metadata: Metadata = {
   title: "Childcare — Metagame 2026",
@@ -25,6 +26,20 @@ export default function ChildcarePage() {
             have fun too.
           </p>
           <p className="mt-3">
+            All children attending Metagame must be registered by{" "}
+            <strong className="font-semibold text-navy">October 15</strong>,
+            whether or not they&apos;re signing up for childcare.
+          </p>
+          <Button asChild variant="navy" className="mt-5">
+            <a
+              href={CHILD_REGISTRATION_FORM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Register your children <span aria-hidden="true">&rarr;</span>
+            </a>
+          </Button>
+          <p className="mt-5">
             Our 2026 schedule is still in progress, but you can take a look at{" "}
             <a
               href="#family-room"
