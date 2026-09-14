@@ -16,7 +16,6 @@ import SignupForm from "@/v2/components/signup/SignupForm";
 import SiteHero from "@/v2/components/SiteHero";
 import {
   EYEBROW,
-  HEADING,
   NEWSLETTER_LINK,
   SECTION,
   SECTION_ANCHOR,
@@ -322,21 +321,6 @@ export default function Home() {
           {/* The panel renders bare toggle + tiles; the column/gap is ours. */}
           <div className="flex max-w-[700px] flex-col items-start gap-6">
             <TicketsPanel showHeading={false} surface="light" align="start" />
-          </div>
-
-          <div className="mt-14 max-w-[820px]">
-            <div>
-              <h3 className={`${HEADING} text-2xl text-navy`}>
-                Want to help run it?
-              </h3>
-              <p className="mt-2 text-base text-ink/70">
-                Volunteer, run a session, or just stay in the loop.{" "}
-                <Link href="/get-involved" className={BODY_LINK}>
-                  Get involved
-                </Link>
-                .
-              </p>
-            </div>
           </div>
         </div>
       </section>
