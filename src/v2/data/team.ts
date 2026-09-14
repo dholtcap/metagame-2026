@@ -15,6 +15,8 @@ import tommy from "../../../public/images/team/tommy.jpg";
 export type Person = {
   name: string;
   title: string;
+  // When set, the title renders as a link (speaker bylines).
+  titleUrl?: string;
   photo?: StaticImageData;
   email?: string;
 };

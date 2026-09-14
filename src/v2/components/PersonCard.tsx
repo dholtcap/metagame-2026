@@ -15,6 +15,7 @@ const initials = (name: string) =>
 export default function PersonCard({
   name,
   title,
+  titleUrl,
   photo,
   email,
   compact = false,
@@ -46,7 +47,18 @@ export default function PersonCard({
           {name}
         </h3>
         <p className="mt-1 font-space-mono text-xs tracking-[0.08em] text-ink/60 uppercase">
-          {title}
+          {titleUrl ? (
+            <a
+              href={titleUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 transition-colors hover:text-navy"
+            >
+              {title}
+            </a>
+          ) : (
+            title
+          )}
         </p>
         {email && !compact && (
           <a
