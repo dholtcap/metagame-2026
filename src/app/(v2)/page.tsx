@@ -208,6 +208,51 @@ export default function Home() {
 
       <ChessDivider />
 
+      {/* speakers */}
+      <section id="speakers" className={`${SECTION} md:py-14`}>
+        <div className={CONTAINER}>
+          <SectionHeading eyebrow="Who will be there?" title="Speakers" />
+          <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-6">
+            {SPEAKERS.map((speaker) => (
+              <PersonCard key={speaker.name} {...speaker} compact />
+            ))}
+          </div>
+          <p className="mt-8 text-base text-ink/70">
+            And many more coming soon&hellip;
+          </p>
+        </div>
+      </section>
+
+      <CardSuitsDivider />
+
+      {/* schedule */}
+      <section id="schedule" className={`${SECTION} md:py-14`}>
+        <div className={CONTAINER}>
+          <SectionHeading
+            eyebrow="What's going on?"
+            title="Run something at Metagame"
+          />
+          <p className={`${PROSE} max-w-[600px]`}>
+            The 2026 schedule is coming soon. In the meantime, you can{" "}
+            <Link href="/last-year" className={BODY_LINK}>
+              see last year&apos;s schedule here
+            </Link>
+            .
+          </p>
+          <p className={`${PROSE} max-w-[600px]`}>
+            We&apos;re still taking proposals for things to add to it: talks,
+            workshops, games, or something that defies category.
+          </p>
+          <Button asChild variant="default" className="mt-5">
+            <a href={RFP_FORM_URL} target="_blank" rel="noopener noreferrer">
+              Propose a session <span aria-hidden="true">&rarr;</span>
+            </a>
+          </Button>
+        </div>
+      </section>
+
+      <DungeonCrawlDivider />
+
       {/* venue */}
       <section id="venue" className={`${SECTION} md:py-14`}>
         <div className={CONTAINER}>
@@ -252,48 +297,6 @@ export default function Home() {
               className="h-auto w-full max-w-[560px] rounded-2xl border border-navy/10 shadow-[0_8px_24px_rgba(23,48,89,0.08)]"
               sizes="(min-width: 1024px) 560px, 100vw"
             />
-          </div>
-        </div>
-      </section>
-
-      <CardSuitsDivider />
-
-      {/* schedule */}
-      <section id="schedule" className={`${SECTION} md:py-14`}>
-        <div className={CONTAINER}>
-          <SectionHeading
-            eyebrow="What's going on?"
-            title="Run something at Metagame"
-          />
-          <p className={`${PROSE} max-w-[600px]`}>
-            The 2026 schedule is coming soon. In the meantime, you can{" "}
-            <Link href="/last-year" className={BODY_LINK}>
-              see last year&apos;s schedule here
-            </Link>
-            .
-          </p>
-          <p className={`${PROSE} max-w-[600px]`}>
-            We&apos;re still taking proposals for things to add to it: talks,
-            workshops, games, or something that defies category.
-          </p>
-          <Button asChild variant="default" className="mt-5">
-            <a href={RFP_FORM_URL} target="_blank" rel="noopener noreferrer">
-              Propose a session <span aria-hidden="true">&rarr;</span>
-            </a>
-          </Button>
-        </div>
-      </section>
-
-      <DungeonCrawlDivider />
-
-      {/* speakers */}
-      <section id="speakers" className={`${SECTION} md:py-14`}>
-        <div className={CONTAINER}>
-          <SectionHeading eyebrow="Who will be there?" title="Speakers" />
-          <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-6">
-            {SPEAKERS.map((speaker) => (
-              <PersonCard key={speaker.name} {...speaker} compact />
-            ))}
           </div>
         </div>
       </section>
@@ -386,31 +389,8 @@ export default function Home() {
 
       <CatanDivider />
 
-      {/* stay in the loop */}
-      <section id="stay-in-the-loop" className={`${SECTION} md:py-14`}>
-        <div className={CONTAINER}>
-          <SectionHeading eyebrow="Want to keep up?" title="Stay in the loop" />
-          <p className="mt-3 mb-7 max-w-[520px] text-base text-ink/70">
-            Get notified about ticket sales, updates, volunteer opportunities,
-            future events, and more.
-          </p>
-          <div className="max-w-[600px]">
-            <SignupForm light />
-          </div>
-          <p className="mt-8 max-w-[600px] text-base text-ink/70">
-            Want to do more than read about it? Volunteer, sponsor, or run
-            something.{" "}
-            <Link href="/get-involved" className={NEWSLETTER_LINK}>
-              Get involved &rarr;
-            </Link>
-          </p>
-        </div>
-      </section>
-
-      <MonopolyDivider />
-
       {/* faq */}
-      <section id="faq" className={`${SECTION} md:pt-14 md:pb-[88px]`}>
+      <section id="faq" className={`${SECTION} md:py-14`}>
         <div className={CONTAINER}>
           <SectionHeading
             eyebrow="But what about…"
@@ -438,6 +418,32 @@ export default function Home() {
               .
             </p>
           </div>
+        </div>
+      </section>
+
+      <MonopolyDivider />
+
+      {/* stay in the loop */}
+      <section
+        id="stay-in-the-loop"
+        className={`${SECTION} md:pt-14 md:pb-[88px]`}
+      >
+        <div className={CONTAINER}>
+          <SectionHeading eyebrow="Want to keep up?" title="Stay in the loop" />
+          <p className="mt-3 mb-7 max-w-[520px] text-base text-ink/70">
+            Get notified about ticket sales, updates, volunteer opportunities,
+            future events, and more.
+          </p>
+          <div className="max-w-[600px]">
+            <SignupForm light />
+          </div>
+          <p className="mt-8 max-w-[600px] text-base text-ink/70">
+            Want to do more than read about it? Volunteer, sponsor, or run
+            something.{" "}
+            <Link href="/get-involved" className={NEWSLETTER_LINK}>
+              Get involved &rarr;
+            </Link>
+          </p>
         </div>
       </section>
     </>
