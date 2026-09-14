@@ -6,7 +6,6 @@ import BloodOnTheClocktowerDivider from "@/v2/components/dividers/blood-on-the-c
 import CardSuitsDivider from "@/v2/components/dividers/card-suits";
 import CatanDivider from "@/v2/components/dividers/catan";
 import ChessDivider from "@/v2/components/dividers/chess";
-import DiceDivider from "@/v2/components/dividers/dice";
 import DungeonCrawlDivider from "@/v2/components/dividers/dungeon-crawl";
 import MonopolyDivider from "@/v2/components/dividers/monopoly";
 import SetCardDivider from "@/v2/components/dividers/set-cards";
@@ -15,7 +14,6 @@ import PersonCard from "@/v2/components/PersonCard";
 import SectionHeading from "@/v2/components/SectionHeading";
 import SignupForm from "@/v2/components/signup/SignupForm";
 import SiteHero from "@/v2/components/SiteHero";
-import Testimonials from "@/v2/components/Testimonials";
 import {
   EYEBROW,
   HEADING,
@@ -26,7 +24,6 @@ import {
 import TicketsPanel from "@/v2/components/tickets/TicketsPanel";
 import { Button } from "@/v2/components/ui/button";
 import { CAROUSEL } from "@/v2/data/carousel";
-import { CHILDCARE_TESTIMONIALS } from "@/v2/data/childcare-testimonials";
 import { GOLD_SPONSORS, PATRON_SPONSORS } from "@/v2/data/sponsors";
 import { SPEAKERS } from "@/v2/data/speakers";
 import {
@@ -298,27 +295,6 @@ export default function Home() {
               <PersonCard key={speaker.name} {...speaker} compact />
             ))}
           </div>
-        </div>
-      </section>
-
-      <DiceDivider />
-
-      {/* childcare */}
-      <section id="childcare" className={`${SECTION} md:py-14`}>
-        <div className={CONTAINER}>
-          <SectionHeading eyebrow="What of the children?" title="Childcare" />
-          {/* TODO(team): real childcare blurb */}
-          <p className={`${PROSE} max-w-[600px]`}>
-            [Placeholder] Metagame welcomes your whole family. Childcare and
-            children&apos;s programming will be provided throughout the
-            conference, so the grown-ups can play too.
-          </p>
-          <p className={`${PROSE} max-w-[600px]`}>
-            <Link href="/childcare" className={NEWSLETTER_LINK}>
-              More about childcare &rarr;
-            </Link>
-          </p>
-          <Testimonials items={CHILDCARE_TESTIMONIALS} className="mt-10" />
         </div>
       </section>
 
