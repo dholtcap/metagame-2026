@@ -3,6 +3,7 @@ import ben from "../../../public/images/team/ben.jpg";
 import brendan from "../../../public/images/team/brendan.jpg";
 import brian from "../../../public/images/team/brian.jpg";
 import jisk from "../../../public/images/team/jisk.jpg";
+import john from "../../../public/images/team/john_bromels.jpg";
 import patrick from "../../../public/images/team/patrick.jpg";
 import ricki from "../../../public/images/team/ricki.jpg";
 import sparr from "../../../public/images/team/sparr.jpg";
@@ -40,6 +41,7 @@ export const TEAM: Person[] = [
     photo: brian,
     email: "brian@metagame.games",
   },
+  { name: "John Bromels", title: "Megagame Lead", photo: john },
   { name: "Jisk Kopczynski", title: "Megagame Chief of Staff", photo: jisk },
   { name: "Sparr Risher", title: "Generalist", photo: sparr },
 ];
