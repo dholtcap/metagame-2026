@@ -43,7 +43,6 @@ export const TEAM: Person[] = [
 ];
 
 export const ADVISORS: Person[] = [
-  // TODO(team): advisor titles
   { name: "Brendan Hurst", title: "Advisor", photo: brendan },
   { name: "Tommy Honton", title: "Advisor", photo: tommy },
   { name: "Patrick McKenzie", title: "Advisor", photo: patrick },
