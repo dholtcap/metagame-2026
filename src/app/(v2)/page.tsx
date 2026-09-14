@@ -7,15 +7,17 @@ import CardSuitsDivider from "@/v2/components/dividers/card-suits";
 import CatanDivider from "@/v2/components/dividers/catan";
 import ChessDivider from "@/v2/components/dividers/chess";
 import DiceDivider from "@/v2/components/dividers/dice";
+import DungeonCrawlDivider from "@/v2/components/dividers/dungeon-crawl";
 import MonopolyDivider from "@/v2/components/dividers/monopoly";
 import SetCardDivider from "@/v2/components/dividers/set-cards";
 import FaqItem from "@/v2/components/FaqItem";
+import PersonCard from "@/v2/components/PersonCard";
 import SectionHeading from "@/v2/components/SectionHeading";
 import SignupForm from "@/v2/components/signup/SignupForm";
 import SiteHero from "@/v2/components/SiteHero";
-import TeamCarousel from "@/v2/components/TeamCarousel";
 import Testimonials from "@/v2/components/Testimonials";
 import {
+  EYEBROW,
   HEADING,
   NEWSLETTER_LINK,
   SECTION,
@@ -25,6 +27,8 @@ import TicketsPanel from "@/v2/components/tickets/TicketsPanel";
 import { Button } from "@/v2/components/ui/button";
 import { CAROUSEL } from "@/v2/data/carousel";
 import { CHILDCARE_TESTIMONIALS } from "@/v2/data/childcare-testimonials";
+import { GOLD_SPONSORS, PATRON_SPONSORS } from "@/v2/data/sponsors";
+import { SPEAKERS } from "@/v2/data/speakers";
 import {
   HOUSING_URL,
   LIGHTHAVEN_URL,
@@ -259,31 +263,6 @@ export default function Home() {
 
       <CardSuitsDivider />
 
-      {/* about us */}
-      <section id="about-us" className={`${SECTION} md:py-14`}>
-        <div
-          className={`${CONTAINER} grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-center`}
-        >
-          <div>
-            <SectionHeading eyebrow="Who's behind this?" title="About us" />
-            {/* TODO(team): real about-us blurb */}
-            <p className={`${PROSE} max-w-[600px]`}>
-              [Placeholder] Metagame is put on by a small crew of people who
-              like games a little too much, with help from a lot of volunteers
-              who like them just as much.
-            </p>
-            <p className={`${PROSE} max-w-[600px]`}>
-              <Link href="/team" className={NEWSLETTER_LINK}>
-                Meet the team &rarr;
-              </Link>
-            </p>
-          </div>
-          <TeamCarousel className="mx-auto w-full max-w-[400px]" />
-        </div>
-      </section>
-
-      <SetCardDivider />
-
       {/* schedule */}
       <section id="schedule" className={`${SECTION} md:py-14`}>
         <div className={CONTAINER}>
@@ -307,6 +286,20 @@ export default function Home() {
               Propose a session <span aria-hidden="true">&rarr;</span>
             </a>
           </Button>
+        </div>
+      </section>
+
+      <DungeonCrawlDivider />
+
+      {/* speakers */}
+      <section id="speakers" className={`${SECTION} md:py-14`}>
+        <div className={CONTAINER}>
+          <SectionHeading eyebrow="Who will be there?" title="Speakers" />
+          <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-6">
+            {SPEAKERS.map((speaker) => (
+              <PersonCard key={speaker.name} {...speaker} compact />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -369,6 +362,50 @@ export default function Home() {
                 .
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <SetCardDivider />
+
+      {/* sponsors */}
+      <section id="sponsors" className={`${SECTION} md:py-14`}>
+        <div className={CONTAINER}>
+          <SectionHeading
+            eyebrow="With gratitude"
+            title="Our sponsors"
+            align="center"
+          />
+          <div className="mt-10 flex flex-col items-center gap-10">
+            {[
+              { label: "Gold", sponsors: GOLD_SPONSORS, logo: "h-20 md:h-24" },
+              {
+                label: "Patron",
+                sponsors: PATRON_SPONSORS,
+                logo: "h-14 md:h-16",
+              },
+            ].map(({ label, sponsors, logo }) => (
+              <div key={label} className="flex flex-col items-center gap-4">
+                <p className={`${EYEBROW} text-sm text-ink/50`}>{label}</p>
+                <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+                  {sponsors.map((s) => (
+                    <a
+                      key={s.name}
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition-opacity hover:opacity-75"
+                    >
+                      <Image
+                        src={s.logo}
+                        alt={`${s.name} logo`}
+                        className={`w-auto ${logo}`}
+                      />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
