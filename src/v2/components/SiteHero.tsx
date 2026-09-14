@@ -17,13 +17,11 @@ export default function SiteHero() {
       <HeroBackdrop />
       <Dice />
       <div className="mt-4 flex max-w-[52ch] flex-col items-center rounded-2xl border border-navy/10 bg-cream/85 px-7 py-5 shadow-[0_8px_24px_rgba(23,48,89,0.12)] backdrop-blur-sm">
-        {/* Two deliberate lines on narrow screens instead of a ragged wrap. */}
+        {/* Always two deliberate lines: the joined one-liner is wider than
+            this card ever gets, so it would overflow or wrap raggedly. */}
         <p className={`${EYEBROW} text-lg text-meeple md:text-xl`}>
-          {/* &nbsp; around the dot: the one-liner can't wrap mid-line, so a
-              split only ever happens via the <br>, where the dot is hidden. */}
           <span className="whitespace-nowrap">Nov 6-8, 2026</span>
-          <span className="hidden lg:inline">&nbsp;&middot;&nbsp;</span>
-          <br className="lg:hidden" />
+          <br />
           <span className="whitespace-nowrap">Lighthaven, Berkeley, CA</span>
         </p>
         <Button

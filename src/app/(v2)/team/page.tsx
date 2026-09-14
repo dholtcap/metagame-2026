@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import ContentPage from "@/v2/components/ContentPage";
 import PersonCard from "@/v2/components/PersonCard";
 import { HEADING } from "@/v2/components/styles";
+import { Button } from "@/v2/components/ui/button";
 import { ADVISORS, TEAM } from "@/v2/data/team";
-import { TEAM_EMAIL } from "@/v2/lib/links";
+import { JOIN_TEAM_FORM_URL } from "@/v2/lib/links";
 
 export const metadata: Metadata = {
   title: "Team — Metagame 2026",
@@ -16,16 +17,9 @@ export default function TeamPage() {
       eyebrow="Who's behind this?"
       title="The team"
       intro={
-        // TODO(team): a line about the crew
         <p>
-          [Placeholder] The people who plan, build, and run Metagame. Want to
-          join them?{" "}
-          <a
-            href={`mailto:${TEAM_EMAIL}`}
-            className="font-semibold text-navy underline underline-offset-2"
-          >
-            {TEAM_EMAIL}
-          </a>
+          Metagame is run by a small group of game-lovers and powered by
+          countless volunteers. Here are some of our faces.
         </p>
       }
     >
@@ -49,6 +43,15 @@ export default function TeamPage() {
           </li>
         ))}
       </ul>
+
+      <p className={`${HEADING} mt-16 text-[clamp(24px,3vw,34px)] text-navy`}>
+        Want to join the team? Let us know here:
+      </p>
+      <Button asChild variant="navy" size="lg" className="mt-6 text-lg">
+        <a href={JOIN_TEAM_FORM_URL} target="_blank" rel="noopener noreferrer">
+          Get involved <span aria-hidden="true">&rarr;</span>
+        </a>
+      </Button>
     </ContentPage>
   );
 }

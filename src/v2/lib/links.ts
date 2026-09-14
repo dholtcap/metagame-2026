@@ -13,6 +13,10 @@ export const VOLUNTEER_FORM_URL =
 export const CHILD_REGISTRATION_FORM_URL =
   "https://airtable.com/appROpPV6XUP4CSqX/pagZ9WbXLji0eBqDU/form";
 
+// "Join the team" Airtable form, linked from the /team page.
+export const JOIN_TEAM_FORM_URL =
+  "https://airtable.com/appROpPV6XUP4CSqX/pagtwwDizijHH6FkB/form";
+
 // On-site housing at Lighthaven. The password in the URL is public now that
 // tickets are on sale.
 export const HOUSING_URL =
