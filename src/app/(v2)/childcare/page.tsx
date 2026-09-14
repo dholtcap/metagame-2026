@@ -17,12 +17,23 @@ export default function ChildcarePage() {
       eyebrow="What of the children?"
       title="Childcare"
       intro={
-        // TODO(team): real childcare details (hours, ages, sign-up)
         <>
           <p>
-            [Placeholder] Metagame welcomes your whole family. Childcare and
-            children&apos;s programming will be available throughout the
-            conference. The 2026 childcare schedule is coming soon.
+            Metagame is for the whole family. Children under 13 attend Metagame
+            for free, and we hope to see many in attendance! In addition, we
+            offer free childcare for kids ages 5-12, so that the grown-ups can
+            have fun too.
+          </p>
+          <p className="mt-3">
+            Our 2026 schedule is still in progress, but you can take a look at{" "}
+            <a
+              href="#family-room"
+              className="font-semibold text-navy underline underline-offset-2"
+            >
+              what we offered last year
+            </a>{" "}
+            to get a sense for what the Metagame children&apos;s experience
+            might look like.
           </p>
           <p className="mt-3">
             Questions or particular needs? Email{" "}
@@ -42,7 +53,10 @@ export default function ChildcarePage() {
       </h2>
       <Testimonials items={CHILDCARE_TESTIMONIALS} className="mb-14" />
 
-      <h2 className={`${HEADING} mb-6 text-[clamp(24px,3vw,34px)] text-navy`}>
+      <h2
+        id="family-room"
+        className={`${HEADING} mb-6 scroll-mt-24 text-[clamp(24px,3vw,34px)] text-navy`}
+      >
         Last year in The Family Room
       </h2>
       <LastYearSchedule
