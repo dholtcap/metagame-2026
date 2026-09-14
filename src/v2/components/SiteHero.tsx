@@ -19,8 +19,10 @@ export default function SiteHero() {
       <div className="mt-4 flex max-w-[52ch] flex-col items-center rounded-2xl border border-navy/10 bg-cream/85 px-7 py-5 shadow-[0_8px_24px_rgba(23,48,89,0.12)] backdrop-blur-sm">
         {/* Two deliberate lines on narrow screens instead of a ragged wrap. */}
         <p className={`${EYEBROW} text-lg text-meeple md:text-xl`}>
+          {/* &nbsp; around the dot: the one-liner can't wrap mid-line, so a
+              split only ever happens via the <br>, where the dot is hidden. */}
           <span className="whitespace-nowrap">Nov 6-8, 2026</span>
-          <span className="hidden lg:inline"> &middot; </span>
+          <span className="hidden lg:inline">&nbsp;&middot;&nbsp;</span>
           <br className="lg:hidden" />
           <span className="whitespace-nowrap">Lighthaven, Berkeley, CA</span>
         </p>
@@ -32,7 +34,7 @@ export default function SiteHero() {
         >
           <Link href="/#tickets">Get Tickets</Link>
         </Button>
-        <p className="mt-4 text-base text-ink/60 italic">
+        <p className="mt-4 font-grotesk text-lg text-navy italic md:text-xl">
           I never met a game I didn&apos;t like
         </p>
       </div>

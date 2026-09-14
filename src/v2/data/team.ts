@@ -32,9 +32,14 @@ export const TEAM: Person[] = [
     photo: ben,
     email: "ben@metagame.games",
   },
+  {
+    name: "Brian Smiley",
+    title: "Operations Lead",
+    photo: brian,
+    email: "brian@metagame.games",
+  },
   { name: "Jisk Kopczynski", title: "Megagame Chief of Staff", photo: jisk },
   { name: "Sparr Risher", title: "Generalist", photo: sparr },
-  { name: "Brian Smiley", title: "Operations", photo: brian },
 ];
 
 export const ADVISORS: Person[] = [
