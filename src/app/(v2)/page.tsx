@@ -186,17 +186,15 @@ export default function Home() {
       <section id="about" className={`${SECTION} md:pt-11 md:pb-12`}>
         <div className={CONTAINER}>
           <div className="max-w-[600px]">
-            <SectionHeading
-              eyebrow="What is all this?"
-              title="Games, designs, puzzles."
-            />
-            {/* TODO(team): new elevator pitch (META-548) */}
+            <SectionHeading eyebrow="What is all this?" title="Metagame 2026" />
             <p className={PROSE}>
-              This convention is a conundrum, sent to confound you. It is a
-              puzzle. A riddle. There will be game designers in nooks and
-              alcoves, whispering their secrets to knowing audiences. You will
-              be competing, but you may not know against whom. And, above all
-              else, there will be games.
+              Metagame is a weekend conference devoted to games. We mean games
+              in the broadest sense of the word: any experience that is designed
+              to be played, as opposed to passively consumed. This includes
+              board games, card games, videogames, tabletop games, LARPs,
+              puzzles, rock climbing routes, and more. If building it involves
+              asking the question &ldquo;what would the consumer of this
+              experience choose to do next?&rdquo;, it&apos;s a game.
             </p>
             <p className={PROSE}>
               <Link href="/last-year" className={NEWSLETTER_LINK}>

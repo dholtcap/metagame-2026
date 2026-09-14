@@ -17,12 +17,8 @@ export default function SiteHero() {
       <HeroBackdrop />
       <Dice />
       <div className="mt-4 flex max-w-[52ch] flex-col items-center rounded-2xl border border-navy/10 bg-cream/85 px-7 py-5 shadow-[0_8px_24px_rgba(23,48,89,0.12)] backdrop-blur-sm">
-        <p className="text-lg text-ink">
-          Metagame is a conference for game design, strategy, narrative, and
-          play.
-        </p>
         {/* Two deliberate lines on narrow screens instead of a ragged wrap. */}
-        <p className={`${EYEBROW} mt-3 text-lg text-meeple md:text-xl`}>
+        <p className={`${EYEBROW} text-lg text-meeple md:text-xl`}>
           <span className="whitespace-nowrap">Nov 6-8, 2026</span>
           <span className="hidden lg:inline"> &middot; </span>
           <br className="lg:hidden" />
