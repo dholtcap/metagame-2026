@@ -1,6 +1,7 @@
 import type { StaticImageData } from "next/image";
 import ben from "../../../public/images/team/ben.jpg";
 import brendan from "../../../public/images/team/brendan.jpg";
+import brian from "../../../public/images/team/brian.jpg";
 import jisk from "../../../public/images/team/jisk.jpg";
 import patrick from "../../../public/images/team/patrick.jpg";
 import ricki from "../../../public/images/team/ricki.jpg";
@@ -33,6 +34,7 @@ export const TEAM: Person[] = [
   },
   { name: "Jisk Kopczynski", title: "Megagame Chief of Staff", photo: jisk },
   { name: "Sparr Risher", title: "Generalist", photo: sparr },
+  { name: "Brian Smiley", title: "Operations", photo: brian },
 ];
 
 export const ADVISORS: Person[] = [

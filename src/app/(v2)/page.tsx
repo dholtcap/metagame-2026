@@ -186,6 +186,7 @@ export default function Home() {
               eyebrow="What is all this?"
               title="Games, designs, puzzles."
             />
+            {/* TODO(team): new elevator pitch (META-548) */}
             <p className={PROSE}>
               This convention is a conundrum, sent to confound you. It is a
               puzzle. A riddle. There will be game designers in nooks and
