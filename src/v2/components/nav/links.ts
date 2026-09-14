@@ -20,7 +20,7 @@ export const NAV_LINKS: readonly NavLink[] = [
   {
     id: "get-involved",
     label: "Get Involved",
-    href: "/get-involved",
+    href: "/#get-involved",
     icon: HeartHandshake,
   },
   { id: "sponsor", label: "Sponsor", href: "/sponsor", icon: Award },

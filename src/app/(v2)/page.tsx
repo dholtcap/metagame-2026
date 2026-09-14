@@ -16,6 +16,7 @@ import SignupForm from "@/v2/components/signup/SignupForm";
 import SiteHero from "@/v2/components/SiteHero";
 import {
   EYEBROW,
+  HEADING,
   NEWSLETTER_LINK,
   SECTION,
   SECTION_ANCHOR,
@@ -30,6 +31,7 @@ import {
   LIGHTHAVEN_URL,
   RFP_FORM_URL,
   TEAM_EMAIL,
+  VOLUNTEER_FORM_URL,
 } from "@/v2/lib/links";
 import { EARLY_BIRD_DEADLINE } from "@/v2/lib/tickets";
 import lighthavenMap from "../../../public/images/lighthaven.png";
@@ -225,29 +227,98 @@ export default function Home() {
 
       <CardSuitsDivider />
 
-      {/* schedule */}
-      <section id="schedule" className={`${SECTION} md:py-14`}>
+      {/* get involved */}
+      <section id="get-involved" className={`${SECTION} md:py-14`}>
         <div className={CONTAINER}>
-          <SectionHeading
-            eyebrow="What's going on?"
-            title="Run something at Metagame"
-          />
+          <SectionHeading eyebrow="Want to do more?" title="Get Involved" />
           <p className={`${PROSE} max-w-[600px]`}>
-            The 2026 schedule is coming soon. In the meantime, you can{" "}
-            <Link href="/last-year" className={BODY_LINK}>
-              see last year&apos;s schedule here
-            </Link>
-            .
+            Metagame is made by the people who show up. Here&apos;s how to be
+            one of them.
           </p>
-          <p className={`${PROSE} max-w-[600px]`}>
-            We&apos;re still taking proposals for things to add to it: talks,
-            workshops, games, or something that defies category.
-          </p>
-          <Button asChild variant="default" className="mt-5">
-            <a href={RFP_FORM_URL} target="_blank" rel="noopener noreferrer">
-              Propose a session <span aria-hidden="true">&rarr;</span>
-            </a>
-          </Button>
+          <div className="mt-10 grid gap-6 min-[900px]:grid-cols-3">
+            {[
+              {
+                title: "Run something",
+                body: (
+                  <>
+                    We want your games, puzzles, competitions, indie TTRPGs,
+                    immersive theater performances, tournaments, design jams,
+                    LARPs, trivia, crosswords, homemade meeples, chess variants,
+                    turtle doves, social deception experiments not yet ready for
+                    prime time, or things that defy all of these categories
+                  </>
+                ),
+                cta: "Propose a session",
+                href: RFP_FORM_URL,
+                external: true,
+              },
+              {
+                title: "Volunteer",
+                body: (
+                  <>
+                    Help out before or during the con by joining one of the
+                    volunteer teams:
+                    <ul className="mt-2 list-disc pl-5 font-medium">
+                      <li className="text-[#d16d8b]">Registration desk</li>
+                      <li className="text-[#d98a54]">Room check</li>
+                      <li className="text-[#c9a227]">Physical labor</li>
+                      <li className="text-[#6faa6f]">Set design</li>
+                      <li className="text-[#5ba8a0]">Marketing</li>
+                      <li className="text-[#7a8fd4]">Speaker coordination</li>
+                      <li className="text-[#a582c9]">Megagame design</li>
+                      <li className="text-[#c76a6a]">&hellip; and more!</li>
+                    </ul>
+                  </>
+                ),
+                cta: "Apply to volunteer",
+                href: VOLUNTEER_FORM_URL,
+                external: true,
+              },
+              {
+                title: "Sponsor Metagame",
+                body: (
+                  <>
+                    Put your name on the weekend. Sponsor tiers can include:
+                    <ul className="mt-2 list-disc pl-5">
+                      <li>Logo placement on the site, swag, and marketing</li>
+                      <li>A booth at the night market / career fair</li>
+                      <li>Tickets for your team</li>
+                      <li>Main-room talk and office-hours slots</li>
+                      <li>A custom-built branded event</li>
+                      <li>
+                        &hellip; and at the headline tier, let&apos;s dream big
+                      </li>
+                    </ul>
+                  </>
+                ),
+                cta: "Sponsor tiers",
+                href: "/sponsor",
+                external: false,
+              },
+            ].map(({ title, body, cta, href, external }) => (
+              <div
+                key={title}
+                className="flex flex-col rounded-2xl border border-navy/[0.16] bg-white p-7 shadow-[0_8px_24px_rgba(23,48,89,0.08)]"
+              >
+                <h3 className={`${HEADING} text-2xl text-navy`}>{title}</h3>
+                {/* div, not p: the volunteer body nests a <ul>. */}
+                <div className="mt-3 flex-1 text-[15px] text-ink/70">
+                  {body}
+                </div>
+                <Button asChild variant="default" className="mt-6 w-fit">
+                  {external ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer">
+                      {cta} <span aria-hidden="true">&rarr;</span>
+                    </a>
+                  ) : (
+                    <Link href={href}>
+                      {cta} <span aria-hidden="true">&rarr;</span>
+                    </Link>
+                  )}
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -429,13 +500,6 @@ export default function Home() {
           <div className="max-w-[600px]">
             <SignupForm light />
           </div>
-          <p className="mt-8 max-w-[600px] text-base text-ink/70">
-            Want to do more than read about it? Volunteer, sponsor, or run
-            something.{" "}
-            <Link href="/get-involved" className={NEWSLETTER_LINK}>
-              Get involved &rarr;
-            </Link>
-          </p>
         </div>
       </section>
     </>
