@@ -8,8 +8,10 @@ import CatanDivider from "@/v2/components/dividers/catan";
 import ChessDivider from "@/v2/components/dividers/chess";
 import DiceDivider from "@/v2/components/dividers/dice";
 import MonopolyDivider from "@/v2/components/dividers/monopoly";
+import PacmanDivider from "@/v2/components/dividers/pacman";
 import SetCardDivider from "@/v2/components/dividers/set-cards";
 import FaqItem from "@/v2/components/FaqItem";
+import KeyDates from "@/v2/components/KeyDates";
 import PersonCard from "@/v2/components/PersonCard";
 import SectionHeading from "@/v2/components/SectionHeading";
 import SignupForm from "@/v2/components/signup/SignupForm";
@@ -406,6 +408,19 @@ export default function Home() {
       </section>
 
       <SetCardDivider />
+
+      {/* key dates */}
+      <section id="key-dates" className={`${SECTION} md:py-14`}>
+        <div className={CONTAINER}>
+          <SectionHeading eyebrow="When is what?" title="Key dates" />
+          <p className={`${PROSE} max-w-[600px]`}>
+            Everything with a deadline between now and the con.
+          </p>
+          <KeyDates />
+        </div>
+      </section>
+
+      <PacmanDivider />
 
       {/* sponsors */}
       <section id="sponsors" className={`${SECTION} md:py-14`}>

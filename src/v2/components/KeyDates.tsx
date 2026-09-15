@@ -1,0 +1,85 @@
+import Link from "next/link";
+import { isPast, KEY_DATES } from "@/v2/data/key-dates";
+import { HEADING } from "./styles";
+
+// Deadlines between now and the con. A vertical rail on small screens, one
+// horizontal rail with a stop per date from lg up. Past dates fade; the first
+// upcoming one gets the meeple accent so the eye lands on what's due next.
+export default function KeyDates() {
+  const nextIdx = KEY_DATES.findIndex((d) => !isPast(d.endsAt));
+
+  return (
+    <ol className="relative mt-10 lg:grid lg:grid-cols-8">
+      {KEY_DATES.map((d, i) => {
+        const past = isPast(d.endsAt);
+        const next = i === nextIdx;
+        const tone = past
+          ? "text-ink/40"
+          : next || d.milestone
+            ? "text-meeple"
+            : "text-navy";
+        const dot = past
+          ? "border-ink/25 bg-ink/15"
+          : d.milestone
+            ? "border-meeple bg-meeple"
+            : next
+              ? "border-meeple bg-background ring-4 ring-meeple/20"
+              : "border-navy bg-background";
+        const external = d.href?.startsWith("http");
+
+        return (
+          <li
+            key={d.label}
+            // The rail is the ::before: a vertical line down the left on small
+            // screens (hidden on the last stop), a horizontal one through the
+            // dot from lg up (half-width on the first and last stops).
+            className="relative pb-8 pl-10 before:absolute before:top-3 before:-bottom-2 before:left-[9px] before:w-0.5 before:bg-navy/15 last:pb-0 last:before:hidden lg:px-2 lg:pt-9 lg:pb-0 lg:text-center lg:before:top-[9px] lg:before:right-0 lg:before:bottom-auto lg:before:left-0 lg:before:h-0.5 lg:before:w-auto lg:first:before:left-1/2 lg:last:before:right-1/2 lg:last:before:block"
+          >
+            <span
+              aria-hidden
+              className={`absolute top-[3px] left-0 z-10 rounded-full border-2 ${dot} ${
+                d.milestone ? "size-5 lg:-top-0.5 lg:size-6" : "size-5 lg:top-0"
+              } lg:left-1/2 lg:-translate-x-1/2`}
+            />
+            <p
+              className={`font-space-mono text-xs tracking-[0.12em] uppercase ${tone}`}
+            >
+              {d.label}
+            </p>
+            <p
+              className={`${HEADING} mt-1 text-[17px] text-balance ${
+                d.aside
+                  ? "font-medium text-ink/50 italic"
+                  : d.milestone
+                    ? `text-xl ${tone}`
+                    : past
+                      ? "text-ink/45"
+                      : "text-navy"
+              }`}
+            >
+              {d.title}
+            </p>
+            {d.href && d.cta && !past && (
+              <p className="mt-1.5 text-sm font-semibold text-meeple">
+                {external ? (
+                  <a
+                    href={d.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2"
+                  >
+                    {d.cta} <span aria-hidden="true">&rarr;</span>
+                  </a>
+                ) : (
+                  <Link href={d.href} className="underline underline-offset-2">
+                    {d.cta} <span aria-hidden="true">&rarr;</span>
+                  </Link>
+                )}
+              </p>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
