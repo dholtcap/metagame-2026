@@ -233,32 +233,6 @@ export default function Home() {
 
       <CardSuitsDivider />
 
-      {/* highlights from 2025 */}
-      <section id="highlights" className={`${SECTION} md:py-14`}>
-        <div className={CONTAINER}>
-          <SectionHeading
-            eyebrow="What happened last year?"
-            title="Highlights from 2025"
-          />
-          <Highlights2025 />
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Button asChild variant="default">
-              <a href={RFP_FORM_URL} target="_blank" rel="noopener noreferrer">
-                Propose a session <span aria-hidden="true">&rarr;</span>
-              </a>
-            </Button>
-            <Button asChild variant="navy">
-              <Link href="/last-year">
-                See the full 2025 schedule{" "}
-                <span aria-hidden="true">&rarr;</span>
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      <PacmanDivider />
-
       {/* get involved */}
       <section id="get-involved" className={`${SECTION} md:py-14`}>
         <div className={CONTAINER}>
@@ -412,6 +386,32 @@ export default function Home() {
       </section>
 
       <BloodOnTheClocktowerDivider />
+
+      {/* highlights from 2025 */}
+      <section id="highlights" className={`${SECTION} md:py-14`}>
+        <div className={CONTAINER}>
+          <SectionHeading
+            eyebrow="What happened last year?"
+            title="Highlights from 2025"
+          />
+          <Highlights2025 />
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Button asChild variant="default">
+              <a href={RFP_FORM_URL} target="_blank" rel="noopener noreferrer">
+                Propose a session <span aria-hidden="true">&rarr;</span>
+              </a>
+            </Button>
+            <Button asChild variant="navy">
+              <Link href="/last-year">
+                See the full 2025 schedule{" "}
+                <span aria-hidden="true">&rarr;</span>
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <PacmanDivider />
 
       {/* tickets */}
       <section id="tickets" className={`${SECTION} md:py-14`}>
