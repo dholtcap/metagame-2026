@@ -1,8 +1,7 @@
 import type { StaticImageData } from "next/image";
-import events from "../../../public/images/misc_photos/david_turner.jpg";
 import games from "../../../public/images/misc_photos/board_game_round_robin_2.jpg";
 import talks from "../../../public/images/misc_photos/jay_dragon.jpg";
-import workshops from "../../../public/images/misc_photos/kathy_ari_cards.jpg";
+import workshops from "../../../public/images/misc_photos/david_turner.jpg";
 
 export type HighlightSession = {
   title: string;
@@ -45,7 +44,7 @@ export const HIGHLIGHTS_2025: HighlightGroup[] = [
   {
     label: "Workshops",
     photo: workshops,
-    alt: "Two players studying their cards over a game of Codex at Metagame 2025",
+    alt: "David Turner presenting from a lectern in the Lighthaven garden",
     sessions: [
       {
         title: "Build Your Own Escape Room",
@@ -61,10 +60,15 @@ export const HIGHLIGHTS_2025: HighlightGroup[] = [
       },
       { title: "Video Games as Alignment Benchmarks", hosts: "Emmett Shear" },
       { title: "Design a Board Game: Zo", hosts: "Paul “Lorxus” Rapoport" },
+      { title: "TASK Party", hosts: "Ursula Collins-Laine" },
+      {
+        title: "Open HDMI Cable",
+        hosts: "lightning talks, hosted by Brendan Hurst",
+      },
     ],
   },
   {
-    label: "Games",
+    label: "Games & More",
     photo: games,
     alt: "A crowd leaning over a long table of abstract games during the board game round robin",
     sessions: [
@@ -75,19 +79,7 @@ export const HIGHLIGHTS_2025: HighlightGroup[] = [
       { title: "Mystery Manor", hosts: "Marlee Honton" },
       { title: "Sorcerority: A LARP", hosts: "Alicorn" },
       { title: "Board Game Round Robin", hosts: "Sparr Risher" },
-    ],
-  },
-  {
-    label: "Events",
-    photo: events,
-    alt: "David Turner presenting from a lectern in the Lighthaven garden",
-    sessions: [
       { title: "Night Market + Career Fair" },
-      {
-        title: "Open HDMI Cable",
-        hosts: "lightning talks, hosted by Brendan Hurst",
-      },
-      { title: "TASK Party", hosts: "Ursula Collins-Laine" },
     ],
   },
 ];

@@ -4,6 +4,7 @@ import cards from "../../../public/images/carousel/3_cards.jpg";
 import crossword from "../../../public/images/carousel/4_crossword.jpg";
 import jigsawSudoku from "../../../public/images/carousel/5_jigsaw_sudoku.jpg";
 import fairyLights from "../../../public/images/carousel/6_fairy_lights.jpg";
+import codex from "../../../public/images/carousel/7_codex.jpg";
 
 // Home-page photo strip, in order. Sources live in pictures/carousel (not
 // committed); these are 1600px JPEG exports.
@@ -15,4 +16,5 @@ export const CAROUSEL = [
   { src: crossword, alt: "A group solving a crossword" },
   { src: jigsawSudoku, alt: "A jigsaw sudoku puzzle" },
   { src: fairyLights, alt: "Evening games under fairy lights" },
+  { src: codex, alt: "Two players studying their cards over a game of Codex" },
 ];
