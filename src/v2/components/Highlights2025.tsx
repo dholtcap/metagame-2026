@@ -1,26 +1,31 @@
 import Image from "next/image";
 import { HIGHLIGHTS_2025 } from "@/v2/data/highlights-2025";
-import { EYEBROW, HEADING } from "./styles";
+import { HEADING } from "./styles";
 
-// One card per session type: a photo, then the picked sessions with hosts.
-// Two columns from md so each photo keeps some size; one column on phones.
+// One row per session type: photo on one side, the picked sessions with hosts
+// on the other, sides alternating down the page. Rows stack (photo first) on
+// phones.
 export default function Highlights2025() {
   return (
-    <div className="mt-10 grid gap-6 md:grid-cols-2">
-      {HIGHLIGHTS_2025.map((g) => (
+    <div className="mt-12 flex flex-col gap-14 md:gap-16">
+      {HIGHLIGHTS_2025.map((g, i) => (
         <div
           key={g.label}
-          className="overflow-hidden rounded-2xl border border-navy/[0.16] bg-white shadow-[0_8px_24px_rgba(23,48,89,0.08)]"
+          className="grid items-center gap-8 md:grid-cols-2 md:gap-12"
         >
           <Image
             src={g.photo}
             alt={g.alt}
-            className="aspect-[3/2] w-full object-cover"
-            sizes="(min-width: 768px) 570px, 100vw"
+            className={`aspect-[3/2] w-full rounded-2xl border border-navy/10 object-cover shadow-[0_8px_24px_rgba(23,48,89,0.08)] ${
+              i % 2 ? "md:order-2" : ""
+            }`}
+            sizes="(min-width: 768px) 560px, 100vw"
           />
-          <div className="p-7">
-            <h3 className={`${EYEBROW} text-base text-meeple`}>{g.label}</h3>
-            <ul className="mt-4 flex flex-col gap-3">
+          <div>
+            <h3 className={`${HEADING} text-[clamp(24px,3vw,32px)] text-navy`}>
+              {g.label}
+            </h3>
+            <ul className="mt-5 flex flex-col gap-3.5">
               {g.sessions.map((s) => (
                 <li key={s.title} className="leading-snug">
                   <span className={`${HEADING} text-[17px] text-navy`}>
