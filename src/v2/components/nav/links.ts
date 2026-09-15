@@ -1,5 +1,12 @@
 import type { ComponentType } from "react";
-import { Award, HeartHandshake, History, Ticket, Users } from "lucide-react";
+import {
+  Award,
+  CalendarDays,
+  HeartHandshake,
+  History,
+  Ticket,
+  Users,
+} from "lucide-react";
 import RubberDuck from "../RubberDuck";
 import Mg2Die from "./Mg2Die";
 
@@ -16,6 +23,12 @@ export type NavLink = {
 export const NAV_LINKS: readonly NavLink[] = [
   { id: "home", label: "Home", href: "/", icon: Mg2Die },
   { id: "tickets", label: "Tickets", href: "/#tickets", icon: Ticket },
+  {
+    id: "key-dates",
+    label: "Key Dates",
+    href: "/key-dates",
+    icon: CalendarDays,
+  },
   { id: "last-year", label: "Last Year", href: "/last-year", icon: History },
   {
     id: "get-involved",

@@ -20,9 +20,21 @@ export type KeyDate = {
   aside?: boolean;
 };
 
-// Wrapped like isEarlyBirdActive so components don't call Date.now() in render.
-export function isPast(endsAt: number, now = Date.now()): boolean {
-  return now >= endsAt;
+// Date.now() stays behind these helpers (like isEarlyBirdActive) so components
+// don't call it in render, which the React purity lint rejects.
+
+/** Dates still to come, in order; the timeline starts from today. */
+export function upcomingKeyDates(now = Date.now()): KeyDate[] {
+  return KEY_DATES.filter((d) => now < d.endsAt);
+}
+
+/** Today's date in Lighthaven's time zone, e.g. "Sep 15". */
+export function todayLabel(now = Date.now()): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "America/Los_Angeles",
+  }).format(now);
 }
 
 // Midnight Pacific after the given 2026 day. DST ends Nov 1, 2026, so October

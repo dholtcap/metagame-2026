@@ -1,28 +1,36 @@
 import Link from "next/link";
-import { isPast, KEY_DATES } from "@/v2/data/key-dates";
+import {
+  todayLabel,
+  upcomingKeyDates,
+  type KeyDate,
+} from "@/v2/data/key-dates";
 import { HEADING } from "./styles";
 
-// Deadlines between now and the con. A vertical rail on small screens, one
-// horizontal rail with a stop per date from lg up. Past dates fade; the first
-// upcoming one gets the meeple accent so the eye lands on what's due next.
+type Stop = KeyDate & { today?: boolean; next?: boolean };
+
+// The road from today to the con. A vertical rail on small screens, one
+// horizontal rail with a stop per date from lg up. The first stop is today;
+// passed deadlines drop off, and the next one up takes the meeple accent.
 export default function KeyDates() {
-  const nextIdx = KEY_DATES.findIndex((d) => !isPast(d.endsAt));
+  const upcoming = upcomingKeyDates();
+  const stops: Stop[] = [
+    { label: "Today", title: todayLabel(), endsAt: Infinity, today: true },
+    ...upcoming.map((d, i) => ({ ...d, next: i === 0 })),
+  ];
 
   return (
-    <ol className="relative mt-10 lg:grid lg:grid-cols-8">
-      {KEY_DATES.map((d, i) => {
-        const past = isPast(d.endsAt);
-        const next = i === nextIdx;
-        const tone = past
-          ? "text-ink/40"
-          : next || d.milestone
-            ? "text-meeple"
-            : "text-navy";
-        const dot = past
-          ? "border-ink/25 bg-ink/15"
+    <ol
+      className="relative lg:grid"
+      // Column count follows the stops left, so the rail always fills the width.
+      style={{ gridTemplateColumns: `repeat(${stops.length}, minmax(0, 1fr))` }}
+    >
+      {stops.map((d) => {
+        const accent = d.next || d.milestone;
+        const dot = d.today
+          ? "border-navy bg-navy"
           : d.milestone
             ? "border-meeple bg-meeple"
-            : next
+            : d.next
               ? "border-meeple bg-background ring-4 ring-meeple/20"
               : "border-navy bg-background";
         const external = d.href?.startsWith("http");
@@ -42,7 +50,9 @@ export default function KeyDates() {
               } lg:left-1/2 lg:-translate-x-1/2`}
             />
             <p
-              className={`font-space-mono text-xs tracking-[0.12em] uppercase ${tone}`}
+              className={`font-space-mono text-xs tracking-[0.12em] uppercase ${
+                accent ? "text-meeple" : "text-navy"
+              }`}
             >
               {d.label}
             </p>
@@ -51,15 +61,13 @@ export default function KeyDates() {
                 d.aside
                   ? "font-medium text-ink/50 italic"
                   : d.milestone
-                    ? `text-xl ${tone}`
-                    : past
-                      ? "text-ink/45"
-                      : "text-navy"
+                    ? "text-xl text-meeple"
+                    : "text-navy"
               }`}
             >
               {d.title}
             </p>
-            {d.href && d.cta && !past && (
+            {d.href && d.cta && (
               <p className="mt-1.5 text-sm font-semibold text-meeple">
                 {external ? (
                   <a
