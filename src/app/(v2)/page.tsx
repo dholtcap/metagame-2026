@@ -438,11 +438,7 @@ export default function Home() {
       {/* sponsors */}
       <section id="sponsors" className={`${SECTION} md:py-14`}>
         <div className={CONTAINER}>
-          <SectionHeading
-            eyebrow="With gratitude"
-            title="Our sponsors"
-            align="center"
-          />
+          <SectionHeading eyebrow="With gratitude" title="Our sponsors" />
           <div className="mt-10 flex flex-col items-center gap-10">
             {[
               { label: "Gold", sponsors: GOLD_SPONSORS, logo: "h-24 md:h-32" },
