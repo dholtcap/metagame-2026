@@ -24,7 +24,6 @@ export const HIGHLIGHTS_2025: HighlightGroup[] = [
     photo: talks,
     alt: "Jay Dragon speaking into a microphone on an outdoor panel at Metagame 2025",
     sessions: [
-      { title: "Will Shortz Q&A", hosts: "Will Shortz" },
       { title: "Games and the World", hosts: "Frank Lantz" },
       {
         title: "PG's Playhouse: The Evolution of Escape Rooms",
@@ -32,13 +31,15 @@ export const HIGHLIGHTS_2025: HighlightGroup[] = [
       },
       { title: "The Interface Is The Game", hosts: "David Sirlin" },
       {
-        title: "So You Wanna Make a Tabletop Game",
+        title:
+          "So You Wanna Make a Tabletop Game: Designing for Mass Production and Working with Manufacturers",
         hosts: "Rita Orlov & Spencer Beebe",
       },
       {
         title: "Bleed at the Table: A Panel",
         hosts: "Sylvan Lawrence, Jay Dragon & Jonaya Kemper",
       },
+      { title: "Will Shortz Q&A", hosts: "Will Shortz" },
     ],
   },
   {
