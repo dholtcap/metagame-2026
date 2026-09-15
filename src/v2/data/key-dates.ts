@@ -69,7 +69,7 @@ export const KEY_DATES: KeyDate[] = [
   },
   {
     label: "Oct 29",
-    title: "Ticket sales end",
+    title: "Ticket sales close",
     endsAt: endOfDay(10, 29),
     href: "/#tickets",
     cta: "Get tickets",
