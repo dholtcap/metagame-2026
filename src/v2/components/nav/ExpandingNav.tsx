@@ -30,6 +30,7 @@ const MOBILE_DROP_EASE = "cubic-bezier(0.4,0,0.8,0.9)";
 const MOBILE_COLLAPSE_MS = 500;
 const MOBILE_SIDEWAYS_EASE = "cubic-bezier(0.22,1,0.36,1)";
 const LINK_STAGGER_MS = 50;
+const AUTO_OPEN_DELAY_MS = 2000;
 
 // Per-item delays folded into the shorthand (React warns when `transition`
 // and `transitionDelay` are set together).
@@ -136,7 +137,8 @@ export default function ExpandingNav() {
   const [dieOpen, setDieOpen] = useState(false);
   const foldTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [hovered, setHovered] = useState(false);
-  // Until the die is first clicked, a ring pulses out from it as a hint.
+  // Until the die is first clicked (or the bar opens itself), a ring pulses
+  // out from it as a hint.
   const [nudged, setNudged] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const pulseRef = useRef<HTMLDivElement>(null);
@@ -207,6 +209,31 @@ export default function ExpandingNav() {
     },
     [],
   );
+
+  // Home, desktop: once the hero has scrolled off the top, unfold the bar
+  // unprompted (once per load, and only if the die hasn't been touched yet)
+  // so first-time visitors see there's a nav. Mobile's menu covers the page,
+  // so it never opens itself.
+  useEffect(() => {
+    if (!desktop || active !== "home" || nudged) return;
+    const hero = document.getElementById("home");
+    if (!hero) return;
+    // A beat after the hero leaves, so it reads as a reaction, not a jolt.
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting || entry.boundingClientRect.top > 0) return;
+      io.disconnect();
+      timer = setTimeout(() => {
+        setNudged(true);
+        setOpen(true);
+      }, AUTO_OPEN_DELAY_MS);
+    });
+    io.observe(hero);
+    return () => {
+      io.disconnect();
+      if (timer) clearTimeout(timer);
+    };
+  }, [desktop, active, nudged, setOpen]);
 
   useEffect(() => {
     if (!expanded) return;
