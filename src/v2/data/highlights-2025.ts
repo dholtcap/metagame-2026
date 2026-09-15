@@ -29,7 +29,7 @@ export const HIGHLIGHTS_2025: HighlightGroup[] = [
       { title: "Games and the World", hosts: "Frank Lantz" },
       {
         title: "PG's Playhouse: The Evolution of Escape Rooms",
-        hosts: "Peih-Gee Law, Tommy Honton & Ricki Heicklen",
+        hosts: "Peih-Gee Law & Tommy Honton",
       },
       { title: "The Interface Is The Game", hosts: "David Sirlin" },
       {

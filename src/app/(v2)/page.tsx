@@ -240,10 +240,6 @@ export default function Home() {
             eyebrow="What happened last year?"
             title="Highlights from 2025"
           />
-          <p className={`${PROSE} max-w-[600px]`}>
-            A taste of what Metagame looks like, and of the kind of thing
-            we&apos;d love you to propose for 2026.
-          </p>
           <Highlights2025 />
           <div className="mt-8 flex flex-wrap gap-4">
             <Button asChild variant="default">
