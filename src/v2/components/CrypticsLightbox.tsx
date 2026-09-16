@@ -121,7 +121,9 @@ function ClueForm() {
             : "Thanks!";
 
   return (
-    <div className="flex flex-col gap-3">
+    // w-0 + min-w-full: fills the dialog's width without contributing to it,
+    // so the photo alone sets the size and swapping rows can't widen it.
+    <div className="flex w-0 min-w-full flex-col gap-3">
       <p
         aria-live="polite"
         className={`h-6 text-base ${status === "error" ? "text-salmon" : "text-cream/90"}`}
