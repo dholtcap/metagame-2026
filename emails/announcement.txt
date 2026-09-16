@@ -11,6 +11,8 @@ https://metagame.games/#tickets
 
 $325 early bird (regular $425). Early bird price ends September 30th.
 
+Brought to you by Rogue Signal, Francisco San, Manifund, and Outside the Asylum.
+
 
 -----------------------------------------------------------
 CALL FOR SESSIONS
@@ -33,27 +35,13 @@ THE MEGAGAME
 
 The Metagame Megagame is an immersive puzzle hunt interwoven into the smaller
 games and sessions of the conference. If you want your session, game, or puzzle
-to play into the overarching structure, let us know.
+to play into the overarching structure, let us know. Some themes we're
+particularly interested in: alliances, maps, alchemy, space travel, gems,
+and/or stars.
 
 Contribute to the Megagame:
 https://airtable.com/appROpPV6XUP4CSqX/pagMOssJPZrZU6YLP/form
-Due October 5th.
-
-
------------------------------------------------------------
-NEXT STEPS
------------------------------------------------------------
-
-Housing
-Want to stay on campus during the conference? Lighthaven rooms are open for
-booking.
-https://www.havenbookings.space/events/metagame-2026/login?password=goofy-pouch-wake-buddy
-
-Children
-Want to bring your young children to Metagame? We will have free childcare
-and kid-friendly activities.
-https://airtable.com/appROpPV6XUP4CSqX/pagZ9WbXLji0eBqDU/form
-Due October 15th.
+Due October 10th.
 
 
 -----------------------------------------------------------
@@ -61,8 +49,9 @@ GET INVOLVED
 -----------------------------------------------------------
 
 Volunteer
-Help out in exchange for a free or discounted ticket. Apply by October 26th.
+Help out in exchange for a free or discounted ticket.
 https://airtable.com/appROpPV6XUP4CSqX/pag6QeXN6XYI1SwYf/form
+Due October 26th.
 
 Night Market
 Apply for an expo booth and exchange goods and services with fellow game
@@ -76,16 +65,20 @@ https://airtable.com/appROpPV6XUP4CSqX/pagtwwDizijHH6FkB/form
 
 
 -----------------------------------------------------------
-OUR SPONSORS
+NEXT STEPS
 -----------------------------------------------------------
 
-Gold: Rogue Signal (https://roguesignal.io)
-Patron: Francisco San (https://franciscosan.org)
-        Manifund (https://manifund.org)
-        Outside the Asylum (https://outsidetheasylum.blog/)
+Housing
+Want to stay on campus during the conference? Lighthaven rooms are open for
+booking.
+https://www.havenbookings.space/events/metagame-2026/login?password=goofy-pouch-wake-buddy
+While supplies last.
 
-Want to add your name to the list? Help make Metagame happen! Sponsor Metagame:
-https://metagame.games/sponsor
+Children
+Kids under 13 get a free ticket to Metagame, and free childcare is available
+with advance registration.
+https://airtable.com/appROpPV6XUP4CSqX/pagZ9WbXLji0eBqDU/form
+Due October 15th.
 
 
 -----------------------------------------------------------
@@ -95,8 +88,11 @@ KEY DATES
 Sep 30   Early-bird ticket pricing ends
          https://metagame.games/#tickets
 
-Oct 5    Session proposals and Megagame submissions due
+Oct 5    Session proposals due
          https://airtable.com/appROpPV6XUP4CSqX/pagVuzTEXODlUwoi0/form
+
+Oct 10   Megagame proposals due
+         https://airtable.com/appROpPV6XUP4CSqX/pagMOssJPZrZU6YLP/form
 
 Oct 15   Childcare registration due
          https://airtable.com/appROpPV6XUP4CSqX/pagZ9WbXLji0eBqDU/form
@@ -117,6 +113,19 @@ Nov 9    The Metagame team takes a looong nap
 
 
 -----------------------------------------------------------
+OUR SPONSORS
+-----------------------------------------------------------
+
+Gold: Rogue Signal (https://roguesignal.io)
+Patron: Francisco San (https://franciscosan.org)
+        Manifund (https://manifund.org)
+        Outside the Asylum (https://outsidetheasylum.blog/)
+
+Want to add your name to the list? Help make Metagame happen! Sponsor Metagame:
+https://metagame.games/sponsor
+
+
+-----------------------------------------------------------
 MORE QUESTIONS?
 -----------------------------------------------------------
 
@@ -128,8 +137,12 @@ Check out our FAQ (https://metagame.games/#faq) or reply to this email.
 metagame.games | Discord: https://discord.gg/8pxvc9p4Ss | team@metagame.games
 November 6-8, 2026 | Berkeley, California
 
+This is not a puzzle.
+
 (c) 2026 Metagame LLC
-EO Physical Return Address, 86-90 Paul Street, London EC2A 4NE, United Kingdom
 
 You received this email because you subscribed to our list. You can
 unsubscribe at any time: {{UnsubscribeURL}}
+
+Powered by EmailOctopus: {{RewardsURL}}
+{{SenderInfoLine}}
