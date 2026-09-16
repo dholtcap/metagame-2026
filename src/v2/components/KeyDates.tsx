@@ -8,10 +8,19 @@ import { HEADING } from "./styles";
 
 type Stop = KeyDate & { today?: boolean; next?: boolean };
 
-// The road from today to the con. A vertical rail on small screens; from lg
-// up one horizontal rail with the stops alternating above and below it so
-// neighbouring titles don't crowd each other. The first stop is today; passed
-// deadlines drop off, and the next one up takes the meeple accent.
+// A trunk segment, centred on the column edge that meets the trunk.
+const TRUNK =
+  "absolute bottom-0 w-[3px] group-[.left]:right-0 group-[.left]:translate-x-1/2 group-[.right]:left-0 group-[.right]:-translate-x-1/2";
+
+// Same drawing as the announcement email's "Key dates": a vertical trunk with
+// each stop hanging off it on a short tick, its date in a boxed mono label.
+// From md the stops alternate left and right of a centre trunk; below that
+// they all hang to the right of a trunk down the left edge. The first stop is
+// today; passed deadlines drop off, and the next one up takes the meeple accent.
+//
+// Each stop starts one grid row after the previous and spans two, so the
+// sides interleave: a stop begins level with the middle of the one across
+// from it.
 export default function KeyDates() {
   const upcoming = upcomingKeyDates();
   const stops: Stop[] = [
@@ -19,91 +28,97 @@ export default function KeyDates() {
     ...upcoming.map((d, i) => ({ ...d, next: i === 0 })),
   ];
 
+  const milestone = stops.findIndex((d) => d.milestone);
+
   return (
-    // Three subgrid rows (above / rail / below) shared by every stop, so the
-    // rail sits at one height however tall the text above it gets.
-    <ol
-      className="relative lg:grid lg:grid-rows-[auto_1.5rem_auto]"
-      // Column count follows the stops left, so the rail always fills the width.
-      style={{ gridTemplateColumns: `repeat(${stops.length}, minmax(0, 1fr))` }}
-    >
+    // The ol's ::after is the bulb at the top of the trunk; each stop draws
+    // the trunk from its own tick down to its bottom, so the trunk can end
+    // in a second bulb at the con and continue as dashes to the stop after.
+    <ol className="relative mx-auto grid max-w-[760px] grid-cols-2 gap-y-5 after:absolute after:top-1 after:left-1/2 after:size-4 after:-translate-x-1/2 after:rounded-full after:border-[3px] after:border-rail after:bg-background">
       {stops.map((d, i) => {
-        const above = i % 2 === 0;
+        const left = i % 2 === 0;
         const accent = d.next || d.milestone;
-        const dot = d.today
-          ? "border-navy bg-navy"
-          : d.milestone
-            ? "border-meeple bg-meeple"
-            : d.next
-              ? "border-meeple bg-background ring-4 ring-meeple/20"
-              : "border-navy bg-background";
         const external = d.href?.startsWith("http");
 
         return (
           <li
             key={d.label}
-            // Small screens: the ::before is the vertical rail down the left
-            // (hidden on the last stop). From lg the li spans the subgrid rows
-            // and the rail moves to the dot row below.
-            className="group relative pb-8 pl-10 before:absolute before:top-3 before:-bottom-2 before:left-[9px] before:w-0.5 before:bg-navy/15 last:pb-0 last:before:hidden lg:row-span-full lg:grid lg:grid-rows-subgrid lg:pb-0 lg:pl-0 lg:text-center lg:before:hidden"
+            // The ::before is the tick.
+            className={`group relative pb-2 pl-0 before:absolute before:top-[12px] before:left-0 before:h-0.5 before:w-4 before:bg-rail last:pb-0 ${
+              left
+                ? "left col-start-1 pr-4 text-right before:right-0 before:left-auto"
+                : "right col-start-2 pl-4 before:left-0"
+            }`}
+            style={{ gridRow: `${i + 1} / span 2` }}
           >
-            {/* Dot row. From lg its ::before is the horizontal rail, cut to
-                half-width on the first and last stops. */}
-            <div className="absolute top-[3px] left-0 lg:relative lg:top-auto lg:left-auto lg:row-start-2 lg:flex lg:items-center lg:justify-center lg:before:absolute lg:before:inset-x-0 lg:before:top-1/2 lg:before:h-0.5 lg:before:-translate-y-1/2 lg:before:bg-navy/15 lg:group-first:before:left-1/2 lg:group-last:before:right-1/2">
+            {(milestone < 0 || i < milestone) && (
+              <span aria-hidden className={`${TRUNK} top-[12px] bg-rail`} />
+            )}
+            {/* Ends the dashed tail at this stop's tick. */}
+            {milestone >= 0 && i > milestone && (
               <span
                 aria-hidden
-                className={`relative z-10 block rounded-full border-2 ${dot} ${
-                  d.milestone ? "size-5 lg:size-6" : "size-5"
-                }`}
+                className={`${TRUNK} top-[14px] w-[5px] bg-background`}
               />
-            </div>
-            <div
-              className={`lg:px-2 ${
-                above
-                  ? "lg:row-start-1 lg:self-end lg:pb-3"
-                  : "lg:row-start-3 lg:self-start lg:pt-3"
+            )}
+            {i === milestone && (
+              <>
+                <span
+                  aria-hidden
+                  className={`${TRUNK} w-[5px] bg-background`}
+                />
+                <span
+                  aria-hidden
+                  className={`${TRUNK} top-[12px] bg-[repeating-linear-gradient(to_bottom,var(--color-rail)_0_6px,transparent_6px_12px)]`}
+                />
+                <span
+                  aria-hidden
+                  className={`absolute top-1 size-4 rounded-full border-[3px] border-rail bg-background ${
+                    left ? "right-0 translate-x-1/2" : "left-0 -translate-x-1/2"
+                  }`}
+                />
+              </>
+            )}
+            <p
+              className={`inline-block border-2 border-rail px-2 py-px font-space-mono text-[13px] font-bold tracking-[0.08em] uppercase ${
+                d.today
+                  ? "border-navy bg-navy text-cream"
+                  : accent
+                    ? "bg-background text-meeple"
+                    : "bg-background text-navy"
               }`}
             >
-              <p
-                className={`font-space-mono text-xs tracking-[0.12em] uppercase ${
-                  accent ? "text-meeple" : "text-navy"
-                }`}
-              >
-                {d.label}
+              {d.label}
+            </p>
+            <p
+              className={`${HEADING} mt-1.5 text-[17px] text-balance ${
+                d.aside
+                  ? "text-[15px] font-medium text-ink/50 italic"
+                  : d.milestone
+                    ? "text-xl text-meeple"
+                    : "text-navy"
+              }`}
+            >
+              {d.title}
+            </p>
+            {d.href && d.cta && (
+              <p className="mt-1 text-sm font-semibold text-meeple">
+                {external ? (
+                  <a
+                    href={d.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2"
+                  >
+                    {d.cta}
+                  </a>
+                ) : (
+                  <Link href={d.href} className="underline underline-offset-2">
+                    {d.cta}
+                  </Link>
+                )}
               </p>
-              <p
-                className={`${HEADING} mt-1 text-[17px] text-balance ${
-                  d.aside
-                    ? "font-medium text-ink/50 italic"
-                    : d.milestone
-                      ? "text-xl text-meeple"
-                      : "text-navy"
-                }`}
-              >
-                {d.title}
-              </p>
-              {d.href && d.cta && (
-                <p className="mt-1.5 text-sm font-semibold text-meeple">
-                  {external ? (
-                    <a
-                      href={d.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline underline-offset-2"
-                    >
-                      {d.cta} <span aria-hidden="true">&rarr;</span>
-                    </a>
-                  ) : (
-                    <Link
-                      href={d.href}
-                      className="underline underline-offset-2"
-                    >
-                      {d.cta} <span aria-hidden="true">&rarr;</span>
-                    </Link>
-                  )}
-                </p>
-              )}
-            </div>
+            )}
           </li>
         );
       })}

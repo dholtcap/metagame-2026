@@ -4,6 +4,10 @@
 export const RFP_FORM_URL =
   "https://airtable.com/appROpPV6XUP4CSqX/pagVuzTEXODlUwoi0/form";
 
+// "Contribute to the Megagame" Airtable form.
+export const MEGAGAME_PROPOSAL_FORM_URL =
+  "https://airtable.com/appROpPV6XUP4CSqX/pagMOssJPZrZU6YLP/form";
+
 // Volunteer sign-up Airtable form.
 export const VOLUNTEER_FORM_URL =
   "https://airtable.com/appROpPV6XUP4CSqX/pag6QeXN6XYI1SwYf/form";
