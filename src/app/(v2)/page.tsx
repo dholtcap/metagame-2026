@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Carousel from "@/v2/components/Carousel";
+import CrypticsLightbox from "@/v2/components/CrypticsLightbox";
 import BloodOnTheClocktowerDivider from "@/v2/components/dividers/blood-on-the-clocktower";
 import CardSuitsDivider from "@/v2/components/dividers/card-suits";
 import CatanDivider from "@/v2/components/dividers/catan";
@@ -38,7 +39,6 @@ import {
 import { EARLY_BIRD_DEADLINE, isEarlyBirdActive } from "@/lib/early-bird";
 import lighthavenMap from "../../../public/images/lighthaven.png";
 import lighthavenCutout from "../../../public/images/lighthaven_cutout.png";
-import metaCryptics from "../../../public/images/meta_cryptics.jpg";
 
 // Re-render hourly so the early-bird gate flips at the deadline without a deploy.
 export const revalidate = 3600;
@@ -510,12 +510,7 @@ export default function Home() {
                 </FaqItem>
               ))}
             </div>
-            <Image
-              src={metaCryptics}
-              alt="Whiteboard from the 2025 cryptic crossword contest, covered in handwritten clues whose answer is META"
-              className="hidden h-auto w-full rounded-2xl border border-navy/10 shadow-[0_8px_24px_rgba(23,48,89,0.08)] lg:sticky lg:top-24 lg:block"
-              sizes="(min-width: 1024px) 380px, 0px"
-            />
+            <CrypticsLightbox className="hidden lg:sticky lg:top-24 lg:block" />
           </div>
           <div className="mt-11">
             <p className="max-w-[620px] text-ink/70">
