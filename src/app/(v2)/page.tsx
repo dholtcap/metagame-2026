@@ -555,28 +555,30 @@ export default function Home() {
               height roughly matches the collapsed list, and stays put (sticky)
               as answers open; on phones it follows the list. */}
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start">
-            <div className="divide-y divide-line border-y border-line">
-              {FAQS.map(({ id, open, question, answer }) => (
-                <FaqItem
-                  key={question}
-                  id={id}
-                  defaultOpen={open}
-                  question={question}
-                >
-                  {answer}
-                </FaqItem>
-              ))}
+            {/* Contact line lives in the list column so it hugs the questions
+                rather than dropping below the (taller) photo. */}
+            <div>
+              <div className="divide-y divide-line border-y border-line">
+                {FAQS.map(({ id, open, question, answer }) => (
+                  <FaqItem
+                    key={question}
+                    id={id}
+                    defaultOpen={open}
+                    question={question}
+                  >
+                    {answer}
+                  </FaqItem>
+                ))}
+              </div>
+              <p className="mt-6 max-w-[620px] text-ink/70">
+                Have more questions? Email{" "}
+                <a href={`mailto:${TEAM_EMAIL}`} className={BODY_LINK}>
+                  {TEAM_EMAIL}
+                </a>
+                .
+              </p>
             </div>
             <CrypticsLightbox className="block lg:sticky lg:top-24" />
-          </div>
-          <div className="mt-11">
-            <p className="max-w-[620px] text-ink/70">
-              Have more questions? Email{" "}
-              <a href={`mailto:${TEAM_EMAIL}`} className={BODY_LINK}>
-                {TEAM_EMAIL}
-              </a>
-              .
-            </p>
           </div>
         </div>
       </section>
