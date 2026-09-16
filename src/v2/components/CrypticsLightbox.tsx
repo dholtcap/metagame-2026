@@ -36,7 +36,7 @@ export default function CrypticsLightbox({
           src={metaCryptics}
           alt={ALT}
           className="h-auto w-full border border-navy/10 shadow-[0_8px_24px_rgba(23,48,89,0.08)] transition-transform duration-300 group-hover:scale-[1.02]"
-          sizes="(min-width: 1024px) 380px, 0px"
+          sizes="(min-width: 1024px) 380px, 100vw"
         />
       </DialogTrigger>
       {/* Explicit width (700px, or the viewport on phones): a centered fixed

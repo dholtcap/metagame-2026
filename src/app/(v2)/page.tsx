@@ -553,7 +553,7 @@ export default function Home() {
           />
           {/* Photo rides alongside the list on wide screens, sized so its 3:4
               height roughly matches the collapsed list, and stays put (sticky)
-              as answers open; it's decorative, so phones skip it. */}
+              as answers open; on phones it follows the list. */}
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start">
             <div className="divide-y divide-line border-y border-line">
               {FAQS.map(({ id, open, question, answer }) => (
@@ -567,7 +567,7 @@ export default function Home() {
                 </FaqItem>
               ))}
             </div>
-            <CrypticsLightbox className="hidden lg:sticky lg:top-24 lg:block" />
+            <CrypticsLightbox className="block lg:sticky lg:top-24" />
           </div>
           <div className="mt-11">
             <p className="max-w-[620px] text-ink/70">
