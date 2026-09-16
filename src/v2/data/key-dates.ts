@@ -2,6 +2,7 @@ import { EARLY_BIRD_ENDS_AT } from "@/lib/early-bird";
 import {
   CHILD_REGISTRATION_FORM_URL,
   FINANCIAL_AID_FORM_URL,
+  MEGAGAME_PROPOSAL_FORM_URL,
   RFP_FORM_URL,
   VOLUNTEER_FORM_URL,
 } from "@/v2/lib/links";
@@ -57,6 +58,13 @@ export const KEY_DATES: KeyDate[] = [
     endsAt: endOfDay(10, 5),
     href: RFP_FORM_URL,
     cta: "Submit a proposal",
+  },
+  {
+    label: "Oct 10",
+    title: "Megagame proposals due",
+    endsAt: endOfDay(10, 10),
+    href: MEGAGAME_PROPOSAL_FORM_URL,
+    cta: "Contribute",
   },
   {
     label: "Oct 15",
