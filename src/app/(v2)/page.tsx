@@ -33,6 +33,7 @@ import { CAROUSEL } from "@/v2/data/carousel";
 import { GOLD_SPONSORS, PATRON_SPONSORS } from "@/v2/data/sponsors";
 import { SPEAKERS } from "@/v2/data/speakers";
 import {
+  HOTELS_SEARCH_URL,
   HOUSING_URL,
   LIGHTHAVEN_URL,
   MEGAGAME_PROPOSAL_FORM_URL,
@@ -41,7 +42,6 @@ import {
   VOLUNTEER_FORM_URL,
 } from "@/v2/lib/links";
 import { EARLY_BIRD_DEADLINE, isEarlyBirdActive } from "@/lib/early-bird";
-import lighthavenMap from "../../../public/images/lighthaven.png";
 import lighthavenCutout from "../../../public/images/lighthaven_cutout.png";
 import megagameChess from "../../../public/images/megagame-chess.jpg";
 
@@ -67,35 +67,13 @@ const FAQS: {
 }[] = [
   {
     id: "first-faq",
-    question: "What is Metagame?",
+    question: "When is Metagame?",
     answer: (
-      <>
-        To be frank with you, it is hard to describe. Metagame has many of the
-        typical trappings of a board game convention: gaming spaces, designers
-        talking about their projects, as well games requiring more organization,
-        such as Blood on the Clocktower. But it&apos;s a little weirder, too.
-        <br />
-        <br />
-        Last year, the entire con was one large game. Players discovered their
-        team by solving a puzzle on their swag, and spent three days competing
-        against one another while still playing the other games.
-        <br />
-        <br />
-        Attendees who took the escape room design course created their own
-        escape room from scratch and ran it.
-        <br />
-        <br />
-        A guest started a secret, second convention-wide game that staff only
-        learned of in the closing hours. At one point, there were people
-        knife-fighting with tasers.
-        <br />
-        <br />
-        Come see what happens in 2026.
-      </>
+      <>2:00pm Friday, November 6th through 9:00pm, November 8th, 2026.</>
     ),
   },
   {
-    question: "Where will it be?",
+    question: "Where is Metagame happening?",
     answer: (
       <>
         <a href={LIGHTHAVEN_URL} className={BODY_LINK}>
@@ -104,15 +82,15 @@ const FAQS: {
         <br />
         2740 Telegraph Ave, Berkeley, CA 94705
         <Image
-          src={lighthavenMap}
+          src={lighthavenCutout}
           alt="Map of the Lighthaven campus"
-          className="mt-4 h-auto w-full max-w-[560px] rounded-lg"
+          className="mt-4 h-auto w-full max-w-[560px]"
         />
       </>
     ),
   },
   {
-    question: "Where can I stay?",
+    question: "Is lodging available?",
     answer: (
       <>
         On-site housing at Lighthaven is now available.{" "}
@@ -124,24 +102,34 @@ const FAQS: {
         >
           Book a room here
         </a>
+        . There are also plenty of{" "}
+        <a
+          href={HOTELS_SEARCH_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={BODY_LINK}
+        >
+          hotels available in and around Berkeley
+        </a>
         .
       </>
     ),
   },
   {
-    question: "When is Metagame?",
-    answer: <>It begins at 2pm Friday, Nov 6. It will run to 9:00pm, Nov 8.</>,
-  },
-  {
-    question: "What is the refund policy?",
+    question: "Are meals included?",
     answer: (
       <>
-        You may exchange your tickets for as much money as you paid for them
-        until sunset in Berkeley on October 6th. After the sun has set, you must
-        contact us.
-        <br />
-        <br />
-        Bitcoin is ethereal and complicated to refund.
+        Snacks and beverages will be available for the taking. Food trucks will
+        also be on-site with meals available for purchase.
+      </>
+    ),
+  },
+  {
+    question: "Are tickets refundable?",
+    answer: (
+      <>
+        You may request a ticket refund at the price you paid until 6PM Pacific
+        on October 6th. After that, we will process on a case-by-case basis.
       </>
     ),
   },
@@ -158,20 +146,12 @@ const FAQS: {
     ),
   },
   {
-    question: "What will I eat?",
-    answer: (
-      <>
-        Snacks and beverages will be available for the taking. Food trucks will
-        also be on-site with meals available for purchase.
-      </>
-    ),
-  },
-  {
     question: "Can I bring my kids?",
     answer: (
       <>
-        There will be childcare and some children&apos;s programming available
-        during the day! See the{" "}
+        Yes! Children under 13 get free admission, and we will have free
+        childcare and some children&apos;s programming available during the day.
+        See the{" "}
         <Link href="/childcare" className={BODY_LINK}>
           childcare page
         </Link>{" "}
@@ -180,6 +160,46 @@ const FAQS: {
           reach out
         </a>
         .
+      </>
+    ),
+  },
+  {
+    question: "Is parking available?",
+    answer: (
+      <>
+        There is very limited street parking available by Lighthaven. We request
+        attendees avoid parking on the streets in the surrounding two blocks, as
+        this may upset our neighbors.
+      </>
+    ),
+  },
+  {
+    question: "May I bring or demonstrate my own game?",
+    answer: (
+      <>
+        Please do! Fill out our proposal form{" "}
+        <a
+          href={RFP_FORM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={BODY_LINK}
+        >
+          here
+        </a>{" "}
+        to run a game, event, or session.
+      </>
+    ),
+  },
+  {
+    question: "Is the venue accessible?",
+    answer: (
+      <>
+        Some parts of the campus are easier to navigate than others. If
+        accessibility is an issue for you, reach out to{" "}
+        <a href={`mailto:${TEAM_EMAIL}`} className={BODY_LINK}>
+          {TEAM_EMAIL}
+        </a>{" "}
+        so we can figure out how to make it work.
       </>
     ),
   },
