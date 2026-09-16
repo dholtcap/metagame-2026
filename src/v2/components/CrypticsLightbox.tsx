@@ -40,7 +40,7 @@ export default function CrypticsLightbox({
           sizes="(min-width: 1024px) 380px, 100vw"
         />
       </DialogTrigger>
-      {/* Explicit width (700px, or the viewport on phones): a centered fixed
+      {/* Explicit width (630px, or the viewport on phones): a centered fixed
           box with auto width only gets half the viewport to size against,
           which squeezed the photo on mobile. The photo fills that width so
           the handwriting is legible; taller than the screen, the dialog
@@ -48,7 +48,7 @@ export default function CrypticsLightbox({
           close button: click outside or press Escape. */}
       <DialogContent
         showCloseButton={false}
-        className="flex max-h-[calc(100vh-1rem)] w-[min(700px,calc(100vw-1rem))] max-w-none flex-col gap-2 overflow-y-auto border-navy/15 bg-cream p-2 text-ink"
+        className="flex max-h-[calc(100vh-1rem)] w-[min(630px,calc(100vw-1rem))] max-w-none flex-col gap-2 overflow-y-auto border-navy/15 bg-cream p-2 text-ink"
       >
         <DialogTitle className="sr-only">
           Cryptic Crossword Contest, 2025
@@ -111,11 +111,11 @@ function ClueForm() {
     status === "error"
       ? ERROR
       : contactDone
-        ? "Got it. Good luck!"
+        ? "Our chaotic team might get in touch :)"
         : recordId === null
           ? ""
           : recordId
-            ? "Thanks! Add your name if you'd like credit."
+            ? "Innovative, mate! Drop your name if you'd like to be credited"
             : "Thanks!";
 
   return (
@@ -127,7 +127,7 @@ function ClueForm() {
           src={metaCryptics}
           alt={ALT}
           className="h-auto w-full"
-          sizes="(min-width: 640px) 700px, 100vw"
+          sizes="(min-width: 640px) 630px, 100vw"
         />
         <p
           aria-live="polite"

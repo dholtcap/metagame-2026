@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import AnagramEmail from "@/v2/components/AnagramEmail";
 import Carousel from "@/v2/components/Carousel";
 import CrypticsLightbox from "@/v2/components/CrypticsLightbox";
 import BloodOnTheClocktowerDivider from "@/v2/components/dividers/blood-on-the-clocktower";
@@ -583,10 +584,7 @@ export default function Home() {
               </div>
               <p className="mt-6 max-w-[620px] text-ink/70">
                 Have more questions? Email{" "}
-                <a href={`mailto:${TEAM_EMAIL}`} className={BODY_LINK}>
-                  {TEAM_EMAIL}
-                </a>
-                .
+                <AnagramEmail className={BODY_LINK} />.
               </p>
             </div>
             <CrypticsLightbox className="block lg:sticky lg:top-24" />
