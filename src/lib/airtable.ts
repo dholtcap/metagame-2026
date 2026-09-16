@@ -252,6 +252,79 @@ export async function recordPurchase(
   return { stored: true };
 }
 
+// ── META Cryptic Clues ───────────────────────────────────────────────────────
+// Field names in the "META Cryptic Clues" table. Written by name, like the rest.
+const CLUE_FIELD = "Cryptic clue";
+const CLUE_NAME_FIELD = "Name";
+const CLUE_EMAIL_FIELD = "Email";
+
+export type ClueResult = { stored: boolean; id?: string; reason?: string };
+
+function cluesUrl(recordId?: string) {
+  const base = `https://api.airtable.com/v0/${airtableConfig.baseId}/${encodeURIComponent(airtableConfig.crypticCluesTableId)}`;
+  return recordId ? `${base}/${recordId}` : base;
+}
+
+/**
+ * Create a row for a submitted clue and return its record id, so the optional
+ * name/email follow-up can attach to the same row. No-ops (with a warning)
+ * when Airtable isn't configured, mirroring recordSignup.
+ */
+export async function recordCrypticClue(clue: string): Promise<ClueResult> {
+  const { AIRTABLE_API_KEY } = env;
+  if (!AIRTABLE_API_KEY) {
+    console.warn(`[clue] Airtable not configured — not stored: ${clue}`);
+    return { stored: false, reason: "airtable-not-configured" };
+  }
+
+  const res = await fetch(cluesUrl(), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fields: { [CLUE_FIELD]: clue } }),
+  });
+  if (!res.ok) {
+    throw new Error(`Airtable responded ${res.status}: ${await res.text()}`);
+  }
+  const { id } = (await res.json()) as { id: string };
+  return { stored: true, id };
+}
+
+/**
+ * Attach a name and/or email to an already-submitted clue. Updates by record
+ * id and only ever touches the two contact fields, so it can't create rows or
+ * overwrite a clue.
+ */
+export async function addCrypticClueContact(
+  recordId: string,
+  { name, email }: { name?: string; email?: string },
+): Promise<ClueResult> {
+  const { AIRTABLE_API_KEY } = env;
+  if (!AIRTABLE_API_KEY) {
+    console.warn(`[clue] Airtable not configured — contact not stored`);
+    return { stored: false, reason: "airtable-not-configured" };
+  }
+
+  const fields: Record<string, string> = {};
+  if (name) fields[CLUE_NAME_FIELD] = name;
+  if (email) fields[CLUE_EMAIL_FIELD] = email;
+
+  const res = await fetch(cluesUrl(recordId), {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fields }),
+  });
+  if (!res.ok) {
+    throw new Error(`Airtable responded ${res.status}: ${await res.text()}`);
+  }
+  return { stored: true, id: recordId };
+}
+
 export type DiscountCodeRecord = {
   code: string;
   active: boolean;

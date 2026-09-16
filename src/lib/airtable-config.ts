@@ -13,4 +13,6 @@ export const airtableConfig = {
   purchasesTableId: "tblMEDrxbS2abAHob",
   /** "Discount Codes" table — server-validated BTC discount codes (ground truth). */
   discountCodesTableId: "tble7XP43WyeKeHXd",
+  /** "META Cryptic Clues" table — clues submitted from the FAQ whiteboard lightbox. */
+  crypticCluesTableId: "tblzZTAMKKftdRROy",
 } as const;
