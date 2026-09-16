@@ -2,22 +2,26 @@
 
 import { useRef } from "react";
 import { TEAM_EMAIL } from "@/v2/lib/links";
+import { cn } from "@/v2/lib/utils";
 
 // team@metagame.games, where "team" and "meta" are anagrams: hovering either
-// word scrambles both, then each letter flies across the @ to the slot of
-// the same letter in the other word. The result reads identically, so the
-// transforms are dropped at the end and it can run again.
+// word sends each letter arcing across the @ to the slot of the same letter
+// in the other word, spinning once on the way. The result reads identically,
+// so the transforms are dropped at the end and it can run again.
 const A = "team";
 const B = "meta";
 const REST = "game.games";
-const DURATION = 6000;
+const DURATION = 3000;
+const STEPS = 12;
 
 // For each letter of one word, the index of the same letter in the other.
 // Letters repeat nowhere in team/meta, so the mapping is one-to-one.
 const toB = [...A].map((ch) => B.indexOf(ch));
 const toA = [...B].map((ch) => A.indexOf(ch));
 
-const rand = (n: number) => (Math.random() * 2 - 1) * n;
+// Ease-in-out, applied by hand so the arc and spin share one curve.
+const ease = (p: number) =>
+  p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
 
 export default function AnagramEmail({ className }: { className?: string }) {
   const aRef = useRef<HTMLSpanElement>(null);
@@ -35,29 +39,26 @@ export default function AnagramEmail({ className }: { className?: string }) {
     const fly = (from: HTMLElement, to: HTMLElement, i: number) => {
       const dx =
         to.getBoundingClientRect().left - from.getBoundingClientRect().left;
-      // Alternate arc direction so crossing letters don't overlap mid-flight.
-      const arc = i % 2 ? -18 : 14;
-      const t = (x: number, y: number, r: number) =>
-        `translate(${x}px, ${y}px) rotate(${r}deg)`;
+      // Alternate arc height and spin direction so crossing letters don't
+      // overlap mid-flight. A full turn lands upright, so nothing jumps when
+      // the transforms are dropped.
+      const arc = i % 2 ? -16 : 12;
+      const spin = i % 2 ? -360 : 360;
+      const frames = Array.from({ length: STEPS + 1 }, (_, k) => {
+        const p = k / STEPS;
+        const e = ease(p);
+        const x = dx * e;
+        const y = arc * Math.sin(Math.PI * e);
+        return {
+          transform: `translate(${x}px, ${y}px) rotate(${spin * e}deg)`,
+        };
+      });
       from.style.willChange = "transform";
-      return from.animate(
-        [
-          { transform: t(0, 0, 0), offset: 0 },
-          // Scramble: four jittery keyframes over the first ~40%.
-          { transform: t(rand(9), rand(7), rand(35)), offset: 0.1 },
-          { transform: t(rand(9), rand(7), rand(35)), offset: 0.2 },
-          { transform: t(rand(9), rand(7), rand(35)), offset: 0.3 },
-          { transform: t(rand(6), rand(5), rand(25)), offset: 0.4 },
-          { transform: t(0, 0, rand(15)), offset: 0.47 },
-          // Flight: an arc across the @ to the matching letter's slot.
-          { transform: t(dx / 2, arc, rand(10)), offset: 0.7 },
-          { transform: t(dx, 0, 0), offset: 0.9, easing: "ease-out" },
-          // Settle.
-          { transform: t(dx, -2, 0), offset: 0.94 },
-          { transform: t(dx, 0, 0), offset: 1 },
-        ],
-        { duration: DURATION, easing: "ease-in-out", fill: "forwards" },
-      );
+      return from.animate(frames, {
+        duration: DURATION,
+        easing: "linear",
+        fill: "forwards",
+      });
     };
 
     const anims = [
@@ -76,11 +77,10 @@ export default function AnagramEmail({ className }: { className?: string }) {
   }
 
   const word = (text: string, ref: React.RefObject<HTMLSpanElement | null>) => (
-    <span ref={ref} onMouseEnter={run} className="whitespace-nowrap">
+    <span ref={ref} onMouseEnter={run}>
       {[...text].map((ch, i) => (
-        // inline-block so transforms apply; underline re-applied since it
-        // doesn't propagate into inline-blocks.
-        <span key={i} data-letter className="inline-block underline">
+        // inline-block so transforms apply.
+        <span key={i} data-letter className="inline-block">
           {ch}
         </span>
       ))}
@@ -88,10 +88,15 @@ export default function AnagramEmail({ className }: { className?: string }) {
   );
 
   return (
+    // The underline is a static rule under the whole address (text-decoration
+    // wouldn't reach the inline-block letters, and would fly with them).
     <a
       href={`mailto:${TEAM_EMAIL}`}
       aria-label={TEAM_EMAIL}
-      className={className}
+      className={cn(
+        className,
+        "relative inline-block whitespace-nowrap no-underline after:absolute after:inset-x-0 after:bottom-[3px] after:h-px after:bg-current",
+      )}
     >
       {word(A, aRef)}@{word(B, bRef)}
       {REST}
