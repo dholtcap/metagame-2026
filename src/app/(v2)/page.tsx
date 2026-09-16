@@ -494,10 +494,11 @@ export default function Home() {
             title="FAQ"
             className="mb-12"
           />
-          {/* Photo rides alongside the list on wide screens and stays put
-              (sticky) as answers open; it's decorative, so phones skip it. */}
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,820px)_minmax(0,1fr)] lg:items-start">
-            <div className="flex flex-col gap-3.5">
+          {/* Photo rides alongside the list on wide screens, sized so its 3:4
+              height roughly matches the collapsed list, and stays put (sticky)
+              as answers open; it's decorative, so phones skip it. */}
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start">
+            <div className="divide-y divide-line border-y border-line">
               {FAQS.map(({ id, open, question, answer }) => (
                 <FaqItem
                   key={question}
@@ -513,7 +514,7 @@ export default function Home() {
               src={metaCryptics}
               alt="Whiteboard from the 2025 cryptic crossword contest, covered in handwritten clues whose answer is META"
               className="hidden h-auto w-full rounded-2xl border border-navy/10 shadow-[0_8px_24px_rgba(23,48,89,0.08)] lg:sticky lg:top-24 lg:block"
-              sizes="(min-width: 1024px) 320px, 0px"
+              sizes="(min-width: 1024px) 380px, 0px"
             />
           </div>
           <div className="mt-11">
