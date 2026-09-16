@@ -39,12 +39,13 @@ export default function CrypticsLightbox({
           sizes="(min-width: 1024px) 380px, 0px"
         />
       </DialogTrigger>
-      {/* The dialog shrinks to the photo (as tall as the viewport allows), so
-          the form row beneath is exactly as wide as the photo. No close
-          button: click outside or press Escape. */}
+      {/* The dialog shrinks to the photo, which is width-driven (880px or the
+          viewport) so the handwriting is legible; taller than the screen, the
+          dialog scrolls. The form row beneath is exactly as wide as the
+          photo. No close button: click outside or press Escape. */}
       <DialogContent
         showCloseButton={false}
-        className="flex w-auto max-w-[calc(100vw-2rem)] flex-col gap-4 p-4"
+        className="flex max-h-[calc(100vh-2rem)] w-auto max-w-[calc(100vw-2rem)] flex-col gap-4 overflow-y-auto p-4"
       >
         <DialogTitle className="sr-only">
           Cryptic Crossword Contest, 2025
@@ -55,8 +56,8 @@ export default function CrypticsLightbox({
         <Image
           src={metaCryptics}
           alt={ALT}
-          className="h-auto max-h-[calc(100vh-12rem)] w-auto max-w-full"
-          sizes="(min-width: 640px) 700px, 100vw"
+          className="h-auto w-[min(880px,calc(100vw-4rem))] max-w-full"
+          sizes="(min-width: 640px) 880px, 100vw"
         />
         <ClueForm />
       </DialogContent>
