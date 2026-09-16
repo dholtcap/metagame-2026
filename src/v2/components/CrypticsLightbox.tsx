@@ -48,7 +48,7 @@ export default function CrypticsLightbox({
           close button: click outside or press Escape. */}
       <DialogContent
         showCloseButton={false}
-        className="flex max-h-[calc(100vh-1rem)] w-[min(700px,calc(100vw-1rem))] max-w-none flex-col gap-3 overflow-y-auto border-navy/15 bg-cream p-2 text-ink sm:gap-4 sm:p-4"
+        className="flex max-h-[calc(100vh-1rem)] w-[min(700px,calc(100vw-1rem))] max-w-none flex-col gap-2 overflow-y-auto border-navy/15 bg-cream p-2 text-ink sm:p-4"
       >
         <DialogTitle className="sr-only">
           Cryptic Crossword Contest, 2025
@@ -70,7 +70,7 @@ export default function CrypticsLightbox({
 
 const ERROR = "Something went wrong. Try again.";
 
-// One status line over one 48px row, in every state, so the dialog never
+// One 48px row over one status line, in every state, so the dialog never
 // changes size: the line is blank until there's something to say, and the
 // row swaps from clue + Submit to Name + Email + Add after the clue lands.
 function ClueForm() {
@@ -125,13 +125,7 @@ function ClueForm() {
             : "Thanks!";
 
   return (
-    <div className="flex w-full flex-col gap-3">
-      <p
-        aria-live="polite"
-        className={`h-6 text-base ${status === "error" ? "text-meeple-dark" : "text-ink/80"}`}
-      >
-        {message}
-      </p>
+    <div className="flex w-full flex-col gap-2">
       {recordId === null ? (
         <form onSubmit={submitClue} className="flex flex-col gap-3 sm:flex-row">
           <Input
@@ -189,6 +183,13 @@ function ClueForm() {
           </Button>
         </form>
       )}
+      {/* Below the row, so the field sits right under the photo. */}
+      <p
+        aria-live="polite"
+        className={`h-6 text-base ${status === "error" ? "text-meeple-dark" : "text-ink/80"}`}
+      >
+        {message}
+      </p>
     </div>
   );
 }
