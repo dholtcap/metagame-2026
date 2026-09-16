@@ -2,8 +2,11 @@ import type { StaticImageData } from "next/image";
 import ben from "../../../public/images/team/ben.jpg";
 import brendan from "../../../public/images/team/brendan.jpg";
 import brian from "../../../public/images/team/brian.jpg";
+import damon from "../../../public/images/team/damon.jpg";
+import davidHolt from "../../../public/images/team/david_holt.jpg";
 import jisk from "../../../public/images/team/jisk.jpg";
 import john from "../../../public/images/team/john_bromels.jpg";
+import kai from "../../../public/images/team/kai.jpg";
 import patrick from "../../../public/images/team/patrick.jpg";
 import ricki from "../../../public/images/team/ricki.jpg";
 import sparr from "../../../public/images/team/sparr.jpg";
@@ -44,6 +47,17 @@ export const TEAM: Person[] = [
   { name: "John Bromels", title: "Megagame Lead", photo: john },
   { name: "Jisk Kopczynski", title: "Megagame Chief of Staff", photo: jisk },
   { name: "Sparr Risher", title: "Generalist", photo: sparr },
+  { name: "Kai Geffen", title: "Generalist", photo: kai },
+  {
+    name: "Damon Pourtahmaseb-Sasi",
+    title: "Community Health Liaison",
+    photo: damon,
+  },
+  {
+    name: "David Holt",
+    title: "Marketing & Sponsorships",
+    photo: davidHolt,
+  },
 ];
 
 export const ADVISORS: Person[] = [
