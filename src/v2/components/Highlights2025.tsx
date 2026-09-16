@@ -2,12 +2,12 @@ import Image from "next/image";
 import { HIGHLIGHTS_2025 } from "@/v2/data/highlights-2025";
 import { HEADING } from "./styles";
 
-// A gapless checkerboard: each session type is one row, photo in one column
-// and the picked sessions with hosts in the other, sides alternating so the
-// photos meet corner to corner. Rows stack (photo first) on phones.
+// A checkerboard: each session type is one row, photo in one column and the
+// picked sessions with hosts in the other, sides alternating. Rows stack
+// (photo first) on phones.
 export default function Highlights2025() {
   return (
-    <div className="mt-10">
+    <div className="mt-10 flex flex-col gap-6 md:gap-8">
       {HIGHLIGHTS_2025.map((g, i) => (
         <div key={g.label} className="grid md:grid-cols-2">
           {/* h-full: the row is as tall as the photo's natural height at column
@@ -15,7 +15,11 @@ export default function Highlights2025() {
           <Image
             src={g.photo}
             alt={g.alt}
-            className={`h-full w-full object-cover ${i % 2 ? "md:order-2" : ""}`}
+            className={`h-full w-full object-cover ${
+              i % 2
+                ? "md:order-2 md:[mask-image:linear-gradient(to_right,transparent,black_30%)]"
+                : "md:[mask-image:linear-gradient(to_left,transparent,black_30%)]"
+            }`}
             sizes="(min-width: 768px) 560px, 100vw"
           />
           <div className="self-center px-0 py-8 md:px-10 md:py-10">

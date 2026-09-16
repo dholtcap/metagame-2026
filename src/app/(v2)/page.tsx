@@ -7,6 +7,7 @@ import CardSuitsDivider from "@/v2/components/dividers/card-suits";
 import CatanDivider from "@/v2/components/dividers/catan";
 import ChessDivider from "@/v2/components/dividers/chess";
 import DiceDivider from "@/v2/components/dividers/dice";
+import DungeonCrawlDivider from "@/v2/components/dividers/dungeon-crawl";
 import MonopolyDivider from "@/v2/components/dividers/monopoly";
 import PacmanDivider from "@/v2/components/dividers/pacman";
 import SetCardDivider from "@/v2/components/dividers/set-cards";
@@ -31,6 +32,7 @@ import { SPEAKERS } from "@/v2/data/speakers";
 import {
   HOUSING_URL,
   LIGHTHAVEN_URL,
+  MEGAGAME_PROPOSAL_FORM_URL,
   RFP_FORM_URL,
   TEAM_EMAIL,
   VOLUNTEER_FORM_URL,
@@ -38,6 +40,7 @@ import {
 import { EARLY_BIRD_DEADLINE, isEarlyBirdActive } from "@/lib/early-bird";
 import lighthavenMap from "../../../public/images/lighthaven.png";
 import lighthavenCutout from "../../../public/images/lighthaven_cutout.png";
+import megagameChess from "../../../public/images/megagame-chess.jpg";
 
 // Re-render hourly so the early-bird gate flips at the deadline without a deploy.
 export const revalidate = 3600;
@@ -314,16 +317,66 @@ export default function Home() {
                 <Button asChild variant="default" className="mt-6 w-fit">
                   {external ? (
                     <a href={href} target="_blank" rel="noopener noreferrer">
-                      {cta} <span aria-hidden="true">&rarr;</span>
+                      {cta}
                     </a>
                   ) : (
-                    <Link href={href}>
-                      {cta} <span aria-hidden="true">&rarr;</span>
-                    </Link>
+                    <Link href={href}>{cta}</Link>
                   )}
                 </Button>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <DungeonCrawlDivider />
+
+      {/* the megagame */}
+      <section id="megagame" className={`${SECTION} md:py-14`}>
+        <div className={CONTAINER}>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
+            <div className="max-w-[600px]">
+              <SectionHeading
+                eyebrow="Want to be a part of something bigger?"
+                eyebrowClassName="text-lg"
+                title="The Megagame"
+              />
+              <div className="mt-3.5 space-y-3 text-base text-ink/70">
+                <p>
+                  The game begins when you step through the gate, and runs all
+                  weekend. One part puzzle hunt, one part game gauntlet, one
+                  part interlocking story.
+                </p>
+                <p>
+                  The Megagame is threaded through the rest of Metagame, with
+                  many puzzles and games making up larger games and larger
+                  puzzles. Anyone can play it, and anyone can help create it. We
+                  want puzzles! We want games! We want cryptic hints added to
+                  your session! More details in the proposal form.
+                </p>
+              </div>
+              <Button asChild variant="default" className="mt-6 w-fit">
+                <a
+                  href={MEGAGAME_PROPOSAL_FORM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Build part of the Megagame
+                </a>
+              </Button>
+            </div>
+            <figure className="w-full max-w-[560px]">
+              <Image
+                src={megagameChess}
+                alt="Giant orange and blue chess pieces, a knight in front"
+                className="h-auto w-full [mask-image:linear-gradient(to_right,transparent,black_30%)]"
+                sizes="(min-width: 1024px) 560px, 100vw"
+              />
+              <figcaption className="mt-3 text-center text-sm text-ink/70 italic">
+                A puzzle and game made of smaller puzzles and games. Made
+                by&hellip; you?
+              </figcaption>
+            </figure>
           </div>
         </div>
       </section>
@@ -364,7 +417,7 @@ export default function Home() {
               </p>
               <Button asChild variant="navy" className="mt-5">
                 <a href={HOUSING_URL} target="_blank" rel="noopener noreferrer">
-                  Book your rooms <span aria-hidden="true">&rarr;</span>
+                  Book your rooms
                 </a>
               </Button>
             </div>
@@ -395,17 +448,14 @@ export default function Home() {
             title="Highlights from 2025"
           />
           <Highlights2025 />
-          <div className="mt-8 flex flex-wrap gap-4">
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Button asChild variant="default">
               <a href={RFP_FORM_URL} target="_blank" rel="noopener noreferrer">
-                Propose a session <span aria-hidden="true">&rarr;</span>
+                Propose a session
               </a>
             </Button>
             <Button asChild variant="navy">
-              <Link href="/last-year">
-                See the full 2025 schedule{" "}
-                <span aria-hidden="true">&rarr;</span>
-              </Link>
+              <Link href="/last-year">See the full 2025 schedule</Link>
             </Button>
           </div>
         </div>
@@ -482,9 +532,7 @@ export default function Home() {
               Interested in helping make Metagame 2026 happen?
             </h3>
             <Button asChild variant="navy" size="lg" className="mt-5 text-lg">
-              <Link href="/sponsor">
-                Sponsor Metagame <span aria-hidden="true">&rarr;</span>
-              </Link>
+              <Link href="/sponsor">Sponsor Metagame</Link>
             </Button>
           </div>
         </div>
