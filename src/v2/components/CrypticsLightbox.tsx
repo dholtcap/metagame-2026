@@ -39,13 +39,15 @@ export default function CrypticsLightbox({
           sizes="(min-width: 1024px) 380px, 0px"
         />
       </DialogTrigger>
-      {/* The dialog shrinks to the photo, which is width-driven (880px or the
-          viewport) so the handwriting is legible; taller than the screen, the
-          dialog scrolls. The form row beneath is exactly as wide as the
-          photo. No close button: click outside or press Escape. */}
+      {/* Explicit width (700px, or the viewport on phones): a centered fixed
+          box with auto width only gets half the viewport to size against,
+          which squeezed the photo on mobile. The photo fills that width so
+          the handwriting is legible; taller than the screen, the dialog
+          scrolls. The form row beneath is exactly as wide as the photo. No
+          close button: click outside or press Escape. */}
       <DialogContent
         showCloseButton={false}
-        className="flex max-h-[calc(100vh-2rem)] w-auto max-w-[calc(100vw-2rem)] flex-col gap-4 overflow-y-auto p-4"
+        className="flex max-h-[calc(100vh-1rem)] w-[min(700px,calc(100vw-1rem))] max-w-none flex-col gap-3 overflow-y-auto p-2 sm:gap-4 sm:p-4"
       >
         <DialogTitle className="sr-only">
           Cryptic Crossword Contest, 2025
@@ -56,8 +58,8 @@ export default function CrypticsLightbox({
         <Image
           src={metaCryptics}
           alt={ALT}
-          className="h-auto w-[min(880px,calc(100vw-4rem))] max-w-full"
-          sizes="(min-width: 640px) 880px, 100vw"
+          className="h-auto w-full"
+          sizes="(min-width: 640px) 700px, 100vw"
         />
         <ClueForm />
       </DialogContent>
@@ -122,9 +124,7 @@ function ClueForm() {
             : "Thanks!";
 
   return (
-    // w-0 + min-w-full: fills the dialog's width without contributing to it,
-    // so the photo alone sets the size and swapping rows can't widen it.
-    <div className="flex w-0 min-w-full flex-col gap-3">
+    <div className="flex w-full flex-col gap-3">
       <p
         aria-live="polite"
         className={`h-6 text-base ${status === "error" ? "text-salmon" : "text-cream/90"}`}
