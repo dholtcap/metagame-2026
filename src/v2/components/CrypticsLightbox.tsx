@@ -111,11 +111,11 @@ function ClueForm() {
     status === "error"
       ? ERROR
       : contactDone
-        ? "Got it. Good luck!"
+        ? "Our chaotic team might get in touch :)"
         : recordId === null
           ? ""
           : recordId
-            ? "Thanks! Add your name if you'd like credit."
+            ? "Innovative, mate! Drop your name if you'd like to be credited"
             : "Thanks!";
 
   return (
