@@ -11,6 +11,7 @@ import {
 } from "@/v2/components/ui/dialog";
 import { Button } from "@/v2/components/ui/button";
 import { Input } from "@/v2/components/ui/input";
+import { FIELD_LIGHT } from "./styles";
 import metaCryptics from "../../../public/images/meta_cryptics.jpg";
 
 const ALT =
@@ -47,7 +48,7 @@ export default function CrypticsLightbox({
           close button: click outside or press Escape. */}
       <DialogContent
         showCloseButton={false}
-        className="flex max-h-[calc(100vh-1rem)] w-[min(700px,calc(100vw-1rem))] max-w-none flex-col gap-3 overflow-y-auto p-2 sm:gap-4 sm:p-4"
+        className="flex max-h-[calc(100vh-1rem)] w-[min(700px,calc(100vw-1rem))] max-w-none flex-col gap-3 overflow-y-auto border-navy/15 bg-cream p-2 text-ink sm:gap-4 sm:p-4"
       >
         <DialogTitle className="sr-only">
           Cryptic Crossword Contest, 2025
@@ -127,7 +128,7 @@ function ClueForm() {
     <div className="flex w-full flex-col gap-3">
       <p
         aria-live="polite"
-        className={`h-6 text-base ${status === "error" ? "text-salmon" : "text-cream/90"}`}
+        className={`h-6 text-base ${status === "error" ? "text-meeple-dark" : "text-ink/80"}`}
       >
         {message}
       </p>
@@ -141,7 +142,7 @@ function ClueForm() {
             onChange={(e) => setClue(e.target.value)}
             placeholder="Submit your own cryptic clue"
             aria-label="Your cryptic clue"
-            className="min-w-0 flex-1"
+            className={`${FIELD_LIGHT} min-w-0 flex-1`}
           />
           <Button
             type="submit"
@@ -167,7 +168,7 @@ function ClueForm() {
             placeholder="Name"
             aria-label="Name"
             autoComplete="name"
-            className="min-w-0 sm:flex-1"
+            className={`${FIELD_LIGHT} min-w-0 sm:flex-1`}
           />
           <Input
             type="email"
@@ -176,11 +177,11 @@ function ClueForm() {
             placeholder="Email"
             aria-label="Email address"
             autoComplete="email"
-            className="min-w-0 sm:flex-1"
+            className={`${FIELD_LIGHT} min-w-0 sm:flex-1`}
           />
           <Button
             type="submit"
-            variant="ghost"
+            variant="navy"
             disabled={busy || (!name.trim() && !email.trim())}
             className="col-span-2 h-12 px-7 text-base sm:col-auto"
           >
