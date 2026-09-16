@@ -48,7 +48,7 @@ export default function CrypticsLightbox({
           close button: click outside or press Escape. */}
       <DialogContent
         showCloseButton={false}
-        className="flex max-h-[calc(100vh-1rem)] w-[min(700px,calc(100vw-1rem))] max-w-none flex-col gap-2 overflow-y-auto border-navy/15 bg-cream p-2 text-ink sm:p-4"
+        className="flex max-h-[calc(100vh-1rem)] w-[min(700px,calc(100vw-1rem))] max-w-none flex-col gap-2 overflow-y-auto border-navy/15 bg-cream p-2 text-ink"
       >
         <DialogTitle className="sr-only">
           Cryptic Crossword Contest, 2025
@@ -56,12 +56,6 @@ export default function CrypticsLightbox({
         <DialogDescription className="sr-only">
           Every clue on the board resolves to META. Submit your own.
         </DialogDescription>
-        <Image
-          src={metaCryptics}
-          alt={ALT}
-          className="h-auto w-full"
-          sizes="(min-width: 640px) 700px, 100vw"
-        />
         <ClueForm />
       </DialogContent>
     </Dialog>
@@ -70,9 +64,9 @@ export default function CrypticsLightbox({
 
 const ERROR = "Something went wrong. Try again.";
 
-// One 48px row over one status line, in every state, so the dialog never
-// changes size: the line is blank until there's something to say, and the
-// row swaps from clue + Submit to Name + Email + Add after the clue lands.
+// The photo over one 48px row, in every state, so the dialog never changes
+// size: the row swaps from clue + Submit to Name + Email + Add after the clue
+// lands, and status messages overlay the photo instead of taking a line.
 function ClueForm() {
   const [clue, setClue] = useState("");
   const [name, setName] = useState("");
@@ -126,6 +120,24 @@ function ClueForm() {
 
   return (
     <div className="flex w-full flex-col gap-2">
+      {/* Status (thanks / errors) floats over the photo's bottom corner so it
+          takes no layout space and the dialog keeps one size. */}
+      <div className="relative">
+        <Image
+          src={metaCryptics}
+          alt={ALT}
+          className="h-auto w-full"
+          sizes="(min-width: 640px) 700px, 100vw"
+        />
+        <p
+          aria-live="polite"
+          className={`absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-md px-3 py-1.5 text-sm font-semibold shadow-[0_4px_14px_rgba(23,48,89,0.25)] ${
+            message ? "" : "hidden"
+          } ${status === "error" ? "bg-meeple text-white" : "bg-navy text-cream"}`}
+        >
+          {message}
+        </p>
+      </div>
       {recordId === null ? (
         <form onSubmit={submitClue} className="flex flex-col gap-3 sm:flex-row">
           <Input
@@ -183,13 +195,6 @@ function ClueForm() {
           </Button>
         </form>
       )}
-      {/* Below the row, so the field sits right under the photo. */}
-      <p
-        aria-live="polite"
-        className={`h-6 text-base ${status === "error" ? "text-meeple-dark" : "text-ink/80"}`}
-      >
-        {message}
-      </p>
     </div>
   );
 }
