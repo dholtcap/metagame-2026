@@ -55,7 +55,7 @@ export default function CrypticsLightbox({
         <Image
           src={metaCryptics}
           alt={ALT}
-          className="h-auto max-h-[calc(100vh-10rem)] w-auto max-w-full"
+          className="h-auto max-h-[calc(100vh-12rem)] w-auto max-w-full"
           sizes="(min-width: 640px) 700px, 100vw"
         />
         <ClueForm />
@@ -64,129 +64,127 @@ export default function CrypticsLightbox({
   );
 }
 
+const ERROR = "Something went wrong. Try again.";
+
+// One status line over one 48px row, in every state, so the dialog never
+// changes size: the line is blank until there's something to say, and the
+// row swaps from clue + Submit to Name + Email + Add after the clue lands.
 function ClueForm() {
   const [clue, setClue] = useState("");
-  const [status, setStatus] = useState<Status>("idle");
-  // Set once the clue is stored; the contact step patches this record.
-  const [recordId, setRecordId] = useState<string | null>(null);
-
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setStatus("submitting");
-    try {
-      const res = await fetch("/api/cryptic-clue", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clue }),
-      });
-      if (!res.ok) throw new Error("Request failed");
-      const { id } = (await res.json()) as { id?: string };
-      setRecordId(id ?? "");
-      setStatus("idle");
-    } catch {
-      setStatus("error");
-    }
-  }
-
-  // An empty id means Airtable wasn't configured (local dev): the clue was
-  // accepted but there's no row to attach a contact to, so stop at thanks.
-  if (recordId !== null) {
-    return (
-      <div className="flex flex-col gap-3">
-        <p className="text-base text-cream/90">
-          Thanks!{recordId && <> Add your name if you&apos;d like credit.</>}
-        </p>
-        {recordId && <ContactForm recordId={recordId} />}
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={submit} className="flex flex-col gap-2">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Input
-          type="text"
-          required
-          maxLength={300}
-          value={clue}
-          onChange={(e) => setClue(e.target.value)}
-          placeholder="Submit your own cryptic clue"
-          aria-label="Your cryptic clue"
-          className="min-w-0 flex-1"
-        />
-        <Button
-          type="submit"
-          disabled={status === "submitting" || !clue.trim()}
-          className="h-12 px-7 text-base"
-        >
-          {status === "submitting" ? "…" : "Submit"}
-        </Button>
-      </div>
-      {status === "error" && (
-        <p className="text-sm text-salmon">Something went wrong. Try again.</p>
-      )}
-    </form>
-  );
-}
-
-function ContactForm({ recordId }: { recordId: string }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<Status | "done">("idle");
+  const [status, setStatus] = useState<Status>("idle");
+  // null until the clue is stored; "" when Airtable wasn't configured (local
+  // dev), in which case there's no row to attach a contact to.
+  const [recordId, setRecordId] = useState<string | null>(null);
+  const [contactDone, setContactDone] = useState(false);
 
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function send(method: "POST" | "PATCH", body: unknown) {
     setStatus("submitting");
     try {
       const res = await fetch("/api/cryptic-clue", {
-        method: "PATCH",
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: recordId, name, email }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error("Request failed");
-      setStatus("done");
+      setStatus("idle");
+      return (await res.json()) as { id?: string };
     } catch {
       setStatus("error");
+      return null;
     }
   }
 
-  if (status === "done") {
-    return <p className="text-base text-cream/90">Got it. Good luck!</p>;
+  async function submitClue(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const result = await send("POST", { clue });
+    if (result) setRecordId(result.id ?? "");
   }
 
+  async function submitContact(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const result = await send("PATCH", { id: recordId, name, email });
+    if (result) setContactDone(true);
+  }
+
+  const busy = status === "submitting";
+  const message =
+    status === "error"
+      ? ERROR
+      : contactDone
+        ? "Got it. Good luck!"
+        : recordId === null
+          ? ""
+          : recordId
+            ? "Thanks! Add your name if you'd like credit."
+            : "Thanks!";
+
   return (
-    <form onSubmit={submit} className="flex flex-col gap-2">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-          aria-label="Name"
-          autoComplete="name"
-          className="min-w-0 flex-1"
-        />
-        <Input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          aria-label="Email address"
-          autoComplete="email"
-          className="min-w-0 flex-1"
-        />
-        <Button
-          type="submit"
-          variant="ghost"
-          disabled={status === "submitting" || (!name.trim() && !email.trim())}
-          className="h-12 px-7 text-base"
+    <div className="flex flex-col gap-3">
+      <p
+        aria-live="polite"
+        className={`h-6 text-base ${status === "error" ? "text-salmon" : "text-cream/90"}`}
+      >
+        {message}
+      </p>
+      {recordId === null ? (
+        <form onSubmit={submitClue} className="flex flex-col gap-3 sm:flex-row">
+          <Input
+            type="text"
+            required
+            maxLength={300}
+            value={clue}
+            onChange={(e) => setClue(e.target.value)}
+            placeholder="Submit your own cryptic clue"
+            aria-label="Your cryptic clue"
+            className="min-w-0 flex-1"
+          />
+          <Button
+            type="submit"
+            disabled={busy || !clue.trim()}
+            className="h-12 px-7 text-base"
+          >
+            {busy ? "…" : "Submit"}
+          </Button>
+        </form>
+      ) : (
+        // Stays in the layout (invisible) once done or when there's no row,
+        // so the dialog keeps its height.
+        <form
+          onSubmit={submitContact}
+          className={`grid grid-cols-2 gap-3 sm:flex ${
+            contactDone || !recordId ? "invisible" : ""
+          }`}
         >
-          {status === "submitting" ? "…" : "Add"}
-        </Button>
-      </div>
-      {status === "error" && (
-        <p className="text-sm text-salmon">Something went wrong. Try again.</p>
+          <Input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name"
+            aria-label="Name"
+            autoComplete="name"
+            className="min-w-0 sm:flex-1"
+          />
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            aria-label="Email address"
+            autoComplete="email"
+            className="min-w-0 sm:flex-1"
+          />
+          <Button
+            type="submit"
+            variant="ghost"
+            disabled={busy || (!name.trim() && !email.trim())}
+            className="col-span-2 h-12 px-7 text-base sm:col-auto"
+          >
+            {busy ? "…" : "Add"}
+          </Button>
+        </form>
       )}
-    </form>
+    </div>
   );
 }
