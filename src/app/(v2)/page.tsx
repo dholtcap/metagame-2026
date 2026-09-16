@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Carousel from "@/v2/components/Carousel";
+import CrypticsLightbox from "@/v2/components/CrypticsLightbox";
 import BloodOnTheClocktowerDivider from "@/v2/components/dividers/blood-on-the-clocktower";
 import CardSuitsDivider from "@/v2/components/dividers/card-suits";
 import CatanDivider from "@/v2/components/dividers/catan";
@@ -550,26 +551,34 @@ export default function Home() {
             title="FAQ"
             className="mb-12"
           />
-          <div className="flex max-w-[820px] flex-col gap-3.5">
-            {FAQS.map(({ id, open, question, answer }) => (
-              <FaqItem
-                key={question}
-                id={id}
-                defaultOpen={open}
-                question={question}
-              >
-                {answer}
-              </FaqItem>
-            ))}
-          </div>
-          <div className="mt-11">
-            <p className="max-w-[620px] text-ink/70">
-              Have more questions? Email{" "}
-              <a href={`mailto:${TEAM_EMAIL}`} className={BODY_LINK}>
-                {TEAM_EMAIL}
-              </a>
-              .
-            </p>
+          {/* Photo rides alongside the list on wide screens, sized so its 3:4
+              height roughly matches the collapsed list, and stays put (sticky)
+              as answers open; on phones it follows the list. */}
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start">
+            {/* Contact line lives in the list column so it hugs the questions
+                rather than dropping below the (taller) photo. */}
+            <div>
+              <div className="divide-y divide-line border-y border-line">
+                {FAQS.map(({ id, open, question, answer }) => (
+                  <FaqItem
+                    key={question}
+                    id={id}
+                    defaultOpen={open}
+                    question={question}
+                  >
+                    {answer}
+                  </FaqItem>
+                ))}
+              </div>
+              <p className="mt-6 max-w-[620px] text-ink/70">
+                Have more questions? Email{" "}
+                <a href={`mailto:${TEAM_EMAIL}`} className={BODY_LINK}>
+                  {TEAM_EMAIL}
+                </a>
+                .
+              </p>
+            </div>
+            <CrypticsLightbox className="block lg:sticky lg:top-24" />
           </div>
         </div>
       </section>
