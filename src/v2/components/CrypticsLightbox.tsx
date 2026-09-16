@@ -11,15 +11,10 @@ import {
 } from "@/v2/components/ui/dialog";
 import { Button } from "@/v2/components/ui/button";
 import { Input } from "@/v2/components/ui/input";
-import { HEADING } from "./styles";
 import metaCryptics from "../../../public/images/meta_cryptics.jpg";
 
 const ALT =
   "Whiteboard from the 2025 cryptic crossword contest, covered in handwritten clues whose answer is META";
-
-// Same look as <Input>, multi-line.
-const TEXTAREA =
-  "min-h-24 w-full resize-y rounded-lg border-[1.5px] border-cream/25 bg-navy2 px-4 py-3 text-base text-cream transition-colors outline-none placeholder:text-cream/40 focus:border-tan disabled:opacity-60";
 
 type Status = "idle" | "submitting" | "error";
 
@@ -44,27 +39,26 @@ export default function CrypticsLightbox({
           sizes="(min-width: 1024px) 380px, 0px"
         />
       </DialogTrigger>
-      {/* Photo takes the height it needs (capped to the viewport); the form
-          column sits beside it from md and below it on phones. */}
-      <DialogContent className="grid max-h-[calc(100vh-2rem)] max-w-[min(1120px,calc(100vw-2rem))] grid-rows-[minmax(0,1fr)_auto] gap-0 overflow-hidden p-0 md:grid-cols-[minmax(0,1fr)_360px] md:grid-rows-1">
+      {/* The dialog shrinks to the photo (as tall as the viewport allows), so
+          the form row beneath is exactly as wide as the photo. No close
+          button: click outside or press Escape. */}
+      <DialogContent
+        showCloseButton={false}
+        className="flex w-auto max-w-[calc(100vw-2rem)] flex-col gap-4 p-4"
+      >
+        <DialogTitle className="sr-only">
+          Cryptic Crossword Contest, 2025
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          Every clue on the board resolves to META. Submit your own.
+        </DialogDescription>
         <Image
           src={metaCryptics}
           alt={ALT}
-          className="h-full max-h-[52vh] w-full object-contain object-center md:max-h-[calc(100vh-2rem)]"
-          sizes="(min-width: 768px) 720px, 100vw"
+          className="h-auto max-h-[calc(100vh-10rem)] w-auto max-w-full"
+          sizes="(min-width: 640px) 700px, 100vw"
         />
-        <div className="flex flex-col gap-5 overflow-y-auto p-6 md:justify-center md:p-8">
-          <div>
-            <DialogTitle className={`${HEADING} text-2xl text-cream`}>
-              Cryptic Crossword Contest, 2025
-            </DialogTitle>
-            <DialogDescription className="mt-2 text-[15px] text-cream/70">
-              Every clue on the board resolves to META. Think you can do better?
-              Write a cryptic clue whose answer is META.
-            </DialogDescription>
-          </div>
-          <ClueForm />
-        </div>
+        <ClueForm />
       </DialogContent>
     </Dialog>
   );
@@ -98,10 +92,9 @@ function ClueForm() {
   // accepted but there's no row to attach a contact to, so stop at thanks.
   if (recordId !== null) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         <p className="text-base text-cream/90">
-          Thanks, your clue is in.
-          {recordId && <> Want credit if we use it?</>}
+          Thanks!{recordId && <> Add your name if you&apos;d like credit.</>}
         </p>
         {recordId && <ContactForm recordId={recordId} />}
       </div>
@@ -109,26 +102,26 @@ function ClueForm() {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-3">
-      <label className="sr-only" htmlFor="cryptic-clue">
-        Your cryptic clue
-      </label>
-      <textarea
-        id="cryptic-clue"
-        required
-        maxLength={300}
-        value={clue}
-        onChange={(e) => setClue(e.target.value)}
-        placeholder="Your clue (4)"
-        className={TEXTAREA}
-      />
-      <Button
-        type="submit"
-        disabled={status === "submitting" || !clue.trim()}
-        className="w-fit"
-      >
-        {status === "submitting" ? "…" : "Submit your clue"}
-      </Button>
+    <form onSubmit={submit} className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Input
+          type="text"
+          required
+          maxLength={300}
+          value={clue}
+          onChange={(e) => setClue(e.target.value)}
+          placeholder="Submit your own cryptic clue"
+          aria-label="Your cryptic clue"
+          className="min-w-0 flex-1"
+        />
+        <Button
+          type="submit"
+          disabled={status === "submitting" || !clue.trim()}
+          className="h-12 px-7 text-base"
+        >
+          {status === "submitting" ? "…" : "Submit"}
+        </Button>
+      </div>
       {status === "error" && (
         <p className="text-sm text-salmon">Something went wrong. Try again.</p>
       )}
@@ -162,31 +155,35 @@ function ContactForm({ recordId }: { recordId: string }) {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-3">
-      <Input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Name"
-        aria-label="Name"
-        autoComplete="name"
-      />
-      <Input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="you@example.com"
-        aria-label="Email address"
-        autoComplete="email"
-      />
-      <Button
-        type="submit"
-        variant="ghost"
-        disabled={status === "submitting" || (!name.trim() && !email.trim())}
-        className="w-fit"
-      >
-        {status === "submitting" ? "…" : "Add my details"}
-      </Button>
+    <form onSubmit={submit} className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name"
+          aria-label="Name"
+          autoComplete="name"
+          className="min-w-0 flex-1"
+        />
+        <Input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          aria-label="Email address"
+          autoComplete="email"
+          className="min-w-0 flex-1"
+        />
+        <Button
+          type="submit"
+          variant="ghost"
+          disabled={status === "submitting" || (!name.trim() && !email.trim())}
+          className="h-12 px-7 text-base"
+        >
+          {status === "submitting" ? "…" : "Add"}
+        </Button>
+      </div>
       {status === "error" && (
         <p className="text-sm text-salmon">Something went wrong. Try again.</p>
       )}
