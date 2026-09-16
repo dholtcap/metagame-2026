@@ -46,17 +46,17 @@ export const TEAM: Person[] = [
   },
   { name: "John Bromels", title: "Megagame Lead", photo: john },
   { name: "Jisk Kopczynski", title: "Megagame Chief of Staff", photo: jisk },
+  {
+    name: "David Holt",
+    title: "Marketing & Sponsorships",
+    photo: davidHolt,
+  },
   { name: "Sparr Risher", title: "Generalist", photo: sparr },
   { name: "Kai Geffen", title: "Generalist", photo: kai },
   {
     name: "Damon Pourtahmaseb-Sasi",
     title: "Community Health Liaison",
     photo: damon,
-  },
-  {
-    name: "David Holt",
-    title: "Marketing & Sponsorships",
-    photo: davidHolt,
   },
 ];
 
