@@ -404,7 +404,7 @@ export default function Home() {
               <Image
                 src={megagameChess}
                 alt="Giant orange and blue chess pieces, a knight in front"
-                className="h-auto w-full [mask-image:linear-gradient(to_right,transparent,black_30%)]"
+                className="h-auto w-full lg:[mask-image:linear-gradient(to_right,transparent,black_30%)]"
                 sizes="(min-width: 1024px) 560px, 100vw"
               />
               <figcaption className="mt-3 text-center text-sm text-ink/70 italic">
@@ -440,6 +440,21 @@ export default function Home() {
               <p className="mt-2 text-base text-ink/60">
                 2740 Telegraph Ave, Berkeley, CA 94705
               </p>
+              {/* Below lg the map floats inside the copy so the paragraphs
+                  wrap it; at lg it moves to its own grid column instead. */}
+              <a
+                href={LIGHTHAVEN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="float-right -mt-2 -mr-6 -mb-2 ml-1 w-[52%] lg:hidden"
+              >
+                <Image
+                  src={lighthavenCutout}
+                  alt="Aerial view of the Lighthaven campus"
+                  className="h-auto w-full"
+                  sizes="45vw"
+                />
+              </a>
               <p className="mt-6 text-base text-ink/70">
                 Lighthaven Campus is a puzzle-seeker&apos;s paradise, with
                 easter eggs wedged into every nook and cranny and games mid-play
@@ -450,7 +465,7 @@ export default function Home() {
                 of bed and into a game at any moment. Rooms can be booked
                 directly with Lighthaven.
               </p>
-              <Button asChild variant="navy" className="mt-5">
+              <Button asChild variant="navy" className="clear-both mt-5">
                 <a href={HOUSING_URL} target="_blank" rel="noopener noreferrer">
                   Book your room
                 </a>
@@ -460,7 +475,7 @@ export default function Home() {
               href={LIGHTHAVEN_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full max-w-[560px] transition-transform duration-300 hover:scale-[1.04]"
+              className="hidden w-full max-w-[560px] transition-transform duration-300 hover:scale-[1.04] lg:block"
             >
               <Image
                 src={lighthavenCutout}

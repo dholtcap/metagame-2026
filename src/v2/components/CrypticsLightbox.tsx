@@ -48,7 +48,7 @@ export default function CrypticsLightbox({
           close button: click outside or press Escape. */}
       <DialogContent
         showCloseButton={false}
-        className="flex max-h-[calc(100vh-1rem)] w-[min(630px,calc(100vw-1rem))] max-w-none flex-col gap-2 overflow-y-auto border-navy/15 bg-cream p-2 text-ink"
+        className="top-2 flex max-h-[calc(100vh-1rem)] w-[min(630px,calc(100vw-1rem))] max-w-none translate-y-0 flex-col gap-2 overflow-y-auto border-navy/15 bg-cream p-2 text-ink sm:top-1/2 sm:-translate-y-1/2"
       >
         <DialogTitle className="sr-only">
           Cryptic Crossword Contest, 2025
@@ -122,11 +122,14 @@ function ClueForm() {
     <div className="flex w-full flex-col gap-2">
       {/* Status (thanks / errors) floats over the photo's bottom corner so it
           takes no layout space and the dialog keeps one size. */}
+      {/* On short phones the portrait photo is capped so the form row fits on
+          screen without the dialog scrolling. Width stays 100%: with w-auto,
+          next/image's intrinsic size comes from `sizes` and can be tiny. */}
       <div className="relative">
         <Image
           src={metaCryptics}
           alt={ALT}
-          className="h-auto w-full"
+          className="h-auto max-h-[calc(100svh-8rem)] w-full object-contain sm:max-h-none"
           sizes="(min-width: 640px) 630px, 100vw"
         />
         <p
@@ -139,7 +142,10 @@ function ClueForm() {
         </p>
       </div>
       {recordId === null ? (
-        <form onSubmit={submitClue} className="flex flex-col gap-3 sm:flex-row">
+        <form
+          onSubmit={submitClue}
+          className="order-first flex shrink-0 flex-col gap-3 sm:order-none sm:flex-row"
+        >
           <Input
             type="text"
             required
@@ -148,12 +154,12 @@ function ClueForm() {
             onChange={(e) => setClue(e.target.value)}
             placeholder="Submit your own cryptic clue"
             aria-label="Your cryptic clue"
-            className={`${FIELD_LIGHT} min-w-0 flex-1`}
+            className={`${FIELD_LIGHT} min-w-0 sm:flex-1`}
           />
           <Button
             type="submit"
             disabled={busy || !clue.trim()}
-            className="h-12 px-7 text-base"
+            className="h-10 px-5 text-sm sm:h-12 sm:px-7 sm:text-base"
           >
             {busy ? "…" : "Submit"}
           </Button>
@@ -163,7 +169,7 @@ function ClueForm() {
         // so the dialog keeps its height.
         <form
           onSubmit={submitContact}
-          className={`grid grid-cols-2 gap-3 sm:flex ${
+          className={`order-first grid shrink-0 grid-cols-2 gap-3 sm:order-none sm:flex ${
             contactDone || !recordId ? "invisible" : ""
           }`}
         >
@@ -189,7 +195,7 @@ function ClueForm() {
             type="submit"
             variant="navy"
             disabled={busy || (!name.trim() && !email.trim())}
-            className="col-span-2 h-12 px-7 text-base sm:col-auto"
+            className="col-span-2 h-10 px-5 text-sm sm:col-auto sm:h-12 sm:px-7 sm:text-base"
           >
             {busy ? "…" : "Add"}
           </Button>
