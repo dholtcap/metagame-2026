@@ -61,7 +61,7 @@ export const HATS: Record<HatId, Hat> = {
       [64.2, 21.3],
       [66.3, 18.6],
     ],
-    wear: { width: 71.5, bottom: 53.2, rotate: 38.5, shiftX: 6.1 },
+    wear: { width: 71.5, bottom: 56, rotate: 38.5, shiftX: 6.4 },
   },
   crown: {
     id: "crown",
@@ -196,7 +196,7 @@ export const HATS: Record<HatId, Hat> = {
       [66.1, 10.8],
       [59.8, 9.0],
     ],
-    wear: { width: 54.5, bottom: 34.6, shiftX: -0.7 },
+    wear: { width: 58.5, bottom: 37.3, shiftX: -0.7 },
   },
 };
 
