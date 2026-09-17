@@ -259,10 +259,10 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <p className="mt-8 text-base text-ink/70">
+          <p className="mt-8 text-center text-base text-ink/70">
             And many more coming soon&hellip;
           </p>
-          <p className="mt-2 text-base text-ink/70">
+          <p className="mt-2 text-center text-base text-ink/70">
             Want to speak or run a session?{" "}
             <a
               href={RFP_FORM_URL}
