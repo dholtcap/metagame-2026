@@ -69,8 +69,12 @@ import {
 // attribution needed. `letter` is A–Z or "" for the blank; the score comes
 // from tiles.ts and is left off when `scored` is false (a played blank).
 // `armed` dims the tile while it waits for a typed letter. `look` and
-// `motion` carry the easter eggs (effects.ts). Not mounted anywhere yet;
-// available for a future section.
+// `motion` carry the easter eggs (effects.ts).
+// Tapping the same tile over and over is the whole interaction, so it has to
+// survive iOS: touch-manipulation keeps the second tap from being read as
+// double-tap-to-zoom, and coarse pointers get the cursor Safari wants before
+// it will deliver a click to a plain <svg> (no cursor on a phone to give the
+// secret away).
 const CHARCOAL = "#4d4d4d";
 const FONT = "var(--font-space-grotesk), system-ui, sans-serif";
 
@@ -201,23 +205,15 @@ export function ScrabbleTile({
     <svg
       viewBox="0 0 100 100"
       aria-hidden
-      className={`${GLYPH} shrink-0 ${look.glow ? "drop-shadow-[0_0_5px_rgba(216,80,43,0.85)]" : SHADOW} ${
-        look.tall ||
-        look.dead ||
-        look.fuzz ||
-        look.fire ||
-        horns ||
-        halo ||
-        diced ||
-        rod
-          ? "overflow-visible"
-          : ""
+      className={`${GLYPH} shrink-0 touch-manipulation overflow-visible pointer-coarse:cursor-pointer ${
+        look.glow ? "drop-shadow-[0_0_5px_rgba(216,80,43,0.85)]" : SHADOW
       }`}
       style={{
         transform: `${motion?.transform ?? ""} ${restPose(look)}`,
         opacity: motion?.opacity,
         ...motion?.extra,
         marginLeft: gap,
+        WebkitTapHighlightColor: "transparent",
         transition: `${
           motion?.transition ??
           `transform 300ms ease-out ${look.flat ? FLAT_DELAY_MS : 0}ms, opacity 300ms ease-out, filter 300ms ease-out`
@@ -226,6 +222,19 @@ export function ScrabbleTile({
       onClick={onClick}
       ref={ref}
     >
+      {/* The tap target. An <svg> is only hit-tested where it actually paints,
+          and the letter is a hole punched through the tile — so without this a
+          tap on the letter, on a rounded corner, or in the 4-unit border falls
+          straight through. Sized past the viewBox on touch (globals.css),
+          hence overflow-visible above. */}
+      <rect
+        className="scrabble-hit"
+        x="0"
+        y="0"
+        width="100"
+        height="100"
+        fill="none"
+      />
       {/* The default mask region stops 10% outside the viewBox, which would
           crop a tile that's both TALL and DEAD. */}
       <mask

@@ -168,8 +168,23 @@ button:not(:disabled) {
   }
 }
 
-/* Scrabble divider easter eggs (src/v2/components/dividers/scrabble): MAGA
-   flashes a red bar across the top of the viewport. */
+/* Scrabble divider (src/v2/components/dividers/scrabble). The invisible rect
+   that catches taps on a tile: pointer-events has to be spelled out, since the
+   rect paints nothing. A mouse gets the tile's own 30px box; tapping one tile
+   over and over is the whole interaction on a phone, so touch grows it to the
+   46px a thumb wants (scaled about the centre of the 100-unit viewBox). */
+.scrabble-hit {
+  pointer-events: all;
+  transform-origin: 50px 50px;
+}
+
+@media (pointer: coarse) {
+  .scrabble-hit {
+    transform: scale(1.54);
+  }
+}
+
+/* MAGA flashes a red bar across the top of the viewport. */
 @keyframes scrabble-maga {
   0%,
   22%,
