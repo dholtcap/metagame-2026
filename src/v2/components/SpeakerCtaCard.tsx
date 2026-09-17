@@ -18,17 +18,18 @@ export default function SpeakerCtaCard({ href }: { href: string }) {
           viewBox="0 0 100 100"
           className="h-[86%] w-[86%] fill-navy/15 transition-[fill] group-hover:fill-navy/25"
         >
-          <circle cx="50" cy="34" r="19" />
-          <path d="M8 100c0-24 18-41 42-41s42 17 42 41z" />
+          {/* head, neck, sloping shoulders: the classic anonymous-profile cutout */}
+          <ellipse cx="50" cy="30" rx="17" ry="19" />
+          <path d="M44 46h12v9c0 3 2 5 5 6 18 4 33 18 33 39H6c0-21 15-35 33-39 3-1 5-3 5-6z" />
         </svg>
         <span
-          className={`${HEADING} absolute top-[22%] text-6xl text-navy/55 transition-colors group-hover:text-navy/80 sm:text-7xl`}
+          className={`${HEADING} absolute inset-0 flex items-center justify-center text-[8.5rem] leading-none text-navy/55 transition-colors group-hover:text-navy/80 sm:text-[11rem]`}
         >
           ?
         </span>
       </div>
       <div className="px-4 py-3 text-center">
-        <h3 className={`${HEADING} text-lg text-navy`}>You?</h3>
+        <h3 className={`${HEADING} text-lg text-navy`}>Your Name Here</h3>
         <p className="mt-1 font-space-mono text-xs tracking-[0.08em] text-ink/60 uppercase transition-colors group-hover:text-navy">
           <span className="underline underline-offset-2">
             Submit a proposal &rarr;
