@@ -19,8 +19,16 @@ export type Hat = {
   points: [number, number][];
   // How it sits on the silhouette: width as a percentage of the card square,
   // where its bottom edge lands (percent from the top) as the first hat worn,
-  // and an optional tilt.
-  wear: { width: number; bottom: number; rotate?: number; shiftX?: number };
+  // an optional tilt, and `lift`: when worn on another hat, how far its bottom
+  // edge sits above that hat's vertical center (same units; negative sinks
+  // it). Unset means a modest default that scales with the hat below.
+  wear: {
+    width: number;
+    bottom: number;
+    rotate?: number;
+    shiftX?: number;
+    lift?: number;
+  };
 };
 
 export const HAT_TRICK_TARGET = 3;

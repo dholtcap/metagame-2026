@@ -6,7 +6,7 @@ import { hatAspect, hatCutoutStyle, type Hat } from "./hats";
 // side; hat positions are in that box's units.
 //
 // Stack: the first hat sits on the head; each later one perches on the hat
-// below, a bit smaller and overlapping it, so the pile stays in frame.
+// below, a bit smaller, its bottom edge `lift` units above that hat's center.
 export default function HatPile({ hats }: { hats: Hat[] }) {
   const stack = hats.reduce<
     { hat: Hat; width: number; top: number; bottom: number }[]
@@ -15,7 +15,8 @@ export default function HatPile({ hats }: { hats: Hat[] }) {
     const height = width / hatAspect(hat);
     const below = acc[acc.length - 1];
     const bottom = below
-      ? below.top + (below.bottom - below.top) * 0.32
+      ? (below.top + below.bottom) / 2 -
+        (hat.wear.lift ?? (below.bottom - below.top) * 0.18)
       : hat.wear.bottom;
     return [...acc, { hat, width, top: bottom - height, bottom }];
   }, []);
