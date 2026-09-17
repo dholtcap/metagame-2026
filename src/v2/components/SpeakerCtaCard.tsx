@@ -12,17 +12,17 @@ export default function SpeakerCtaCard({ href }: { href: string }) {
     >
       <div
         aria-hidden
-        className="relative flex aspect-square w-full items-end justify-center overflow-hidden bg-navy"
+        className="relative flex aspect-square w-full items-end justify-center overflow-hidden bg-navy/[0.06]"
       >
         <svg
           viewBox="0 0 100 100"
-          className="h-[86%] w-[86%] fill-cream/20 transition-[fill] group-hover:fill-cream/30"
+          className="h-[86%] w-[86%] fill-navy/15 transition-[fill] group-hover:fill-navy/25"
         >
           <circle cx="50" cy="34" r="19" />
           <path d="M8 100c0-24 18-41 42-41s42 17 42 41z" />
         </svg>
         <span
-          className={`${HEADING} absolute top-[22%] text-6xl text-cream sm:text-7xl`}
+          className={`${HEADING} absolute top-[22%] text-6xl text-navy/55 transition-colors group-hover:text-navy/80 sm:text-7xl`}
         >
           ?
         </span>
