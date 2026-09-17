@@ -13,6 +13,7 @@ import DndDivider from "@/v2/components/dividers/dnd";
 import MonopolyDivider from "@/v2/components/dividers/monopoly";
 import PacmanDivider from "@/v2/components/dividers/pacman";
 import SetCardDivider from "@/v2/components/dividers/set-cards";
+import TetrisDivider from "@/v2/components/dividers/tetris";
 import FaqItem from "@/v2/components/FaqItem";
 import Highlights2025 from "@/v2/components/Highlights2025";
 import KeyDates from "@/v2/components/KeyDates";
@@ -627,7 +628,7 @@ export default function Home() {
         </div>
       </section>
 
-      <DndDivider />
+      <TetrisDivider />
 
       {/* key dates */}
       <section id="key-dates" className={`${SECTION} md:py-14`}>
