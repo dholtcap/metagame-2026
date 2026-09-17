@@ -48,7 +48,7 @@ export default function SpeakerCtaCard({ href }: { href: string }) {
           {/* Score on the chest, below the head, when the page margin beside
               the card is too narrow for it (see the sibling below). */}
           {score && (
-            <div className="absolute inset-x-3 top-[72%] text-center text-[15px] 2xl:hidden">
+            <div className="absolute inset-x-3 top-[78%] text-center text-[15px] 2xl:hidden">
               {score}
             </div>
           )}
