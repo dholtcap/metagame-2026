@@ -87,10 +87,11 @@ export default function PlacementPreview({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="mx-auto w-full max-w-[280px] overflow-hidden rounded-2xl border border-dashed border-navy/40 bg-white shadow-[0_8px_24px_rgba(23,48,89,0.08)]">
+      {/* No overflow clipping here, matching the site: a tall pile rises above the card. */}
+      <div className="mx-auto mt-16 w-full max-w-[280px] rounded-2xl border border-dashed border-navy/40 bg-white shadow-[0_8px_24px_rgba(23,48,89,0.08)]">
         <div
           ref={square}
-          className="relative flex aspect-square w-full items-end justify-center overflow-hidden bg-navy/[0.06]"
+          className="relative flex aspect-square w-full items-end justify-center rounded-t-2xl bg-navy/[0.06]"
         >
           <svg viewBox="0 0 100 100" className="h-[86%] w-[86%] fill-navy/15">
             <path d="M50 8c-16 0-23 11-23 24 0 11-1 22-5 30 3 4 12 4 18-1v4c-8 1-20 4-26 11-5 5-7 14-7 24h86c0-10-2-19-7-24-6-7-18-10-26-11v-4c6 5 15 5 18 1-4-8-5-19-5-30 0-13-7-24-23-24z" />
