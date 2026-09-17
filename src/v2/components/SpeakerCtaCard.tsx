@@ -18,10 +18,8 @@ export default function SpeakerCtaCard({ href }: { href: string }) {
           viewBox="0 0 100 100"
           className="h-[86%] w-[86%] fill-navy/15 transition-[fill] group-hover:fill-navy/25"
         >
-          {/* hair to the shoulders, head, neck, sloping shoulders: a restroom-sign bust */}
-          <path d="M25 66V30c0-25 50-25 50 0v36c0 4-4 6-8 4l-7-3V44H40v23l-7 3c-4 2-8 0-8-4z" />
-          <ellipse cx="50" cy="30" rx="17" ry="19" />
-          <path d="M44 46h12v9c0 3 2 5 5 6 18 4 33 18 33 39H6c0-21 15-35 33-39 3-1 5-3 5-6z" />
+          {/* one cutout: a bob of hair around the head, flowing into the neck, on sloped shoulders */}
+          <path d="M50 8c-16 0-23 11-23 24 0 11-1 22-5 30 3 4 12 4 18-1v4c-8 1-20 4-26 11-5 5-7 14-7 24h86c0-10-2-19-7-24-6-7-18-10-26-11v-4c6 5 15 5 18 1-4-8-5-19-5-30 0-13-7-24-23-24z" />
         </svg>
         <span
           className={`${HEADING} absolute inset-0 flex items-center justify-center text-[8.5rem] leading-none text-navy/55 transition-colors group-hover:text-navy/80 sm:text-[11rem]`}
