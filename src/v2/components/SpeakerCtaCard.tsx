@@ -6,6 +6,7 @@ import {
   HATS,
   hatAspect,
   hatCutoutStyle,
+  type Hat,
 } from "@/v2/hat-trick/hats";
 import { useHatTrick } from "@/v2/hat-trick/store";
 import { HEADING } from "./styles";
@@ -20,15 +21,17 @@ export default function SpeakerCtaCard({ href }: { href: string }) {
 
   // Stack: the first hat sits on the head; each later one perches on the
   // hat below, a bit smaller and overlapping it, so the pile stays in frame.
-  let nextBottom = 0;
-  const stack = worn.map((hat, i) => {
-    const scale = 0.85 ** i;
-    const width = hat.wear.width * scale;
+  const stack = worn.reduce<
+    { hat: Hat; width: number; top: number; bottom: number }[]
+  >((acc, hat, i) => {
+    const width = hat.wear.width * 0.85 ** i;
     const height = width / hatAspect(hat);
-    const bottom = i === 0 ? hat.wear.bottom : nextBottom;
-    nextBottom = bottom - height * 0.68;
-    return { hat, width, top: bottom - height };
-  });
+    const below = acc[acc.length - 1];
+    const bottom = below
+      ? below.top + (below.bottom - below.top) * 0.32
+      : hat.wear.bottom;
+    return [...acc, { hat, width, top: bottom - height, bottom }];
+  }, []);
 
   return (
     <a
