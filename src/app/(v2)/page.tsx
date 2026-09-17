@@ -248,15 +248,21 @@ export default function Home() {
       <section id="speakers" className={`${SECTION} md:py-14`}>
         <div className={CONTAINER}>
           <SectionHeading eyebrow="Who will be there?" title="Speakers" />
-          <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-6">
+          {/* Wrapping flex, not a grid, so a short last row centers. */}
+          <div className="mt-10 flex flex-wrap justify-center gap-5">
             {SPEAKERS.map((speaker) => (
-              <PersonCard key={speaker.name} {...speaker} compact />
+              <div
+                key={speaker.name}
+                className="w-[calc(50%-0.625rem)] sm:w-[calc(33.333%-0.8334rem)] lg:w-[calc(25%-0.9375rem)]"
+              >
+                <PersonCard {...speaker} compact />
+              </div>
             ))}
           </div>
-          <p className="mt-8 text-base text-ink/70">
+          <p className="mt-8 text-center text-base text-ink/70">
             And many more coming soon&hellip;
           </p>
-          <p className="mt-2 text-base text-ink/70">
+          <p className="mt-2 text-center text-base text-ink/70">
             Want to speak or run a session?{" "}
             <a
               href={RFP_FORM_URL}
