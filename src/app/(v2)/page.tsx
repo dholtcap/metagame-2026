@@ -33,6 +33,7 @@ import { Button } from "@/v2/components/ui/button";
 import { CAROUSEL } from "@/v2/data/carousel";
 import { GOLD_SPONSORS, PATRON_SPONSORS } from "@/v2/data/sponsors";
 import { SPEAKERS } from "@/v2/data/speakers";
+import SpeakerCtaCard from "@/v2/components/SpeakerCtaCard";
 import {
   HOTELS_SEARCH_URL,
   HOUSING_URL,
@@ -258,20 +259,12 @@ export default function Home() {
                 <PersonCard {...speaker} compact />
               </div>
             ))}
+            <div className="w-[calc(50%-0.625rem)] sm:w-[calc(33.333%-0.8334rem)] lg:w-[calc(25%-0.9375rem)]">
+              <SpeakerCtaCard href={RFP_FORM_URL} />
+            </div>
           </div>
           <p className="mt-8 text-center text-base text-ink/70">
             And many more coming soon&hellip;
-          </p>
-          <p className="mt-2 text-center text-base text-ink/70">
-            Want to speak or run a session?{" "}
-            <a
-              href={RFP_FORM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={NEWSLETTER_LINK}
-            >
-              Submit a proposal &rarr;
-            </a>
           </p>
         </div>
       </section>
