@@ -22,12 +22,11 @@ swap(
                   Arbor&rsquo;s annual game design conference is back! Metagame 2026
                   is a weekend conference dedicated to games and strategy in all
                   shapes and flavors. It&rsquo;s a festival of creating and
-                  celebrating games in the broadest sense of the word: any
+                  celebrating games in the broadest sense of the word games: any
                   experience designed to be played or actively consumed. If
                   building it involves asking the question &ldquo;what would the
                   person experiencing this choose to do next?&rdquo; we want it at
-                  Metagame. If you like our bootcamps, we&rsquo;d bet you&rsquo;ll
-                  enjoy Metagame and we&rsquo;d love to see you there.`,
+                  Metagame.`,
 );
 
 swap(
