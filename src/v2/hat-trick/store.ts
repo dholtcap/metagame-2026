@@ -52,11 +52,24 @@ function subscribe(listener: () => void) {
   };
 }
 
+// Fired once per newly grabbed hat, for the toast.
+export type CollectEvent = { id: HatId; count: number };
+const collectListeners = new Set<(e: CollectEvent) => void>();
+export function onCollect(listener: (e: CollectEvent) => void) {
+  collectListeners.add(listener);
+  return () => {
+    collectListeners.delete(listener);
+  };
+}
+
 export function useHatTrick() {
   const collected = useSyncExternalStore(subscribe, get, () => EMPTY);
   const collect = useCallback((id: HatId) => {
     const current = get();
-    if (!current.includes(id)) set([...current, id]);
+    if (current.includes(id)) return;
+    const next = [...current, id];
+    set(next);
+    collectListeners.forEach((l) => l({ id, count: next.length }));
   }, []);
   return { collected, collect };
 }
