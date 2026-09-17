@@ -10,7 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm typecheck && pnpm lint && pnpm format:check"
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check",
+    "email:min": "node scripts/email-minify.mjs"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.19.3",

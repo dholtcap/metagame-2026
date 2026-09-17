@@ -21,6 +21,64 @@
         .h1 {
           font-size: 34px !important;
         }
+        .venue {
+          font-size: 13px !important;
+          letter-spacing: 1px !important;
+        }
+        .tight {
+          font-size: 12px !important;
+          letter-spacing: 0.5px !important;
+        }
+        .icons {
+          padding: 0 6px !important;
+        }
+        /* Housing / Children stay side by side on phones, one size down. */
+        .half-sm a {
+          font-size: 13px !important;
+          padding: 10px 8px !important;
+        }
+        .half-sm .copy-sm {
+          font-size: 13px !important;
+          padding: 0 !important;
+        }
+        .half-sm .eyebrow-sm {
+          font-size: 10px !important;
+          letter-spacing: 1px !important;
+        }
+        /* Call-for-sessions photos: a three-up strip under the button. */
+        .row-sm {
+          font-size: 0 !important;
+          padding: 14px 0 0 0 !important;
+        }
+        .row-sm img {
+          display: inline-block !important;
+          width: 32% !important;
+          max-width: 32% !important;
+          margin: 0 !important;
+          vertical-align: top;
+        }
+        .row-sm img + img {
+          margin-left: 2% !important;
+        }
+        .fill {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        .center-sm {
+          text-align: center !important;
+        }
+        .center-sm table {
+          margin-left: auto !important;
+          margin-right: auto !important;
+        }
+        .hide-sm {
+          display: none !important;
+        }
+        .show-sm {
+          display: block !important;
+          max-height: none !important;
+          overflow: visible !important;
+        }
       }
     </style>
   </head>
@@ -32,18 +90,8 @@
       -webkit-text-size-adjust: 100%;
     "
   >
-    <div
-      style="
-        display: none;
-        max-height: 0;
-        overflow: hidden;
-        font-size: 1px;
-        line-height: 1px;
-        color: #fff5f2;
-      "
-    >
-      Early bird tickets available through September 30
-    </div>
+    <!-- No hidden preview text here: EmailOctopus injects the campaign's
+         "preview text" field, and a second copy showed up doubled in inboxes. -->
 
     <table
       role="presentation"
@@ -55,16 +103,18 @@
     >
       <tr>
         <td align="center" style="padding: 24px 12px">
+          <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td><![endif]-->
           <table
             role="presentation"
             class="container"
-            width="600"
+            width="100%"
             cellpadding="0"
             cellspacing="0"
             border="0"
             style="
-              width: 600px;
+              width: 100%;
               max-width: 600px;
+              table-layout: fixed;
               background-color: #fffdfa;
               border: 1px solid #e3d9d4;
               border-radius: 16px;
@@ -114,8 +164,8 @@
                       line-height: 18px;
                       color: #173059;
                       display: block;
-                      width: 360px;
-                      max-width: 100%;
+                      width: 100%;
+                      max-width: 360px;
                       height: auto;
                       border: 0;
                     "
@@ -140,12 +190,12 @@
                   cellpadding="0"
                   cellspacing="0"
                   border="0"
-                  width="360"
-                  style="margin-top: 14px; width: 360px"
+                  align="center"
+                  width="100%"
+                  style="margin: 14px auto 0 auto; width: 100%; max-width: 360px"
                 >
                   <tr>
                     <td
-                      width="50%"
                       align="right"
                       valign="middle"
                       style="
@@ -163,7 +213,7 @@
                       Nov 6&ndash;8
                     </td>
                     <td
-                      width="50%"
+                      class="venue"
                       align="left"
                       valign="middle"
                       style="
@@ -175,7 +225,7 @@
                         line-height: 1.5;
                         text-transform: uppercase;
                         color: #d8502b;
-                        white-space: nowrap;
+                        
                       "
                     >
                       <a
@@ -263,6 +313,7 @@
                   &nbsp;$325
                 </div>
                 <div
+                  class="tight"
                   style="
                     margin: 8px 0 0 0;
                     font-family: 'Courier New', Courier, monospace;
@@ -291,50 +342,12 @@
                 >
                   Brought to you by
                 </div>
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top: 10px">
-                  <tr>
-                    <td align="center" valign="middle" style="padding: 0 10px">
-                      <a href="https://roguesignal.io" style="display: inline-block; line-height: 0">
-                        <img
-                          src="https://metagame.games/images/sponsors/rogue_signal_horiz.png"
-                          width="150"
-                          alt="Rogue Signal"
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 18px; color: #173059; display: block; width: 150px; max-width: 100%; height: auto; border: 0"
-                        />
-                      </a>
-                    </td>
-                    <td align="center" valign="middle" style="padding: 0 10px">
-                      <a href="https://franciscosan.org" style="display: inline-block; line-height: 0">
-                        <img
-                          src="https://metagame.games/images/sponsors/francisco_san_logo.png"
-                          width="72"
-                          alt="Francisco San"
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 18px; color: #173059; display: block; width: 72px; max-width: 100%; height: auto; border: 0"
-                        />
-                      </a>
-                    </td>
-                    <td align="center" valign="middle" style="padding: 0 10px">
-                      <a href="https://manifund.org" style="display: inline-block; line-height: 0">
-                        <img
-                          src="https://metagame.games/images/sponsors/manifund_logo.png"
-                          width="78"
-                          alt="Manifund"
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 18px; color: #173059; display: block; width: 78px; max-width: 100%; height: auto; border: 0"
-                        />
-                      </a>
-                    </td>
-                    <td align="center" valign="middle" style="padding: 0 10px">
-                      <a href="https://outsidetheasylum.blog/" style="display: inline-block; line-height: 0">
-                        <img
-                          src="https://metagame.games/images/sponsors/outside_the_asylum.png"
-                          width="104"
-                          alt="Outside the Asylum"
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 18px; color: #173059; display: block; width: 104px; max-width: 100%; height: auto; border: 0"
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                </table>
+                <div style="margin-top: 4px; text-align: center; line-height: 0">
+                  <a href="https://roguesignal.io" style="display: inline-block; vertical-align: middle; padding: 6px 10px; line-height: 0"><img src="https://metagame.games/images/sponsors/rogue_signal_horiz.png" width="150" alt="Rogue Signal" style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 18px; color: #173059; display: block; width: 150px; max-width: 100%; height: auto; border: 0" /></a>
+                  <a href="https://franciscosan.org" style="display: inline-block; vertical-align: middle; padding: 6px 10px; line-height: 0"><img src="https://metagame.games/images/sponsors/francisco_san_logo.png" width="72" alt="Francisco San" style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 18px; color: #173059; display: block; width: 72px; max-width: 100%; height: auto; border: 0" /></a>
+                  <a href="https://manifund.org" style="display: inline-block; vertical-align: middle; padding: 6px 10px; line-height: 0"><img src="https://metagame.games/images/sponsors/manifund_logo.png" width="78" alt="Manifund" style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 18px; color: #173059; display: block; width: 78px; max-width: 100%; height: auto; border: 0" /></a>
+                  <a href="https://outsidetheasylum.blog/" style="display: inline-block; vertical-align: middle; padding: 6px 10px; line-height: 0"><img src="https://metagame.games/images/sponsors/outside_the_asylum.png" width="104" alt="Outside the Asylum" style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 18px; color: #173059; display: block; width: 104px; max-width: 100%; height: auto; border: 0" /></a>
+                </div>
               </td>
             </tr>
 
@@ -363,7 +376,7 @@
                   border="0"
                 >
                   <tr>
-                    <td class="stack" valign="top" style="padding: 0 20px 0 30px">
+                    <td class="stack center-sm" valign="top" style="padding: 0 20px 0 30px">
                       <div
                         style="
                           font-family: 'Courier New', Courier, monospace;
@@ -398,7 +411,7 @@
                       >
                         We&rsquo;re building our schedule for Metagame 2026 and we
                         want your talks, games, workshops, puzzles, competitions,
-                        indie TTRPGs, immersive theater, tournaments, design jams,
+                        indie TTRPGs, immersive theater performances, tournaments, design jams,
                         LARPs, trivia, crosswords, chess variants, social deception
                         experiments not yet ready for prime time, or things that
                         defy all of these categories.
@@ -449,10 +462,11 @@
                         Due October 5th
                       </div>
                     </td>
-                    <td class="stack" width="196" valign="top" style="line-height: 0">
+                    <td class="stack row-sm" width="196" valign="top" style="line-height: 0; padding: 0 30px 0 0">
                       <img
                         src="https://metagame.games/images/email/strip_codex.jpg"
                         width="196"
+                        class="fill"
                         alt="Two players studying their cards over a game of Codex"
                         style="
                           font-family: Arial, Helvetica, sans-serif;
@@ -470,6 +484,7 @@
                       <img
                         src="https://metagame.games/images/email/megagame_puzzle.jpg"
                         width="196"
+                        class="fill"
                         alt="Piecing together a puzzle at the Megagame table"
                         style="
                           font-family: Arial, Helvetica, sans-serif;
@@ -485,9 +500,10 @@
                         "
                       />
                       <img
-                        src="https://metagame.games/images/email/strip_round_robin.jpg"
+                        src="https://metagame.games/images/email/strip_jay_dragon.jpg"
                         width="196"
-                        alt="A crowd around the board game round robin table"
+                        class="fill"
+                        alt="Jay Dragon speaking on character bleed"
                         style="
                           font-family: Arial, Helvetica, sans-serif;
                           font-size: 13px;
@@ -530,44 +546,10 @@
                   cellpadding="0"
                   cellspacing="0"
                   border="0"
+                  dir="rtl"
                 >
                   <tr>
-                    <td class="stack" width="196" valign="top" style="line-height: 0">
-                      <img
-                        src="https://metagame.games/images/email/megagame_election.jpg"
-                        width="196"
-                        alt="Running the election game, crown and all"
-                        style="
-                          font-family: Arial, Helvetica, sans-serif;
-                          font-size: 13px;
-                          line-height: 18px;
-                          color: #173059;
-                          display: block;
-                          width: 196px;
-                          max-width: 100%;
-                          height: auto;
-                          border: 0;
-                          margin-bottom: 4px;
-                        "
-                      />
-                      <img
-                        src="https://metagame.games/images/email/strip_sudoku.jpg"
-                        width="196"
-                        alt="Placing pieces in the life-size jigsaw sudoku"
-                        style="
-                          font-family: Arial, Helvetica, sans-serif;
-                          font-size: 13px;
-                          line-height: 18px;
-                          color: #173059;
-                          display: block;
-                          width: 196px;
-                          max-width: 100%;
-                          height: auto;
-                          border: 0;
-                        "
-                      />
-                    </td>
-                    <td class="stack" valign="top" style="padding: 0 30px 0 20px">
+                    <td class="stack center-sm" valign="top" dir="ltr" style="padding: 0 30px 0 20px">
                       <div
                         style="
                           margin: 6px 0 0 0;
@@ -641,6 +623,61 @@
                       >
                         Due October 10th
                       </div>
+                    </td>
+                    <td class="stack row-sm" width="196" valign="top" dir="ltr" style="line-height: 0; padding: 0 0 0 30px">
+                      <img
+                        src="https://metagame.games/images/email/strip_round_robin.jpg"
+                        width="196"
+                        class="fill"
+                        alt="A crowd around the board game round robin table"
+                        style="
+                          font-family: Arial, Helvetica, sans-serif;
+                          font-size: 13px;
+                          line-height: 18px;
+                          color: #173059;
+                          display: block;
+                          width: 196px;
+                          max-width: 100%;
+                          height: auto;
+                          border: 0;
+                          margin-bottom: 4px;
+                        "
+                      />
+                      <img
+                        src="https://metagame.games/images/email/strip_sudoku.jpg"
+                        width="196"
+                        class="fill"
+                        alt="Placing pieces in the life-size jigsaw sudoku"
+                        style="
+                          font-family: Arial, Helvetica, sans-serif;
+                          font-size: 13px;
+                          line-height: 18px;
+                          color: #173059;
+                          display: block;
+                          width: 196px;
+                          max-width: 100%;
+                          height: auto;
+                          border: 0;
+                          margin-bottom: 4px;
+                        "
+                      />
+                      <img
+                        src="https://metagame.games/images/email/megagame_election.jpg"
+                        width="196"
+                        class="fill"
+                        alt="The election game"
+                        style="
+                          font-family: Arial, Helvetica, sans-serif;
+                          font-size: 13px;
+                          line-height: 18px;
+                          color: #173059;
+                          display: block;
+                          width: 196px;
+                          max-width: 100%;
+                          height: auto;
+                          border: 0;
+                        "
+                      />
                     </td>
                   </tr>
                 </table>
@@ -716,10 +753,12 @@
                       />
                       <table
                         role="presentation"
+                        align="center"
                         width="100%"
                         cellpadding="0"
                         cellspacing="0"
                         border="0"
+                        style="margin: 0 auto; max-width: 340px"
                       >
                         <tr>
                           <td
@@ -750,7 +789,8 @@
                       </table>
                       <div
                         style="
-                          margin-top: 10px;
+                          margin: 10px auto 0 auto;
+                          max-width: 328px;
                           padding: 0 6px;
                           font-family: Arial, Helvetica, sans-serif;
                           font-size: 13px;
@@ -779,7 +819,7 @@
                       <img
                         src="https://metagame.games/images/email/night_market_cooks.jpg"
                         width="170"
-                        alt="Too many cooks at the Night Market"
+                        alt="“Too Many Cooks” at the Night Market"
                         style="
                           font-family: Arial, Helvetica, sans-serif;
                           font-size: 13px;
@@ -795,10 +835,12 @@
                       />
                       <table
                         role="presentation"
+                        align="center"
                         width="100%"
                         cellpadding="0"
                         cellspacing="0"
                         border="0"
+                        style="margin: 0 auto; max-width: 340px"
                       >
                         <tr>
                           <td
@@ -829,7 +871,8 @@
                       </table>
                       <div
                         style="
-                          margin-top: 10px;
+                          margin: 10px auto 0 auto;
+                          max-width: 328px;
                           padding: 0 6px;
                           font-family: Arial, Helvetica, sans-serif;
                           font-size: 13px;
@@ -845,7 +888,7 @@
                       <img
                         src="https://metagame.games/images/email/general_crossword.jpg"
                         width="170"
-                        alt="Working the wall-sized crossword"
+                        alt="25-foot long crossword"
                         style="
                           font-family: Arial, Helvetica, sans-serif;
                           font-size: 13px;
@@ -861,10 +904,12 @@
                       />
                       <table
                         role="presentation"
+                        align="center"
                         width="100%"
                         cellpadding="0"
                         cellspacing="0"
                         border="0"
+                        style="margin: 0 auto; max-width: 340px"
                       >
                         <tr>
                           <td
@@ -895,7 +940,8 @@
                       </table>
                       <div
                         style="
-                          margin-top: 10px;
+                          margin: 10px auto 0 auto;
+                          max-width: 328px;
                           padding: 0 6px;
                           font-family: Arial, Helvetica, sans-serif;
                           font-size: 13px;
@@ -949,11 +995,13 @@
                   border="0"
                 >
                   <tr>
-                    <td class="stack" width="50%" valign="top">
+                    <td class="half-sm" width="50%" valign="top">
+
                       <img
                         src="https://metagame.games/images/email/room_1.jpg"
                         width="254"
-                        alt="A bright Lighthaven bedroom"
+                        class="fill"
+                        alt="Lighthaven bedroom"
                         style="
                           font-family: Arial, Helvetica, sans-serif;
                           font-size: 13px;
@@ -980,6 +1028,7 @@
                         Housing
                       </div>
                       <div
+                        class="copy-sm"
                         style="
                           margin-top: 6px;
                           padding: 0 6px;
@@ -992,13 +1041,65 @@
                       >
                         Want to stay on campus during the conference? Lighthaven rooms are open for booking.
                       </div>
+                    </td>
+                    <td class="half-sm" width="50%" valign="top">
+
+                      <img
+                        src="https://metagame.games/images/email/chess_kids.jpg"
+                        width="254"
+                        class="fill"
+                        alt="Giant orange and purple chess pieces"
+                        style="
+                          font-family: Arial, Helvetica, sans-serif;
+                          font-size: 13px;
+                          line-height: 18px;
+                          color: #173059;
+                          display: block;
+                          width: 100%;
+                          max-width: 254px;
+                          height: auto;
+                          border: 0;
+                        "
+                      />
+                      <div
+                        style="
+                          margin-top: 12px;
+                          font-family: Arial, Helvetica, sans-serif;
+                          font-size: 18px;
+                          font-weight: bold;
+                          line-height: 1.2;
+                          color: #173059;
+                          text-align: center;
+                        "
+                      >
+                        Children
+                      </div>
+                      <div
+                        class="copy-sm"
+                        style="
+                          margin-top: 6px;
+                          padding: 0 6px;
+                          font-family: Arial, Helvetica, sans-serif;
+                          font-size: 14px;
+                          line-height: 1.45;
+                          color: #444444;
+                          text-align: center;
+                        "
+                      >
+                        Kids under 13 get a free ticket to Metagame, and free childcare is available with advance registration.
+                      </div>
+                    </td>
+                  </tr>
+                  <!-- Buttons share a row so they line up however the copy wraps. -->
+                  <tr>
+                    <td class="half-sm" width="50%" valign="top">
                       <table
                         role="presentation"
                         align="center"
                         cellpadding="0"
                         cellspacing="0"
                         border="0"
-                        style="margin: 12px auto 0 auto"
+                        style="margin: 4px auto 0 auto"
                       >
                         <tr>
                           <td
@@ -1028,6 +1129,7 @@
                         </tr>
                       </table>
                       <div
+                        class="eyebrow-sm"
                         style="
                           margin-top: 10px;
                           font-family: 'Courier New', Courier, monospace;
@@ -1041,56 +1143,14 @@
                         While supplies last
                       </div>
                     </td>
-                    <td class="stack" width="50%" valign="top">
-                      <img
-                        src="https://metagame.games/images/email/chess_kids.jpg"
-                        width="254"
-                        alt="Giant orange and blue chess pieces"
-                        style="
-                          font-family: Arial, Helvetica, sans-serif;
-                          font-size: 13px;
-                          line-height: 18px;
-                          color: #173059;
-                          display: block;
-                          width: 100%;
-                          max-width: 254px;
-                          height: auto;
-                          border: 0;
-                        "
-                      />
-                      <div
-                        style="
-                          margin-top: 12px;
-                          font-family: Arial, Helvetica, sans-serif;
-                          font-size: 18px;
-                          font-weight: bold;
-                          line-height: 1.2;
-                          color: #173059;
-                          text-align: center;
-                        "
-                      >
-                        Children
-                      </div>
-                      <div
-                        style="
-                          margin-top: 6px;
-                          padding: 0 6px;
-                          font-family: Arial, Helvetica, sans-serif;
-                          font-size: 14px;
-                          line-height: 1.45;
-                          color: #444444;
-                          text-align: center;
-                        "
-                      >
-                        Kids under 13 get a free ticket to Metagame, and free childcare is available with advance registration.
-                      </div>
+                    <td class="half-sm" width="50%" valign="top">
                       <table
                         role="presentation"
                         align="center"
                         cellpadding="0"
                         cellspacing="0"
                         border="0"
-                        style="margin: 12px auto 0 auto"
+                        style="margin: 4px auto 0 auto"
                       >
                         <tr>
                           <td
@@ -1120,6 +1180,7 @@
                         </tr>
                       </table>
                       <div
+                        class="eyebrow-sm"
                         style="
                           margin-top: 10px;
                           font-family: 'Courier New', Courier, monospace;
@@ -1180,6 +1241,8 @@
                 >
                   Key dates
                 </div>
+                <!-- Wide screens only (.hide-sm): the alternating timeline. -->
+                <div class="hide-sm">
                 <div style="margin-top: 18px; line-height: 0; font-size: 0">
                   <div style="width: 10px; height: 10px; border: 3px solid #e3d9d4; border-radius: 8px; background-color: #fffdfa; margin-left: 250.5px;"></div>
                 </div>
@@ -1519,6 +1582,50 @@
                     </tr>
                   </tbody>
                 </table>
+                </div>
+                <!-- Phones only (.show-sm); wide screens get the timeline above. -->
+                <div class="show-sm" style="display: none; max-height: 0; overflow: hidden; mso-hide: all">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 18px">
+                    <tbody>
+                    <tr>
+                      <td align="right" valign="top" width="70" style="width: 70px; padding: 0 12px 16px 0; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; white-space: nowrap; color: #d8502b">Sep 30</td>
+                      <td valign="top" style="border-left: 3px solid #d8502b; padding: 0 0 16px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.45; color: #173059; font-weight: bold;">Early-bird ticket pricing ends<div style="margin-top: 2px; font-size: 14px"><a href="https://metagame.games/#tickets" style="color: #d8502b; font-weight: bold; text-decoration: underline">Get tickets</a></div></td>
+                    </tr>
+                    <tr>
+                      <td align="right" valign="top" width="70" style="width: 70px; padding: 0 12px 16px 0; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; white-space: nowrap; color: #173059">Oct 5</td>
+                      <td valign="top" style="border-left: 3px solid #e3d9d4; padding: 0 0 16px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.45; color: #173059; ">Session proposals due<div style="margin-top: 2px; font-size: 14px"><a href="https://airtable.com/appROpPV6XUP4CSqX/pagVuzTEXODlUwoi0/form" style="color: #d8502b; font-weight: bold; text-decoration: underline">Submit a proposal</a></div></td>
+                    </tr>
+                    <tr>
+                      <td align="right" valign="top" width="70" style="width: 70px; padding: 0 12px 16px 0; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; white-space: nowrap; color: #173059">Oct 10</td>
+                      <td valign="top" style="border-left: 3px solid #e3d9d4; padding: 0 0 16px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.45; color: #173059; ">Megagame proposals due<div style="margin-top: 2px; font-size: 14px"><a href="https://airtable.com/appROpPV6XUP4CSqX/pagMOssJPZrZU6YLP/form" style="color: #d8502b; font-weight: bold; text-decoration: underline">Contribute</a></div></td>
+                    </tr>
+                    <tr>
+                      <td align="right" valign="top" width="70" style="width: 70px; padding: 0 12px 16px 0; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; white-space: nowrap; color: #173059">Oct 15</td>
+                      <td valign="top" style="border-left: 3px solid #e3d9d4; padding: 0 0 16px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.45; color: #173059; ">Childcare registration due<div style="margin-top: 2px; font-size: 14px"><a href="https://airtable.com/appROpPV6XUP4CSqX/pagZ9WbXLji0eBqDU/form" style="color: #d8502b; font-weight: bold; text-decoration: underline">Register a child</a></div></td>
+                    </tr>
+                    <tr>
+                      <td align="right" valign="top" width="70" style="width: 70px; padding: 0 12px 16px 0; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; white-space: nowrap; color: #173059">Oct 19</td>
+                      <td valign="top" style="border-left: 3px solid #e3d9d4; padding: 0 0 16px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.45; color: #173059; ">Financial aid applications due<div style="margin-top: 2px; font-size: 14px"><a href="https://airtable.com/appROpPV6XUP4CSqX/pagNpxewXARLObldc/form" style="color: #d8502b; font-weight: bold; text-decoration: underline">Apply for aid</a></div></td>
+                    </tr>
+                    <tr>
+                      <td align="right" valign="top" width="70" style="width: 70px; padding: 0 12px 16px 0; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; white-space: nowrap; color: #173059">Oct 26</td>
+                      <td valign="top" style="border-left: 3px solid #e3d9d4; padding: 0 0 16px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.45; color: #173059; ">Volunteer applications due<div style="margin-top: 2px; font-size: 14px"><a href="https://airtable.com/appROpPV6XUP4CSqX/pag6QeXN6XYI1SwYf/form" style="color: #d8502b; font-weight: bold; text-decoration: underline">Apply to volunteer</a></div></td>
+                    </tr>
+                    <tr>
+                      <td align="right" valign="top" width="70" style="width: 70px; padding: 0 12px 16px 0; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; white-space: nowrap; color: #173059">Oct 29</td>
+                      <td valign="top" style="border-left: 3px solid #e3d9d4; padding: 0 0 16px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.45; color: #173059; ">Ticket sales close<div style="margin-top: 2px; font-size: 14px"><a href="https://metagame.games/#tickets" style="color: #d8502b; font-weight: bold; text-decoration: underline">Get tickets</a></div></td>
+                    </tr>
+                    <tr>
+                      <td align="right" valign="top" width="70" style="width: 70px; padding: 0 12px 16px 0; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; white-space: nowrap; color: #d8502b">Nov 6&ndash;8</td>
+                      <td valign="top" style="border-left: 3px solid #d8502b; padding: 0 0 16px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.45; color: #173059; font-weight: bold;">Metagame 2026!<div style="margin-top: 2px; font-size: 14px"><a href="https://metagame.games" style="color: #d8502b; font-weight: bold; text-decoration: underline">metagame.games</a></div></td>
+                    </tr>
+                    <tr>
+                      <td align="right" valign="top" width="70" style="width: 70px; padding: 0 12px 0px 0; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; white-space: nowrap; color: #173059">Nov 9</td>
+                      <td valign="top" style="border-left: 3px solid #e3d9d4; padding: 0 0 0px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.45; color: #8a8583; font-style: italic;">The Metagame team takes a looong nap</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
               </td>
             </tr>
 
@@ -1794,7 +1901,7 @@
                   border="0"
                 >
                   <tr>
-                    <td align="center" valign="top" style="padding: 0 18px">
+                    <td class="icons" align="center" valign="top" style="padding: 0 18px">
                       <a
                         href="https://metagame.games"
                         style="display: block; text-decoration: none"
@@ -1825,7 +1932,7 @@
                         </div>
                       </a>
                     </td>
-                    <td align="center" valign="top" style="padding: 0 18px">
+                    <td class="icons" align="center" valign="top" style="padding: 0 18px">
                       <a
                         href="https://discord.gg/8pxvc9p4Ss"
                         style="display: block; text-decoration: none"
@@ -1856,7 +1963,7 @@
                         </div>
                       </a>
                     </td>
-                    <td align="center" valign="top" style="padding: 0 18px">
+                    <td class="icons" align="center" valign="top" style="padding: 0 18px">
                       <a
                         href="mailto:team@metagame.games"
                         style="display: block; text-decoration: none"
@@ -1890,6 +1997,7 @@
                   </tr>
                 </table>
                 <div
+                  class="tight"
                   style="
                     margin-top: 14px;
                     font-family: 'Courier New', Courier, monospace;
@@ -1953,6 +2061,7 @@
               </td>
             </tr>
           </table>
+          <!--[if mso]></td></tr></table><![endif]-->
         </td>
       </tr>
     </table>
