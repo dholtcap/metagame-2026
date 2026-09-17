@@ -14,16 +14,20 @@ function swap(anchor, replacement) {
 
 swap(
   `                  We&rsquo;re back! Metagame is a weekend conference devoted to
-                  games, in the broadest sense of the word: any experience`,
-  `                  <div style="margin: 0 0 14px 0">
-                    Did you know Arbor also runs non-trading events? We are
-                    excited to announce our second annual Metagame Conference!
-                  </div>
-                  Metagame 2026 is a weekend conference dedicated to games and
-                  strategy in all shapes and flavors. If you like our bootcamps,
-                  we think you&rsquo;d enjoy Metagame and would love to see you
-                  there! It&rsquo;s a conference devoted to games in the broadest
-                  sense of the word: any experience`,
+                  games, in the broadest sense of the word: any experience
+                  designed to be played or actively consumed. If building it
+                  involves asking the question &ldquo;what would the person
+                  experiencing this choose to do next?&rdquo; we want it at Metagame.`,
+  `                  We&rsquo;ve shenanned before and we&rsquo;ll shenanigan &mdash;
+                  Arbor&rsquo;s annual game design conference is back! Metagame 2026
+                  is a weekend conference dedicated to games and strategy in all
+                  shapes and flavors. It&rsquo;s a festival of creating and
+                  celebrating games in the broadest sense of the word: any
+                  experience designed to be played or actively consumed. If
+                  building it involves asking the question &ldquo;what would the
+                  person experiencing this choose to do next?&rdquo; we want it at
+                  Metagame. If you like our bootcamps, we&rsquo;d bet you&rsquo;ll
+                  enjoy Metagame and we&rsquo;d love to see you there.`,
 );
 
 swap(
