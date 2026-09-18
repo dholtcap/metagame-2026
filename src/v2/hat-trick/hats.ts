@@ -17,6 +17,8 @@ export type Hat = {
   image: StaticImageData;
   // Outline of the hat in its photo, as [x, y] percentages of the image.
   points: [number, number][];
+  // Hats that must already be worn before this one can be taken.
+  requires?: HatId[];
   // How it sits on the silhouette: width as a percentage of the card square,
   // where its bottom edge lands (percent from the top) as the first hat worn,
   // an optional tilt, and `lift`: when worn on another hat, how far its bottom
@@ -37,7 +39,7 @@ export const HAT_TRICK_CODE = "HATTRICK";
 export const HATS: Record<HatId, Hat> = {
   wizard: {
     id: "wizard",
-    name: "wizard hat",
+    name: "Wizard hat",
     image: roundRobin,
     points: [
       [68.9, 15.1],
@@ -69,12 +71,13 @@ export const HATS: Record<HatId, Hat> = {
       [64.2, 21.3],
       [66.3, 18.6],
     ],
-    wear: { width: 71.5, bottom: 56, rotate: 38.5, shiftX: 6.4 },
+    wear: { width: 75.5, bottom: 63.1, rotate: 38.5, shiftX: 5.9, lift: -27 },
   },
   crown: {
     id: "crown",
-    name: "crown",
+    name: "Crown",
     image: election,
+    requires: ["wizard", "pirate", "sequin"],
     points: [
       [60.2, 23.8],
       [60.4, 24.2],
@@ -126,11 +129,11 @@ export const HATS: Record<HatId, Hat> = {
       [58.5, 28.6],
       [59.9, 24.5],
     ],
-    wear: { width: 49, bottom: 31.3, rotate: 4.5, shiftX: 9.6 },
+    wear: { width: 55, bottom: 33.3, rotate: 2, shiftX: 7.7, lift: 3.5 },
   },
   pirate: {
     id: "pirate",
-    name: "pirate hat",
+    name: "Pirate hat",
     image: jisk,
     points: [
       [59.9, 17.6],
@@ -162,11 +165,11 @@ export const HATS: Record<HatId, Hat> = {
       [55.2, 21.4],
       [57.1, 18.8],
     ],
-    wear: { width: 68.5, bottom: 22.6, rotate: -4, shiftX: -0.5 },
+    wear: { width: 81.5, bottom: 28.7, rotate: -4, shiftX: -2.9 },
   },
   sequin: {
     id: "sequin",
-    name: "sequin cap",
+    name: "Spacefarer hat",
     image: brendan,
     points: [
       [53.0, 8.5],
@@ -204,7 +207,7 @@ export const HATS: Record<HatId, Hat> = {
       [66.1, 10.8],
       [59.8, 9.0],
     ],
-    wear: { width: 58.5, bottom: 37.3, shiftX: -0.7 },
+    wear: { width: 58.5, bottom: 37.3, shiftX: -0.7, lift: -6 },
   },
 };
 

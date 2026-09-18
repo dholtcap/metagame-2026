@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
-import { isHatId, type HatId } from "./hats";
+import { HATS, isHatId, type HatId } from "./hats";
 
 // Which hats the visitor has grabbed, in order. Lives in localStorage so the
 // count survives navigating between the home page and the team page.
@@ -52,8 +52,13 @@ function subscribe(listener: () => void) {
   };
 }
 
-// Fired once per newly grabbed hat, for the toast.
-export type CollectEvent = { id: HatId; count: number };
+// Fired on every grab attempt, for the toast: a new hat, or one that is
+// locked until its prerequisites are worn.
+export type CollectEvent = {
+  kind: "found" | "locked";
+  id: HatId;
+  count: number;
+};
 const collectListeners = new Set<(e: CollectEvent) => void>();
 export function onCollect(listener: (e: CollectEvent) => void) {
   collectListeners.add(listener);
@@ -64,12 +69,23 @@ export function onCollect(listener: (e: CollectEvent) => void) {
 
 export function useHatTrick() {
   const collected = useSyncExternalStore(subscribe, get, () => EMPTY);
+  // Returns false when the hat is locked (its prerequisites aren't worn yet).
   const collect = useCallback((id: HatId) => {
     const current = get();
-    if (current.includes(id)) return;
+    if (current.includes(id)) return true;
+    const missing = HATS[id].requires?.some((r) => !current.includes(r));
+    if (missing) {
+      collectListeners.forEach((l) =>
+        l({ kind: "locked", id, count: current.length }),
+      );
+      return false;
+    }
     const next = [...current, id];
     set(next);
-    collectListeners.forEach((l) => l({ id, count: next.length }));
+    collectListeners.forEach((l) =>
+      l({ kind: "found", id, count: next.length }),
+    );
+    return true;
   }, []);
   return { collected, collect };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Image, { type StaticImageData } from "next/image";
+import { useState } from "react";
 import { hatBox, polygon, type Hat } from "./hats";
 import { useHatTrick } from "./store";
 
@@ -25,6 +26,8 @@ export default function HatImage({
   priority?: boolean;
 }) {
   const { collected, collect } = useHatTrick();
+  // A locked hat shakes when clicked, like a wrong pick on the dividers.
+  const [shaking, setShaking] = useState<string | null>(null);
   const taken = hats.filter((h) => collected.includes(h.id));
   const mask = taken.length ? holeMask(taken) : undefined;
 
@@ -66,8 +69,13 @@ export default function HatImage({
                 key={h.id}
                 type="button"
                 aria-label="A hat"
-                onClick={() => collect(h.id)}
-                className="absolute inset-0 cursor-pointer transition-transform duration-200 ease-out hover:scale-110 focus:outline-none focus-visible:scale-110"
+                onClick={() => {
+                  if (!collect(h.id)) setShaking(h.id);
+                }}
+                onAnimationEnd={() => setShaking(null)}
+                className={`absolute inset-0 cursor-pointer transition-transform duration-200 ease-out hover:scale-110 focus:outline-none focus-visible:scale-110 ${
+                  shaking === h.id ? "animate-[shake_400ms_ease-in-out]" : ""
+                }`}
                 style={{
                   clipPath: polygon(h.points),
                   transformOrigin: `${b.x + b.w / 2}% ${b.y + b.h / 2}%`,

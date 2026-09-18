@@ -19,7 +19,8 @@ export default function HatToast() {
 
   if (!event) return null;
   const hat = HATS[event.id];
-  const done = event.count >= HAT_TRICK_TARGET;
+  const locked = event.kind === "locked";
+  const done = !locked && event.count >= HAT_TRICK_TARGET;
 
   return (
     <div
@@ -32,17 +33,20 @@ export default function HatToast() {
         className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-navy/[0.16] bg-white px-5 py-3 shadow-[0_12px_28px_rgba(23,48,89,0.18)] motion-safe:animate-[hat-toast_0.35s_ease-out]"
       >
         <span aria-hidden className="text-2xl">
-          🎩
+          {locked ? "🚫" : "🎩"}
         </span>
         <div>
           <p className={`${HEADING} text-base text-navy`}>
-            {done
-              ? `Hat trick! Coupon code ${HAT_TRICK_CODE}`
-              : `You found the ${hat.name}!`}
+            {locked
+              ? `You're not yet eligible for the ${hat.name}.`
+              : done
+                ? `Hat trick! Coupon code ${HAT_TRICK_CODE}`
+                : `You found the ${hat.name}!`}
           </p>
           <p className="font-space-mono text-xs tracking-[0.08em] text-ink/60 uppercase">
-            Hat count: {event.count}
-            {done ? "" : ` of ${HAT_TRICK_TARGET}`}
+            {locked
+              ? "Trick a few more people into giving you their hats first."
+              : `Hat count: ${event.count}${done ? "" : ` of ${HAT_TRICK_TARGET}`}`}
           </p>
         </div>
       </div>
