@@ -20,9 +20,16 @@ export default function SpeakerCtaCard({ href }: { href: string }) {
       <>
         <p className={`${HEADING} text-navy`}>Hat count: {worn.length}</p>
         {list && (
-          <p className="mt-1 text-sm text-ink/70">
-            {worn.map((h) => h.name.replace(/ hat$/, "")).join(", ")}
-          </p>
+          <ul className="mt-1 text-sm text-ink/70">
+            {worn.map((h) => (
+              <li key={h.id} className="flex items-center gap-1.5">
+                <span aria-hidden className="text-emerald-600">
+                  &#10003;
+                </span>
+                {h.name.replace(/ hat$/, "")}
+              </li>
+            ))}
+          </ul>
         )}
         {done && (
           <p className="mt-1 font-space-mono text-xs tracking-[0.08em] text-ink/60 uppercase">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { HEADING } from "@/v2/components/styles";
-import { HAT_TRICK_CODE, HAT_TRICK_TARGET, HATS } from "./hats";
+import { HATS } from "./hats";
 import { onCollect, type CollectEvent } from "./store";
 
 // A small notice, bottom center, each time a hat is grabbed: which hat, and
@@ -20,7 +20,6 @@ export default function HatToast() {
   if (!event) return null;
   const hat = HATS[event.id];
   const locked = event.kind === "locked";
-  const done = !locked && event.count >= HAT_TRICK_TARGET;
 
   return (
     <div
@@ -44,7 +43,7 @@ export default function HatToast() {
           <p className="font-space-mono text-xs tracking-[0.08em] text-ink/60 uppercase">
             {locked
               ? "Trick a few more people into giving you their hats first."
-              : `Hat count: ${event.count}${done ? ` \u00b7 Hat trick! Coupon code ${HAT_TRICK_CODE}` : ""}`}
+              : `Hat count: ${event.count}`}
           </p>
         </div>
       </div>
