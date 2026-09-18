@@ -23,9 +23,14 @@ export default function SpeakerCtaCard({ href }: { href: string }) {
           <ul className="mt-1 text-sm text-ink/70">
             {worn.map((h) => (
               <li key={h.id} className="flex items-center gap-1.5">
-                <span aria-hidden className="text-emerald-600">
-                  &#10003;
-                </span>
+                {/* The Crown is the bonus after the three, not a box to tick. */}
+                {h.requires?.length ? (
+                  <span aria-hidden>&#x1F451;</span>
+                ) : (
+                  <span aria-hidden className="text-emerald-600">
+                    &#10003;
+                  </span>
+                )}
                 {h.name.replace(/ hat$/, "")}
               </li>
             ))}
