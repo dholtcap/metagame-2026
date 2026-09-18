@@ -39,14 +39,12 @@ export default function HatToast() {
           <p className={`${HEADING} text-base text-navy`}>
             {locked
               ? `You're not yet eligible for the ${hat.name}.`
-              : done
-                ? `Hat trick! Coupon code ${HAT_TRICK_CODE}`
-                : `You found the ${hat.name}!`}
+              : `You found the ${hat.name}!`}
           </p>
           <p className="font-space-mono text-xs tracking-[0.08em] text-ink/60 uppercase">
             {locked
               ? "Trick a few more people into giving you their hats first."
-              : `Hat count: ${event.count}${done ? "" : ` of ${HAT_TRICK_TARGET}`}`}
+              : `Hat count: ${event.count}${done ? ` \u00b7 Hat trick! Coupon code ${HAT_TRICK_CODE}` : ""}`}
           </p>
         </div>
       </div>

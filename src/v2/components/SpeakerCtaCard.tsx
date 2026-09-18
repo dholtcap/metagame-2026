@@ -14,17 +14,24 @@ export default function SpeakerCtaCard({ href }: { href: string }) {
   const worn = collected.map((id) => HATS[id]);
   const done = worn.length >= HAT_TRICK_TARGET;
 
-  const score = worn.length > 0 && (
-    <>
-      <p className={`${HEADING} text-navy`}>Hat count: {worn.length}</p>
-      {done && (
-        <p className="mt-1 font-space-mono text-xs tracking-[0.08em] text-ink/60 uppercase">
-          Coupon code:{" "}
-          <span className="font-bold text-meeple">{HAT_TRICK_CODE}</span>
-        </p>
-      )}
-    </>
-  );
+  // The margin version has room to list the hats; the on-card one doesn't.
+  const score = (list: boolean) =>
+    worn.length > 0 && (
+      <>
+        <p className={`${HEADING} text-navy`}>Hat count: {worn.length}</p>
+        {list && (
+          <p className="mt-1 text-sm text-ink/70">
+            {worn.map((h) => h.name.replace(/ hat$/, "")).join(", ")}
+          </p>
+        )}
+        {done && (
+          <p className="mt-1 font-space-mono text-xs tracking-[0.08em] text-ink/60 uppercase">
+            Coupon code:{" "}
+            <span className="font-bold text-meeple">{HAT_TRICK_CODE}</span>
+          </p>
+        )}
+      </>
+    );
 
   return (
     <div className="relative h-full">
@@ -47,9 +54,9 @@ export default function SpeakerCtaCard({ href }: { href: string }) {
           </svg>
           {/* Score on the chest, below the head, when the page margin beside
               the card is too narrow for it (see the sibling below). */}
-          {score && (
+          {score(false) && (
             <div className="absolute inset-x-3 top-[82%] text-center text-[15px] 2xl:hidden">
-              {score}
+              {score(false)}
             </div>
           )}
         </div>
@@ -71,9 +78,9 @@ export default function SpeakerCtaCard({ href }: { href: string }) {
         <HatPile hats={worn} />
       </div>
       {/* Score beside the card, in the page margin, on wide screens. */}
-      {score && (
+      {score(true) && (
         <div className="absolute top-0 left-full ml-4 hidden w-36 text-base 2xl:block">
-          {score}
+          {score(true)}
         </div>
       )}
     </div>
