@@ -25,6 +25,19 @@ import WordEntry from "./WordEntry";
 import {
   BASE_LOOK,
   MAGA_MS,
+  CODE,
+  CODE_BEAT_MS,
+  CODE_ENTRY_MS,
+  CODE_MULTIPLIER,
+  CODE_SPAN,
+  CODE_STAGGER,
+  DW_FLASH_MS,
+  MARK_COLOR,
+  MARK_BOTH_MS,
+  MARK_CAST_MS,
+  MARK_JOIN_MS,
+  MARK_LETTER,
+  MARK_LIFT_MS,
   BITES_TO_FINISH,
   BOMB_MS,
   COIN_MS,
@@ -53,6 +66,7 @@ import {
   type Hop,
   type Look,
   type Seed,
+  type Side,
   type Spell,
 } from "./effects";
 import {
@@ -586,6 +600,32 @@ const FLASH_MS = 350;
 // — for ROLL's geometry and for placing LOVE's hearts.
 const TILE_PX = 30;
 const TILE_GAP = 22;
+// The reveal row is twice the rack's length, so its tiles sit tighter.
+const CODE_GAP = 8;
+
+// Where `to` sits relative to `from`, as a transform. The dividers' widths are
+// all flex-derived, so these trips can only be measured at runtime.
+const shift = (from: Element, to: Element) => {
+  const a = from.getBoundingClientRect();
+  const b = to.getBoundingClientRect();
+  return `translate(${b.left - a.left}px, ${b.top - a.top}px)`;
+};
+const CODE_SCORE = [...CODE].reduce((n, ch) => n + SCRABBLE_SCORES[ch], 0);
+const CODE_OFF = CODE_SCORE * CODE_MULTIPLIER;
+// From the code opening: the rest of the tiles land, then the sum is told.
+const CODE_SCORE_AT = (CODE.length - 2) * CODE_STAGGER + CODE_ENTRY_MS;
+const DW_FLASH_AT = CODE_SCORE_AT + CODE_BEAT_MS;
+const CODE_TIMES_AT = DW_FLASH_AT + DW_FLASH_MS * 0.6;
+const CODE_OFF_AT = CODE_TIMES_AT + CODE_BEAT_MS;
+const DW_FAINT = {
+  background: "rgba(77,77,77,.1)",
+  color: "rgba(77,77,77,.3)",
+};
+const DW_PINK = { background: "#f2a7a0", color: "#7a2f2a" };
+const codeSide = (i: number) =>
+  (["meta", "game"] as Side[]).find(
+    (k) => i >= CODE_SPAN[k][0] && i < CODE_SPAN[k][1],
+  );
 const PLATE_PAD = 16;
 // PART: extra room opened up in the middle of the rack.
 const PART_PX = 14;
@@ -683,10 +723,23 @@ export default function ScrabbleDivider({
   // empty spacers, so the hairlines keep their gap.
   const [gone, setGone] = useState(false);
   const [maga, setMaga] = useState(0);
+  // META and GAME each leave a mark on a hairline; both earned flies them into
+  // the code below the rack.
+  const [marks, setMarks] = useState({ meta: false, game: false });
+  const [reveal, setReveal] = useState<"none" | "flying" | "open">("none");
+  const metaRef = useRef<HTMLSpanElement>(null);
+  const gameRef = useRef<HTMLSpanElement>(null);
+  const slotRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const dwRef = useRef<HTMLSpanElement>(null);
+  const [dwUp, setDwUp] = useState(false);
+  const flown = useRef(new Set<Side>());
 
+  // A mark's cast holds its colour until the mark has settled on its hairline.
+  const flashMs = useRef(FLASH_MS);
   useEffect(() => {
     if (!flash) return;
-    const t = setTimeout(() => setFlash(null), FLASH_MS);
+    const t = setTimeout(() => setFlash(null), flashMs.current);
+    flashMs.current = FLASH_MS;
     return () => clearTimeout(t);
   }, [flash]);
 
@@ -698,6 +751,15 @@ export default function ScrabbleDivider({
       case "maga":
         setMaga((n) => n + 1);
         break;
+      case "mark": {
+        setFlash(MARK_COLOR[spell.side]);
+        if (marks[spell.side]) break;
+        if (!reducedMotion()) flashMs.current = MARK_LIFT_MS + MARK_CAST_MS;
+        const held = { ...marks, [spell.side]: true };
+        setMarks(held);
+        if (held.meta && held.game && reducedMotion()) setReveal("open");
+        break;
+      }
       case "turn":
         if (reducedMotion()) break;
         setTurning(true);
@@ -996,6 +1058,94 @@ export default function ScrabbleDivider({
     return () => clearTimeout(t);
   }, [acid]);
 
+  // The mark leaves its rack tile (META's M and GAME's G both lead the word)
+  // and travels out to the hairline, and the rack re-rolls once it lands. The
+  // pair only set off to meet once the second has landed: the join measures
+  // them, so they have to be at rest.
+  useEffect(() => {
+    const side = (["meta", "game"] as Side[]).find(
+      (k) => marks[k] && !flown.current.has(k),
+    );
+    if (!side) return;
+    flown.current.add(side);
+    const el = side === "meta" ? metaRef.current : gameRef.current;
+    const from = tileRefs.current[0];
+    if (!el || !from || reducedMotion()) return;
+    const run = el.animate(
+      [{ transform: shift(el, from) }, { transform: "none" }],
+      {
+        delay: MARK_LIFT_MS,
+        duration: MARK_CAST_MS,
+        easing: "cubic-bezier(.45,0,.25,1)",
+        fill: "both",
+      },
+    );
+    const both = marks.meta && marks.game;
+    run.onfinish = () => {
+      if (both) setDwUp(true);
+      // Not out from under someone already spelling the next word.
+      const word = getSnapshot()
+        .map((t) => t.letter)
+        .join("");
+      if (word === side.toUpperCase()) {
+        setRand((n) => n + 1);
+        setTyped((w) => w && "");
+      }
+      if (both)
+        setTimeout(
+          () => setReveal((r) => (r === "none" ? "flying" : r)),
+          MARK_BOTH_MS,
+        );
+    };
+  }, [marks]);
+
+  // Measured, not laid out: the hairlines are flex-1, so how far the marks
+  // have to travel is only known at runtime.
+  useEffect(() => {
+    if (reveal !== "flying") return;
+    const m = metaRef.current;
+    const g = gameRef.current;
+    const s0 = slotRefs.current[CODE_SPAN.meta[0]];
+    const s1 = slotRefs.current[CODE_SPAN.game[0]];
+    if (!m || !g || !s0 || !s1) {
+      setReveal("open");
+      return;
+    }
+    const opts = {
+      duration: MARK_JOIN_MS,
+      easing: "cubic-bezier(.45,0,.25,1)",
+      fill: "both" as const,
+    };
+    const runs = [
+      m.animate([{ transform: "none" }, { transform: shift(m, s0) }], opts),
+      g.animate([{ transform: "none" }, { transform: shift(g, s1) }], opts),
+    ];
+    runs[1].onfinish = () => setReveal("open");
+    return () => runs.forEach((r) => r.cancel());
+  }, [reveal]);
+
+  // The square comes up over the G in its own colour, long enough to read,
+  // then slips back under it as a rim.
+  useEffect(() => {
+    if (reveal !== "open") return;
+    const still = reducedMotion();
+    const run = dwRef.current?.animate(
+      [
+        { ...DW_FAINT, zIndex: -10, transform: "none" },
+        { ...DW_PINK, zIndex: 10, transform: "scale(1.5)", offset: 0.2 },
+        { ...DW_PINK, zIndex: 10, transform: "scale(1.5)", offset: 0.7 },
+        { ...DW_PINK, zIndex: -10, transform: "none" },
+      ],
+      {
+        delay: still ? 0 : DW_FLASH_AT,
+        duration: still ? 1 : DW_FLASH_MS,
+        easing: "ease-in-out",
+        fill: "both",
+      },
+    );
+    return () => run?.cancel();
+  }, [reveal]);
+
   useEffect(() => {
     if (!sudo) return;
     const t = setTimeout(() => setSudo(0), SUDO_MS);
@@ -1026,6 +1176,8 @@ export default function ScrabbleDivider({
       setRack(randomRack());
       return;
     }
+    // A held flash doesn't carry over onto the next word.
+    setFlash(null);
     // What UNDO goes back to: the rack as it stood before this letter.
     before.current = tiles;
     setRack(next);
@@ -1160,13 +1312,31 @@ export default function ScrabbleDivider({
     };
   };
 
+  // Lifted over the rack: it starts out sat on a rack tile.
+  const mark = (side: Side) =>
+    marks[side] && reveal !== "open" ? (
+      <span
+        ref={side === "meta" ? metaRef : gameRef}
+        className="relative z-30 block"
+      >
+        <ScrabbleTile
+          letter={MARK_LETTER[side]}
+          look={{ ...BASE_LOOK, tint: MARK_COLOR[side] }}
+        />
+      </span>
+    ) : undefined;
+
   return (
     <>
       <div className="relative">
         {typed !== null && !exit && (
           // Past the right-hand hairline where there's room, under the rack
-          // where there isn't.
-          <div className="absolute top-full left-1/2 -mt-4 -translate-x-1/2 animate-[scrabble-entry_400ms_ease-out] lg:top-1/2 lg:left-[calc(50%+300px)] lg:mt-0 lg:translate-x-0 lg:-translate-y-1/2">
+          // where there isn't — or over it, once the code has the space under.
+          <div
+            className={`absolute left-1/2 -translate-x-1/2 animate-[scrabble-entry_400ms_ease-out] lg:top-1/2 lg:bottom-auto lg:left-[calc(50%+300px)] lg:m-0 lg:translate-x-0 lg:-translate-y-1/2 ${
+              marks.meta || marks.game ? "bottom-full -mb-4" : "top-full -mt-4"
+            }`}
+          >
             <WordEntry
               word={typed}
               disabled={stopped}
@@ -1177,7 +1347,7 @@ export default function ScrabbleDivider({
             />
           </div>
         )}
-        <DividerRow>
+        <DividerRow left={mark("meta")} right={mark("game")}>
           {/* The dark-mode plate: the letters are punched out of the tiles, so
             in dark mode this is what shows through them. Negative margins keep
             the padding from shifting the hairlines. */}
@@ -1337,6 +1507,105 @@ export default function ScrabbleDivider({
             )}
           </div>
         </DividerRow>
+        {(marks.meta || marks.game) && (
+          // Out of the flow, in the padding the row and the next section
+          // already have, so nothing below moves.
+          <div className="pointer-events-none absolute inset-x-0 top-full -mt-4 flex flex-col items-center justify-center gap-x-3 whitespace-nowrap md:-mt-7 md:flex-row">
+            <span className="sr-only">
+              {reveal === "open" ? `${CODE} for $${CODE_OFF} off` : ""}
+            </span>
+            <span
+              aria-hidden
+              className="flex items-center"
+              style={{ gap: CODE_GAP }}
+            >
+              {[...CODE].map((ch, i) => {
+                const side = codeSide(i);
+                const flown = side && i === CODE_SPAN[side][0];
+                // The tiles that pop in, in order, skipping the two that flew.
+                const nth =
+                  i -
+                  (["meta", "game"] as Side[]).filter(
+                    (k) => CODE_SPAN[k][0] < i,
+                  ).length;
+                return (
+                  <span
+                    key={i}
+                    ref={(el) => {
+                      slotRefs.current[i] = el;
+                    }}
+                    className={`${GLYPH} relative isolate shrink-0`}
+                  >
+                    {i === CODE_SPAN.game[0] && (dwUp || reveal === "open") && (
+                      // The square the G lands on: up once the second mark is
+                      // out on its hairline, too faint to give much away
+                      // until it flashes.
+                      <span
+                        ref={dwRef}
+                        className="absolute -inset-[3px] -z-10 flex flex-col items-center justify-center rounded-[3px] text-center text-[5.5px] leading-[1.15] font-bold tracking-wide uppercase"
+                        style={{
+                          ...DW_FAINT,
+                          animation: `scrabble-entry ${CODE_ENTRY_MS * 2}ms ease-out both`,
+                        }}
+                      >
+                        <span>Double</span>
+                        <span>word</span>
+                        <span>score</span>
+                      </span>
+                    )}
+                    {/* The letters are holes: without this the G would show
+                        the square through itself. */}
+                    {i === CODE_SPAN.game[0] && reveal === "open" && (
+                      <span className="absolute inset-[1.5px] -z-10 rounded-[3.5px] bg-background" />
+                    )}
+                    {reveal === "open" && (
+                      <ScrabbleTile
+                        letter={ch}
+                        look={
+                          side
+                            ? { ...BASE_LOOK, tint: MARK_COLOR[side] }
+                            : BASE_LOOK
+                        }
+                        motion={
+                          flown
+                            ? undefined
+                            : {
+                                extra: {
+                                  animation: `scrabble-entry ${CODE_ENTRY_MS}ms ${nth * CODE_STAGGER}ms ease-out both`,
+                                },
+                              }
+                        }
+                      />
+                    )}
+                  </span>
+                );
+              })}
+            </span>
+            <span
+              aria-hidden
+              className="flex gap-x-1 text-xs leading-4 font-semibold text-ink/70 md:text-sm"
+            >
+              {[
+                [CODE_SCORE_AT, `${CODE_SCORE}`],
+                [CODE_TIMES_AT, `× ${CODE_MULTIPLIER}`],
+                [CODE_OFF_AT, `= $${CODE_OFF} off`],
+              ].map(([at, text]) => (
+                <span
+                  key={at}
+                  style={
+                    reveal === "open"
+                      ? {
+                          animation: `scrabble-entry ${CODE_ENTRY_MS}ms ${at}ms ease-out both`,
+                        }
+                      : { opacity: 0 }
+                  }
+                >
+                  {text}
+                </span>
+              ))}
+            </span>
+          </div>
+        )}
       </div>
       {shower && <Weather key={shower.id} shower={shower} color={CHARCOAL} />}
       {acid && <Acid key={acid.id} trip={acid.trip} />}

@@ -93,6 +93,7 @@ export type Spell =
       which: "bing" | "bong" | "bell" | "ding" | "dong" | "ting" | "ring";
     }
   | { kind: "maga" }
+  | { kind: "mark"; side: Side }
   | { kind: "turn"; turns: number }
   | { kind: "hop"; hop: Hop }
   | { kind: "love" }
@@ -121,6 +122,9 @@ export const SPELLS: Record<string, Spell> = {
   // A dial tone, for five minutes. STOP is the only way to end it early.
   TONE: { kind: "tone" },
   MAGA: { kind: "maga" },
+  // The only two eggs that leave a mark on the row rather than the rack.
+  META: { kind: "mark", side: "meta" },
+  GAME: { kind: "mark", side: "game" },
   SPIN: { kind: "turn", turns: 2 },
   JUMP: { kind: "hop", hop: { name: "jump", ms: 750, count: 1, stagger: 0 } },
   // A jump with one full somersault in the air.
@@ -230,6 +234,41 @@ export const SPELLS: Record<string, Spell> = {
   GRAY: { kind: "look", apply: set({ tint: GRAY }) },
   GREY: { kind: "look", apply: set({ tint: GRAY }) },
 };
+
+// The one egg with something to win, so unlike the rest it outlives its cast:
+// META and GAME each leave a tile on a hairline, and both earned reveal the
+// code. A reload still clears it.
+export type Side = "meta" | "game";
+export const MARK_LETTER: Record<Side, string> = { meta: "M", game: "G" };
+export const MARK_COLOR: Record<Side, string> = {
+  meta: "var(--color-brand-blue)",
+  game: "var(--color-meeple)",
+};
+// Needs a Stripe promotion code and an active, non-Stripe row in Airtable's
+// Discount Codes table (src/lib/discount-codes.ts) to be worth anything. Worth
+// what its tiles score, doubled by the square the G lands on: both of those
+// have to be set to match.
+export const CODE = "MGTILES";
+export const CODE_MULTIPLIER = 2;
+// The run of code tiles in each mark's colour, [from, to). The mark lands on
+// the first of its run.
+export const CODE_SPAN: Record<Side, [number, number]> = {
+  meta: [0, 1],
+  game: [1, 2],
+};
+// The mark sits tinted on its rack tile for a beat, then leaves for its
+// hairline.
+export const MARK_LIFT_MS = 700;
+export const MARK_CAST_MS = 1400;
+// Both marks at rest on their hairlines, before they go to meet.
+export const MARK_BOTH_MS = 1000;
+// The pair's trip in from the hairlines to the head of the code.
+export const MARK_JOIN_MS = 1400;
+export const CODE_STAGGER = 90;
+// The sum, told a step at a time: the score, the square's flash, ×2, the total.
+export const CODE_BEAT_MS = 800;
+export const DW_FLASH_MS = 1300;
+export const CODE_ENTRY_MS = 500;
 
 export const TURN_MS = 1500;
 // A beat between the word landing and FALL/RISE letting go.
