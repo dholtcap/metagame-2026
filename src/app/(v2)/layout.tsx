@@ -1,5 +1,6 @@
 import SiteFooter from "@/v2/components/SiteFooter";
 import SiteShell from "@/v2/components/SiteShell";
+import HatToast from "@/v2/hat-trick/HatToast";
 
 // The rewritten site. Everything it renders lives under src/v2/ — see
 // src/v2/README.md. The previous one-pager is still served at /legacy.
@@ -15,6 +16,7 @@ export default function SiteLayout({
     <div className="flex min-h-dvh flex-col bg-background font-[family-name:var(--font-inter)] leading-[1.55] text-ink">
       <SiteShell>{children}</SiteShell>
       <SiteFooter />
+      <HatToast />
     </div>
   );
 }
