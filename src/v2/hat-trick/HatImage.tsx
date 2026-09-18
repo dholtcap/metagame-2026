@@ -1,7 +1,7 @@
 "use client";
 
 import Image, { type StaticImageData } from "next/image";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { hatBox, polygon, type Hat } from "./hats";
 import { useHatTrick } from "./store";
 
@@ -14,14 +14,17 @@ export default function HatImage({
   alt,
   hats,
   className = "",
+  style,
   sizes,
   priority,
 }: {
   src: StaticImageData;
   alt: string;
   hats: Hat[];
-  // Sizes the frame: aspect / fill classes, plus anything cosmetic.
+  // Sizes the frame: aspect / fill classes, plus anything cosmetic. The
+  // frame is a size container, so it has no height of its own: give it one.
   className?: string;
+  style?: CSSProperties;
   sizes?: string;
   priority?: boolean;
 }) {
@@ -34,6 +37,7 @@ export default function HatImage({
   return (
     <div
       className={`[container-type:size] relative overflow-hidden ${className}`}
+      style={style}
     >
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"

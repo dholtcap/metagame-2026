@@ -18,6 +18,9 @@ export default function Highlights2025() {
               src={g.photo}
               alt={g.alt}
               hats={g.hats}
+              // The photo's own ratio sizes the row when the list is shorter;
+              // in the two-column grid the frame stretches to the row instead.
+              style={{ aspectRatio: `${g.photo.width} / ${g.photo.height}` }}
               className={`w-full ${
                 i % 2
                   ? "md:order-2 md:[mask-image:linear-gradient(to_right,transparent,black_30%)]"
