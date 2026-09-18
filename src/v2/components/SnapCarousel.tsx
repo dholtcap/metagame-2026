@@ -19,8 +19,8 @@ const jump = (el: HTMLElement, slot: number) =>
   el.scrollTo({ left: slot * el.clientWidth, behavior: "instant" });
 
 // Generic one-slide-at-a-time strip. Native scroll-snap does the work — swipe
-// on touch, arrows and dots on desktop — so it needs no gesture library and
-// stays smooth on phones. Slides are whatever you pass; each fills the track.
+// on touch, arrows on desktop — so it needs no gesture library and stays
+// smooth on phones. Slides are whatever you pass; each fills the track.
 //
 // It loops: a clone of the last slide sits before the first and one of the
 // first after the last, so stepping past either end looks like one more
@@ -34,7 +34,7 @@ export default function SnapCarousel({
   arrowsOutside = false,
 }: {
   slides: ReactNode[];
-  label: string; // what a slide is, for the arrow/dot labels ("photo")
+  label: string; // what a slide is, for the arrow labels ("photo")
   className?: string;
   trackClassName?: string;
   // Arrows flush with the wrapper's edges instead of over the slide — pair
@@ -43,7 +43,7 @@ export default function SnapCarousel({
 }) {
   const track = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
-  // Arrows and dots are off while a press's scroll is in flight: a second
+  // Arrows are off while a press's scroll is in flight: a second
   // press mid-animation would read a half-finished position and misfire.
   const [moving, setMoving] = useState(false);
   const n = slides.length;
@@ -164,21 +164,6 @@ export default function SnapCarousel({
           {dir === "prev" ? <ChevronLeft /> : <ChevronRight />}
         </button>
       ))}
-
-      <div className="mt-4 flex justify-center gap-2">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={`Go to ${label} ${i + 1}`}
-            aria-current={i === index}
-            onClick={() => goTo(i + offset)}
-            className={`h-2.5 w-2.5 cursor-pointer rounded-full transition ${
-              i === index ? "bg-meeple" : "bg-navy/25 hover:bg-navy/50"
-            }`}
-          />
-        ))}
-      </div>
     </div>
   );
 }
