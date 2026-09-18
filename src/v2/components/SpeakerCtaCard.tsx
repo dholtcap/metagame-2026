@@ -36,7 +36,16 @@ export default function SpeakerCtaCard({ href }: { href: string }) {
             ))}
           </ul>
         )}
-        {done && (
+        {done && list && (
+          <p className="mt-2 text-sm text-ink/70">
+            Use coupon code{" "}
+            <span className="font-space-mono font-bold text-meeple">
+              {HAT_TRICK_CODE}
+            </span>{" "}
+            for $33 off your ticket price
+          </p>
+        )}
+        {done && !list && (
           <p className="mt-1 font-space-mono text-xs tracking-[0.08em] text-ink/60 uppercase">
             Coupon code:{" "}
             <span className="font-bold text-meeple">{HAT_TRICK_CODE}</span>
