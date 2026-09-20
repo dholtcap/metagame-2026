@@ -18,8 +18,6 @@ const EXIT_MS = 500; // a found set fading out
 const DEAL_MS = 600; // a dealt card fading in
 const SHAKE_MS = 400;
 const STAGGER_MS = 90;
-// DividerRow's gap-[22px]: the spread cards keep the centre four's spacing.
-const GAP = 22;
 
 // portrait card, rounded corners, centred in the viewBox
 const CARD =
@@ -235,7 +233,7 @@ function CardGlyph({
   // Tapping is the whole interaction, so it has to survive iOS: no
   // double-tap-to-zoom, and the cursor Safari wants before it delivers a click
   // to a plain <svg>. The invisible rect widens the target into the gutters —
-  // a 22px-wide card is a small thing to hit with a thumb.
+  // a 24px-wide card is a small thing to hit with a thumb.
   return (
     <svg
       ref={ref}
@@ -315,10 +313,11 @@ export default function SetCardDivider() {
   const [leaving, setLeaving] = useState(false);
   const [shaking, setShaking] = useState(false);
   // Set once the row has spread: the card width the spread cards are placed
-  // by, and how many went either side.
+  // by, how far apart, and how far they run over each hairline.
   const [spread, setSpread] = useState<{
     cardWidth: number;
-    side: number;
+    pitch: number;
+    overhang: number;
   } | null>(null);
   const [found, setFound] = useState(0);
   // Counts up from FIRST's keys. Kept here, not at module level, so a hot
@@ -332,9 +331,18 @@ export default function SetCardDivider() {
   // four stay in flow, so they never move.
   const spreadOut = () => {
     const cardWidth = first.current!.getBoundingClientRect().width;
-    const pitch = cardWidth + GAP;
-    const row = centre.current!.closest("[data-puzzle-game]")!.parentElement!;
+    // The spread cards keep the centre four's spacing.
+    const pitch =
+      cardWidth + parseFloat(getComputedStyle(centre.current!).columnGap);
+    const icons = centre.current!.closest("[data-puzzle-game]")!;
+    const row = icons.parentElement!;
     const side = fit(row.clientWidth, cardWidth, pitch);
+    // The spread runs out over the star's slot and the hairline, which gives
+    // way (and keeps the gap it had to the star's slot).
+    const hairline = row.firstElementChild!.getBoundingClientRect().right;
+    const reach = centre.current!.getBoundingClientRect().left - hairline;
+    const keep = icons.getBoundingClientRect().left - hairline;
+    const overhang = Math.max(0, side * pitch - reach + keep);
     const slots: (Slot | null)[] = [
       ...Array<null>(side).fill(null),
       ...board,
@@ -342,7 +350,7 @@ export default function SetCardDivider() {
     ];
     // Fades in from the centre outward.
     const away = (i: number) => Math.abs(i - (slots.length - 1) / 2) - 1.5;
-    setSpread({ cardWidth, side });
+    setSpread({ cardWidth, pitch, overhang });
     return deal(slots, (card, i) => ({
       card,
       seq: seq.current++,
@@ -404,24 +412,22 @@ export default function SetCardDivider() {
     />
   );
   const place = (i: number): React.CSSProperties => {
-    const pitch = spread!.cardWidth + GAP;
+    const { cardWidth, pitch } = spread!;
     const off = i - (n - 1) / 2;
     return {
       position: "absolute",
       top: 0,
-      left: `calc(50% + ${(off * pitch - spread!.cardWidth / 2).toFixed(2)}px)`,
+      left: `calc(50% + ${(off * pitch - cardWidth / 2).toFixed(2)}px)`,
     };
   };
 
-  // The first card either side lands in the star's slot; each one after that
-  // runs a pitch further over the hairline, which gives way (and keeps a gap).
-  const overhang = spread
-    ? Math.max(0, spread.side * (spread.cardWidth + GAP) - 2 * GAP)
-    : undefined;
-
   return (
-    <DividerRow game="set" overhang={overhang}>
-      <div ref={centre} className="relative flex items-center gap-[22px]">
+    <DividerRow game="set" overhang={spread?.overhang}>
+      {/* Tighter on a phone than the other rows, so all eight cards fit. */}
+      <div
+        ref={centre}
+        className="relative flex items-center gap-[22px] md:gap-[34px]"
+      >
         {board.map((_, i) =>
           i >= inner && i < inner + 4 ? glyph(i) : glyph(i, place(i)),
         )}
