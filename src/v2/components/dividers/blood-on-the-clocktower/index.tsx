@@ -5,9 +5,10 @@ import DividerRow from "../DividerRow";
 import { IconGlyph } from "../IconDivider";
 import Crossbow from "./Crossbow";
 import { trackClick, trackEgg } from "../track";
+import { LAYER } from "../sizing";
 import { ICONS } from "./icons";
 
-const SPIN = "inline-flex transition-[rotate,translate,opacity] ease-in";
+const SPIN = `inline-flex ${LAYER} transition-[rotate,translate,opacity] ease-in`;
 
 // blood · crossbow · demon's trident · clock tower — a nod to Blood on the
 // Clocktower. Click the crossbow and it swings round onto the trident; click
@@ -37,15 +38,18 @@ export default function BloodOnTheClocktowerDivider() {
         if (icon.name === "crossbow") {
           return (
             <span key={icon.name} className="relative inline-flex">
+              {/* Three taps on one spot: touch-manipulation stops iOS reading
+                  the second as double-tap-to-zoom and scaling the page. */}
               <span
                 onClick={onCrossbow}
-                className={`${SPIN} duration-300 ${stage ? "rotate-45" : ""}`}
+                style={{ WebkitTapHighlightColor: "transparent" }}
+                className={`${SPIN} touch-manipulation duration-300 select-none pointer-coarse:cursor-pointer ${stage ? "rotate-45" : ""}`}
               >
                 <Crossbow d={icon.d ?? ""} fired={stage === 2} />
               </span>
               <span
                 ref={bolt}
-                className="pointer-events-none absolute top-1/2 left-[22px] h-0.5 w-[11px] -translate-y-1/2 rounded-full bg-[#4d4d4d] opacity-0"
+                className={`pointer-events-none absolute top-1/2 left-[22px] h-0.5 w-[11px] -translate-y-1/2 rounded-full bg-[#4d4d4d] opacity-0 ${LAYER}`}
               />
             </span>
           );
@@ -65,7 +69,7 @@ export default function BloodOnTheClocktowerDivider() {
             </span>
           );
         }
-        return <IconGlyph key={icon.name} icon={icon} />;
+        return <IconGlyph key={icon.name} icon={icon} className={LAYER} />;
       })}
     </DividerRow>
   );
