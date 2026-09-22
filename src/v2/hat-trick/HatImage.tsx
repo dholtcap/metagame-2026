@@ -9,6 +9,11 @@ import { useHatTrick } from "./store";
 // and it leaves the photo (a see-through hole where it was) for the head of
 // the "You?" silhouette. The photo is object-fit: cover, done by hand so the
 // hat outlines (percentages of the image) line up whatever the crop.
+//
+// A parent that wants the photo to fade at an edge sets `--fade` to a
+// gradient on the frame (not mask-image): it's applied here as a layer of the
+// same mask as the holes. A mask inside a mask renders blocky on some GPUs
+// (Chrome on Intel/Mesa) once the layer is big.
 export default function HatImage({
   src,
   alt,
@@ -32,7 +37,26 @@ export default function HatImage({
   // A locked hat shakes when clicked, like a wrong pick on the dividers.
   const [shaking, setShaking] = useState<string | null>(null);
   const taken = hats.filter((h) => collected.includes(h.id));
-  const mask = taken.length ? holeMask(taken) : undefined;
+  const holes = taken.length ? holeMask(taken) : null;
+  // The fade layer is sized and centred to the frame, since this box can
+  // overflow it (cover). Its fallback is a solid layer, so the holes still
+  // intersect with something when no fade is set.
+  const FADE = "var(--fade, linear-gradient(#000, #000))";
+  const mask: CSSProperties = holes
+    ? {
+        maskImage: `${holes}, ${FADE}`,
+        maskSize: "100% 100%, 100cqw 100cqh",
+        maskPosition: "0 0, center",
+        maskRepeat: "no-repeat",
+        WebkitMaskComposite: "source-in",
+        maskComposite: "intersect",
+      }
+    : {
+        maskImage: "var(--fade, none)",
+        maskSize: "100cqw 100cqh",
+        maskPosition: "center",
+        maskRepeat: "no-repeat",
+      };
 
   return (
     <div
@@ -44,6 +68,7 @@ export default function HatImage({
         style={{
           width: `max(100cqw, calc(100cqh * ${src.width / src.height}))`,
           aspectRatio: `${src.width} / ${src.height}`,
+          ...mask,
         }}
       >
         <Image
@@ -53,16 +78,6 @@ export default function HatImage({
           sizes={sizes}
           priority={priority}
           className="object-cover"
-          style={
-            mask
-              ? {
-                  maskImage: mask,
-                  WebkitMaskImage: mask,
-                  maskSize: "100% 100%",
-                  WebkitMaskSize: "100% 100%",
-                }
-              : undefined
-          }
         />
         {hats
           .filter((h) => !collected.includes(h.id))

@@ -23,8 +23,8 @@ export default function Highlights2025() {
               style={{ aspectRatio: `${g.photo.width} / ${g.photo.height}` }}
               className={`w-full ${
                 i % 2
-                  ? "md:order-2 md:[mask-image:linear-gradient(to_right,transparent,black_30%)]"
-                  : "md:[mask-image:linear-gradient(to_left,transparent,black_30%)]"
+                  ? "md:order-2 md:[--fade:linear-gradient(to_right,transparent,black_30%)]"
+                  : "md:[--fade:linear-gradient(to_left,transparent,black_30%)]"
               }`}
               sizes="(min-width: 768px) 560px, 100vw"
             />
