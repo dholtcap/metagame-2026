@@ -39,10 +39,11 @@ To add a page to the nav: add an entry to `components/nav/links.ts`.
 On load one of seven games is picked at random and its crop of the library
 photo becomes the hero backdrop (`/images/puzzle/library_<game>.webp`). Each section divider is
 one game (`components/dividers/*/index.tsx` passes `game=` to `DividerRow`).
-Clicking the current game's divider earns its star and picks a new game. With
-no stars held, every other divider just runs its own interaction (Tetris
-spins, …); once you hold a star you're "in game" and any wrong divider shakes
-and wipes the stars. A star for all seven → `library_win.webp`.
+A guess is pressing Enter while the pointer is over a divider — never a
+click, so the dividers' own minigames are untouched. Enter over the current
+game's row earns its star and picks a new game; over any other row it shakes
+and wipes the stars. A star for all seven → `library_win.webp`. The dice row
+is D&D (the sword/dragon `dnd` set is unmounted).
 
 - `puzzle/store.ts` — in-memory state (a reload re-rolls), `guess()`, and
   `applyGame()` which sets the `--puzzle-image` CSS variable `HeroBackdrop`

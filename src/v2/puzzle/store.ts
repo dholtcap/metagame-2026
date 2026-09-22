@@ -1,11 +1,10 @@
 // The hero puzzle. One of seven games is "current"; its version of the library
-// photo is the hero backdrop. Clicking that game's section divider earns it a
-// star and picks a new current game. Holding any star puts you "in game":
-// from then on every divider click is a guess, and a wrong one shakes the row
-// and wipes the stars. With no stars, only the current game's row reacts to
-// the puzzle — every other divider just does its own thing (Tetris spins,
-// etc.), so a fresh visitor can play with the rows without tripping it.
-// A star for all seven games swaps the backdrop for the win image.
+// photo is the hero backdrop. Pressing Enter while hovering that game's
+// section divider earns it a star and picks a new current game; Enter over
+// any other divider is a wrong guess: the row shakes and every star is wiped.
+// It's keyboard-only on purpose — the dividers' own click minigames never
+// see the puzzle. A star for all seven games swaps the backdrop for the win
+// image.
 //
 // Nothing is persisted: a reload starts over with a fresh random pick (which
 // doubles as a hint). The pick happens *before first paint* in the inline
@@ -27,10 +26,6 @@ export type Game = (typeof GAMES)[number];
 export type Current = Game | "win";
 export type PuzzleState = { stars: Record<Game, boolean>; current: Current };
 
-// Parked while the puzzle is untangled from the dividers' own interactions:
-// off, every load gets FALLBACK_GAME's image and no divider click is a guess.
-export const PUZZLE_ENABLED = false;
-
 // Boot script failed / JS off: the boot script and the store agree on this.
 export const FALLBACK_GAME: Game = "catan";
 
@@ -42,9 +37,6 @@ const noStars = (): Record<Game, boolean> =>
   Object.fromEntries(GAMES.map((g) => [g, false])) as Record<Game, boolean>;
 
 const DEFAULT: PuzzleState = { stars: noStars(), current: FALLBACK_GAME };
-
-// "In game": at least one star held, so wrong clicks now count.
-export const inGame = (s: PuzzleState) => GAMES.some((g) => s.stars[g]);
 
 // --- useSyncExternalStore plumbing ---------------------------------------
 let state: PuzzleState | null = null;
@@ -103,10 +95,10 @@ function pickNext(stars: Record<Game, boolean>): Current {
   return open[Math.floor(Math.random() * open.length)];
 }
 
-// "pass": the puzzle doesn't care about this click — the divider handles it.
+// "pass": already won, nothing left to guess.
 export type Guess = "right" | "wrong" | "pass";
 
-// A click on a divider; `game` is undefined for rows that aren't any game.
+// Enter over a divider; `game` is undefined for rows that aren't any game.
 export function guess(game?: Game): Guess {
   const s = getSnapshot();
   if (s.current === "win") return "pass";
@@ -115,7 +107,6 @@ export function guess(game?: Game): Guess {
     write({ stars, current: pickNext(stars) });
     return "right";
   }
-  if (!inGame(s)) return "pass";
   write({ stars: noStars(), current: s.current });
   return "wrong";
 }

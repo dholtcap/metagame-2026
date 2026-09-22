@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -12,13 +13,12 @@ import {
   getServerSnapshot,
   getSnapshot,
   guess,
-  PUZZLE_ENABLED,
   subscribe,
   type Game,
 } from "@/v2/puzzle/store";
 
 // Wrap rows in this to take them out of the puzzle (the /dividers gallery):
-// clicks neither guess nor shake, and no stars render.
+// Enter neither guesses nor shakes, and no stars render.
 const NoPuzzleContext = createContext(false);
 export function NoPuzzle({ children }: { children: React.ReactNode }) {
   return (
@@ -29,11 +29,10 @@ export function NoPuzzle({ children }: { children: React.ReactNode }) {
 // Layout shell every section divider shares: two hairlines flanking the icons.
 // With `game` set the row is a puzzle target (src/v2/puzzle/store.ts): a star
 // appears either side of the icons once the game is found. Rows with no
-// `game` are decoys that earn no stars. Clicks are checked in the capture
-// phase: when the puzzle claims one (a find, or any click while in game) it
-// stops there, so the row's own interaction (Tetris spinning, …) only runs
-// for clicks the puzzle passes on. A wrong pick shakes the row. Deliberately
-// no pointer cursor or label — it's a secret. `overhang` is for a row whose
+// `game` are decoys that earn no stars. A guess is Enter pressed while the
+// pointer is over the row — never a click, so the rows' own minigames are
+// untouched. A wrong pick shakes the row. Deliberately no pointer cursor or
+// label — it's a secret. `overhang` is for a row whose
 // icons have spread out past the stars (Set): the stars hide, and each hairline
 // is clipped back that many px from its inner end.
 // `left`/`right` hang a mark on the hairlines, centred and out of the flow.
@@ -52,16 +51,21 @@ export default function DividerRow({
 }) {
   const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [shaking, setShaking] = useState(false);
-  const off = useContext(NoPuzzleContext) || !PUZZLE_ENABLED;
+  const [hovered, setHovered] = useState(false);
+  const off = useContext(NoPuzzleContext);
   const found = Boolean(game && !off && state.stars[game]);
 
-  const onClickCapture = (e: React.MouseEvent) => {
-    if (off) return;
-    const result = guess(game);
-    if (result === "pass") return;
-    e.stopPropagation();
-    if (result === "wrong") setShaking(true);
-  };
+  useEffect(() => {
+    if (!hovered || off) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Enter" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest("input, textarea, [contenteditable]")) return;
+      if (guess(game) === "wrong") setShaking(true);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [hovered, off, game]);
 
   // Stars always take up their space so earning one doesn't shift the icons.
   // The negative margin pulls a star in from the icons' wide gap, so its slot
@@ -95,11 +99,14 @@ export default function DividerRow({
   );
 
   return (
-    <div className="flex scroll-mt-16 items-center justify-center gap-3 py-6 md:scroll-mt-24 md:gap-[22px] md:py-10">
+    <div
+      className="flex scroll-mt-16 items-center justify-center gap-3 py-6 md:scroll-mt-24 md:gap-[22px] md:py-10"
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
+    >
       {line("left", left)}
       <div
         data-puzzle-game={game}
-        onClickCapture={onClickCapture}
         onAnimationEnd={() => setShaking(false)}
         className={`flex items-center ${ICON_GAP} ${shaking ? "animate-[shake_400ms_ease-in-out]" : ""}`}
       >

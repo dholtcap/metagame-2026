@@ -317,9 +317,10 @@ function DiceGlyph({ die }: { die: Die }) {
   );
 }
 
+// The hero puzzle's D&D row.
 export default function DiceDivider() {
   return (
-    <DividerRow>
+    <DividerRow game="dnd">
       {DICE.map((d) => (
         <DiceGlyph key={d.id} die={d} />
       ))}
