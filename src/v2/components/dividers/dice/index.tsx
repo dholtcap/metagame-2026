@@ -16,9 +16,17 @@ const CHARCOAL = "#4d4d4d";
 const SIZE = "-m-[8.25px] h-[49.5px] w-[49.5px]";
 const SPIN_MS = 700;
 
-// A numbered face: where its value sits, its tilt (the value's top points out
-// from the vertex the faces share), how big, and the most digits it fits.
-type Face = { x: number; y: number; turn: number; size: number; digits?: 1 };
+// A numbered face: where its value sits, its tilt, how big, and the most
+// digits it fits. On a vertex-numbered die each entry is one corner of a face
+// instead, and `corner` says which of the die's vertices it belongs to.
+type Face = {
+  x: number;
+  y: number;
+  turn: number;
+  size: number;
+  digits?: 1;
+  corner?: number;
+};
 // A pipped face of the iso cube: centre, plus the two pip-grid step vectors.
 type PipFace = {
   c: [number, number];
@@ -34,24 +42,76 @@ type Die = {
   seams: string; // facet edges, punched out as transparent lines
   faces?: Face[];
   pipFaces?: PipFace[];
+  // Values live on the vertices, not the faces: the rolled value is the one
+  // at the apex, and each other vertex shows its value on every face it joins.
+  vertex?: true;
   initial: number[];
 };
 
+// The d4's vertices, apex first, and its three visible faces as vertex triples.
+const D4_VERTICES: [number, number][] = [
+  [50, 58],
+  [50, 12],
+  [14, 82],
+  [86, 82],
+];
+const D4_FACES = [
+  [0, 1, 2],
+  [0, 1, 3],
+  [0, 2, 3],
+];
+// The apex value is the roll, so it gets the bigger type.
+const D4_SIZE = [15, 12, 12, 12];
+
+// One number per corner of each face, tucked into the corner along its
+// bisector with its top pointing at the vertex, just far enough in that the
+// digit clears the seams either side of it.
+function d4Corners(): Face[] {
+  const out: Face[] = [];
+  for (const face of D4_FACES) {
+    face.forEach((corner, i) => {
+      const [x, y] = D4_VERTICES[corner];
+      const size = D4_SIZE[corner];
+      const [a, b] = [face[(i + 1) % 3], face[(i + 2) % 3]].map((v) => {
+        const dx = D4_VERTICES[v][0] - x;
+        const dy = D4_VERTICES[v][1] - y;
+        const len = Math.hypot(dx, dy);
+        return [dx / len, dy / len];
+      });
+      const [bx, by] = [a[0] + b[0], a[1] + b[1]];
+      const blen = Math.hypot(bx, by);
+      const [ux, uy] = [bx / blen, by / blen];
+      const half = Math.acos(a[0] * b[0] + a[1] * b[1]) / 2;
+      // digit ≈ 0.45em wide, 0.7em tall; seams are 2.5 either side of the edge
+      const d = size * 0.35 + (size * 0.225 + 2.5) / Math.tan(half) + 1.5;
+      out.push({
+        x: x + d * ux,
+        y: y + d * uy,
+        turn: (Math.atan2(ux, -uy) * 180) / Math.PI,
+        size,
+        corner,
+      });
+    });
+  }
+  return out;
+}
+
+const D4_CORNERS = d4Corners();
+const d4Values = (byVertex: number[]) =>
+  D4_CORNERS.map((f) => byVertex[f.corner!]);
+
 const DICE: Die[] = [
-  // tetrahedron: three faces meeting at a low centre point. The side faces are
-  // too narrow to turn a value outwards, so those lean up along the face.
+  // tetrahedron seen from above its apex: three faces meeting at a low centre
+  // point, numbered at the corners like the real thing.
   {
     id: "d4",
     sides: 4,
     pivot: [50, 58.7],
     silhouette: "M50 12 L86 82 L14 82 Z",
     seams: "M50 12 L50 58 M14 82 L50 58 M86 82 L50 58",
-    faces: [
-      { x: 38.5, y: 54, turn: 27, size: 19 },
-      { x: 61.5, y: 54, turn: -27, size: 19 },
-      { x: 50, y: 73, turn: 0, size: 17 },
-    ],
-    initial: [4, 2, 3],
+    faces: D4_CORNERS,
+    vertex: true,
+    initial: d4Values([4, 1, 2, 3]),
   },
   // cube, iso view: three visible faces of pips
   {
@@ -150,8 +210,14 @@ function roll(die: Die): number[] {
   const slots = die.faces ?? die.pipFaces ?? [];
   const pool = Array.from({ length: die.sides }, (_, i) => i + 1);
   const out: number[] = new Array(slots.length);
-  // A d4 has no opposite faces: every face touches the other three.
-  const opposites = die.sides > 4;
+  // Vertex dice: the rolled value goes on the apex and the rest ring the
+  // outer vertices, in a random rotation of their fixed order.
+  if (die.vertex) {
+    const top = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+    const spin = Math.floor(Math.random() * pool.length);
+    const ring = [...pool.slice(spin), ...pool.slice(0, spin)];
+    return d4Values([top, ...ring]);
+  }
   const take = (ok: (n: number) => boolean) => {
     const options = pool.filter(ok);
     const n = options[Math.floor(Math.random() * options.length)];
@@ -166,8 +232,7 @@ function roll(die: Die): number[] {
   for (const i of order) {
     out[i] = take(
       (n) =>
-        (!opposites || !out.includes(die.sides + 1 - n)) &&
-        (!die.faces?.[i].digits || n < 10),
+        !out.includes(die.sides + 1 - n) && (!die.faces?.[i].digits || n < 10),
     );
   }
   return out;
