@@ -181,6 +181,68 @@ export const META_FIELDS = [
     description:
       "Is this session worth flagging to the Megagame organizers as a potential fit for integrating into the Megagame?",
   },
+  {
+    // Airtable spells it "recomendation"; matched exactly so the write lands.
+    field: "Grader Verdict recomendation",
+    label: "Your verdict recommendation",
+    kind: "select",
+    options: [
+      "This would be great for Metagame!!!",
+      "Nice to have",
+      "Add to unconference schedule",
+      "Bad for Metagame",
+    ],
+    description:
+      "Your recommendation as the grader. The committee's own call lives in Verdict, below.",
+  },
+] as const;
+
+export const VERDICT_FIELD = "Verdict";
+export const NEXT_STEPS_FIELD = "Next steps";
+
+const VERDICT_OPTIONS = [
+  "Confirmed",
+  "Probably yes",
+  "Needs modification but could be promising",
+  "Probably no",
+  "Rejected",
+  "N/A",
+  "Sponsorship / product placement potential — send Night Market form",
+  "This is running a game, probably fine",
+] as const;
+
+// Numbered in Airtable, so this order is the pipeline order. The trailing space
+// on "7. None!" is in the option name itself — don't trim it or the write fails.
+const NEXT_STEPS_OPTIONS = [
+  "1. Grade",
+  "2. Committee decision",
+  "3. Email speaker with verdict",
+  "4. Assign shepherd",
+  "5. Shepherd meeting",
+  "6. Add to schedule",
+  "7. None! We're good :) ",
+  "N/A",
+] as const;
+
+/**
+ * The call on the proposal, kept apart from the rubric: these are the shared
+ * pipeline columns the whole committee reads, not one grader's scoring.
+ */
+export const DECISION_FIELDS = [
+  {
+    field: VERDICT_FIELD,
+    label: "Verdict",
+    kind: "select",
+    options: VERDICT_OPTIONS,
+    description: "What's our decision on this session?",
+  },
+  {
+    field: NEXT_STEPS_FIELD,
+    label: "Next steps",
+    kind: "select",
+    options: NEXT_STEPS_OPTIONS,
+    description: "Where are we at in the processing pipeline?",
+  },
 ] as const;
 
 type Writable =
@@ -199,7 +261,7 @@ const WRITABLE_FALLBACK: Record<string, Writable> = {
     ]),
   ),
   ...Object.fromEntries(
-    META_FIELDS.map((f) => [
+    [...META_FIELDS, ...DECISION_FIELDS].map((f) => [
       f.field,
       ("options" in f
         ? { kind: f.kind, options: f.options }
@@ -336,6 +398,8 @@ export type Submission = {
   host: string;
   graders: Grader[];
   gradingStatus: string | null;
+  verdict: string | null;
+  nextSteps: string | null;
   /** True once any of the five rubric metrics has a value. */
   started: boolean;
   fields: Record<string, unknown>;
@@ -344,6 +408,8 @@ export type Submission = {
 type AirtableRecord = { id: string; fields: Record<string, unknown> };
 
 type Collaborator = { email?: string; name?: string };
+
+const text = (value: unknown) => (typeof value === "string" ? value : null);
 
 function toSubmission(record: AirtableRecord): Submission {
   const { fields } = record;
@@ -357,10 +423,9 @@ function toSubmission(record: AirtableRecord): Submission {
     graders: raw.flatMap((c) =>
       c?.email ? [{ email: c.email, name: c.name || c.email }] : [],
     ),
-    gradingStatus:
-      typeof fields[GRADING_STATUS_FIELD] === "string"
-        ? (fields[GRADING_STATUS_FIELD] as string)
-        : null,
+    gradingStatus: text(fields[GRADING_STATUS_FIELD]),
+    verdict: text(fields[VERDICT_FIELD]),
+    nextSteps: text(fields[NEXT_STEPS_FIELD]),
     started: RUBRIC_METRICS.some((m) => Boolean(fields[m.field])),
     fields,
   };
@@ -460,12 +525,17 @@ export function hostPicture(
 
 const SCHEMA_TTL_SECONDS = 300;
 
-type FieldSchema = { options?: string[]; description?: string };
+type FieldSchema = {
+  options?: string[];
+  /** Option name → Airtable colour token, e.g. "greenBright". */
+  colors?: Record<string, string>;
+  description?: string;
+};
 
 type MetaField = {
   name: string;
   description?: string;
-  options?: { choices?: { name: string }[] };
+  options?: { choices?: { name: string; color?: string }[] };
 };
 
 async function fieldSchema(): Promise<Record<string, FieldSchema>> {
@@ -500,6 +570,11 @@ async function fieldSchema(): Promise<Record<string, FieldSchema>> {
         f.name,
         {
           options: f.options?.choices?.map((c) => c.name),
+          colors: Object.fromEntries(
+            f.options?.choices
+              ?.filter((c) => c.color)
+              .map((c) => [c.name, c.color as string]) ?? [],
+          ),
           description: f.description,
         },
       ]),
@@ -518,16 +593,38 @@ export type ResolvedField = {
   description?: string;
 };
 
-/** META_FIELDS with live options + descriptions layered over the committed ones. */
-export async function resolveMetaFields(): Promise<ResolvedField[]> {
+/** Editable fields with live options + descriptions layered over the committed ones. */
+export async function resolveEditableFields(
+  fields: readonly {
+    field: string;
+    label: string;
+    kind: ResolvedField["kind"];
+    options?: readonly string[];
+    description?: string;
+  }[],
+): Promise<ResolvedField[]> {
   const schema = await fieldSchema();
-  return META_FIELDS.map((f) => ({
+  return fields.map((f) => ({
     field: f.field,
     label: f.label,
     kind: f.kind,
-    options: schema[f.field]?.options ?? ("options" in f ? f.options : []),
+    options: schema[f.field]?.options ?? f.options ?? [],
     description: schema[f.field]?.description || f.description,
   }));
+}
+
+/**
+ * Option name → Airtable colour token for the given fields, so a select can be
+ * shown here in the colours it already has in Airtable. Empty without the
+ * schema scope, in which case callers fall back to plain text.
+ */
+export async function optionColors(
+  fields: readonly string[],
+): Promise<Record<string, Record<string, string>>> {
+  const schema = await fieldSchema();
+  return Object.fromEntries(
+    fields.map((field) => [field, schema[field]?.colors ?? {}]),
+  );
 }
 
 export async function resolveGradingStatuses(): Promise<readonly string[]> {
@@ -551,19 +648,33 @@ export async function resolveDisplayFields(
 
 async function writableFields(): Promise<Record<string, Writable>> {
   const schema = await fieldSchema();
+  // When the schema is readable, drop anything Airtable no longer has. Otherwise
+  // one renamed column 422s the whole PATCH and nobody can save at all.
+  const live = Object.keys(schema).length > 0;
+
   return Object.fromEntries(
-    Object.entries(WRITABLE_FALLBACK).map(([field, spec]) => {
-      const live = schema[field]?.options;
-      // Rubric options stay on the committed list: each one is paired with its
-      // guidance text, so a renamed choice should fail loudly, not silently.
-      const isRubric = RUBRIC_METRICS.some((m) => m.field === field);
-      return [
-        field,
-        live && "options" in spec && !isRubric
-          ? { ...spec, options: live }
-          : spec,
-      ];
-    }),
+    Object.entries(WRITABLE_FALLBACK)
+      .filter(([field]) => {
+        if (live && !(field in schema)) {
+          console.warn(
+            `[grade] field "${field}" is gone from Airtable — skipping`,
+          );
+          return false;
+        }
+        return true;
+      })
+      .map(([field, spec]) => {
+        const options = schema[field]?.options;
+        // Rubric options stay on the committed list: each one is paired with its
+        // guidance text, so a renamed choice should fail loudly, not silently.
+        const isRubric = RUBRIC_METRICS.some((m) => m.field === field);
+        return [
+          field,
+          options && "options" in spec && !isRubric
+            ? { ...spec, options }
+            : spec,
+        ];
+      }),
   );
 }
 
