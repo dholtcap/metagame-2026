@@ -3,10 +3,18 @@ import { connection } from "next/server";
 import { GraderPicker, PasswordForm } from "./SignInForms";
 import { isConfigured, readSession } from "@/lib/grader-auth";
 import type { Grader } from "@/lib/grader-auth";
+import InlineSelect from "./InlineSelect";
+import { swatch } from "@/lib/airtable-colors";
 import {
   gradersFrom,
+  GRADING_STATUS_FIELD,
   listSubmissions,
+  NEXT_STEPS_FIELD,
+  optionColors,
+  resolveEditableFields,
+  DECISION_FIELDS,
   RUBRIC_METRICS,
+  VERDICT_FIELD,
   type Submission,
 } from "@/lib/rfp-rubric";
 
@@ -17,11 +25,40 @@ const VIEWS = [
 
 type ViewKey = (typeof VIEWS)[number]["key"];
 
-const SORTS = ["proposal", "grader", "status"] as const;
+const SORTS = ["proposal", "grader", "verdict", "next", "grading"] as const;
 type SortKey = (typeof SORTS)[number];
 
 // Worst-to-best, so ascending puts what still needs attention first.
-const STATUS_ORDER = ["Not started", "In Progress", "Blocked", "Done"];
+const GRADING_ORDER = ["Not started", "In Progress", "Blocked", "Done"];
+
+// Airtable's own select order, so sorting reads the way the column does there.
+const VERDICT_ORDER = [
+  "Confirmed",
+  "Probably yes",
+  "This is running a game, probably fine",
+  "Needs modification but could be promising",
+  "Sponsorship / product placement potential — send Night Market form",
+  "Probably no",
+  "Rejected",
+  "N/A",
+];
+
+const NEXT_STEPS_ORDER = [
+  "1. Grade",
+  "2. Committee decision",
+  "3. Email speaker with verdict",
+  "4. Assign shepherd",
+  "5. Shepherd meeting",
+  "6. Add to schedule",
+  "7. None! We're good :) ",
+  "N/A",
+];
+
+/** Blank or unrecognised values sort after everything known. */
+const rank = (order: string[], value: string | null) => {
+  const i = value ? order.indexOf(value) : -1;
+  return i === -1 ? order.length : i;
+};
 
 const first = (value: string | string[] | undefined) =>
   (Array.isArray(value) ? value[0] : value) ?? "";
@@ -36,19 +73,39 @@ function compare(a: Submission, b: Submission, sort: SortKey) {
       a.title.localeCompare(b.title)
     );
   }
-  if (sort === "status") {
+  if (sort === "grading") {
     return (
-      STATUS_ORDER.indexOf(a.gradingStatus ?? "Not started") -
-        STATUS_ORDER.indexOf(b.gradingStatus ?? "Not started") ||
+      rank(GRADING_ORDER, a.gradingStatus) -
+        rank(GRADING_ORDER, b.gradingStatus) || a.title.localeCompare(b.title)
+    );
+  }
+  if (sort === "verdict") {
+    return (
+      rank(VERDICT_ORDER, a.verdict) - rank(VERDICT_ORDER, b.verdict) ||
       a.title.localeCompare(b.title)
+    );
+  }
+  if (sort === "next") {
+    return (
+      rank(NEXT_STEPS_ORDER, a.nextSteps) -
+        rank(NEXT_STEPS_ORDER, b.nextSteps) || a.title.localeCompare(b.title)
     );
   }
   return a.title.localeCompare(b.title);
 }
 
-function StatusPill({ submission }: { submission: Submission }) {
+function GradingPill({
+  submission,
+  colors,
+}: {
+  submission: Submission;
+  colors: Record<string, string>;
+}) {
   const status = submission.gradingStatus ?? "Not started";
-  const tone =
+  const tone = swatch(colors[status]);
+  // Without the schema scope there are no Airtable colours, so fall back to the
+  // site palette rather than rendering every status identically.
+  const fallback =
     status === "Done"
       ? "bg-moss/15 text-moss"
       : status === "Blocked"
@@ -56,40 +113,51 @@ function StatusPill({ submission }: { submission: Submission }) {
         : status === "In Progress"
           ? "bg-tan/25 text-navy"
           : "bg-ink/8 text-ink/55";
+
   return (
-    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${tone}`}>
+    <span
+      style={tone ?? undefined}
+      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${tone ? "" : fallback}`}
+    >
       {status}
     </span>
   );
 }
 
-/** Reads as a person, so it can't be mistaken for part of the host's name. */
+/**
+ * Initials only, so the column stays narrow and the title gets the room. The
+ * name shows on hover at lg+; below that the row stacks and it just fits inline.
+ */
 function GraderChip({ graders }: { graders: Grader[] }) {
-  if (graders.length === 0) {
-    return (
-      <span className="rounded-full border border-dashed border-ink/25 px-2.5 py-1 text-xs text-ink/40">
-        Unassigned
-      </span>
-    );
-  }
-
-  const names = graders.map((g) => g.name).join(", ");
-  const initials = graders[0].name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
+  const assigned = graders.length > 0;
+  const names = assigned ? graders.map((g) => g.name).join(", ") : "Unassigned";
+  const initials = assigned
+    ? graders[0].name
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((word) => word[0])
+        .join("")
+        .toUpperCase()
+    : "–";
 
   return (
-    <span
-      title={`Grader: ${names}`}
-      className="flex w-fit items-center gap-1.5 rounded-full bg-ink/6 py-1 pr-2.5 pl-1 text-xs text-ink/70"
-    >
-      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-navy text-[9px] font-semibold text-cream">
+    // Full width so the whole cell is the hover target, not just the 24px circle.
+    <span className="group/grader relative inline-flex w-full items-center gap-1.5">
+      <span
+        className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${
+          assigned
+            ? "bg-navy text-cream"
+            : "border border-dashed border-ink/30 text-ink/35"
+        }`}
+      >
         {initials}
       </span>
-      <span className="truncate">{names}</span>
+      <span className="truncate text-xs text-ink/70 lg:hidden">{names}</span>
+      {/* Beside the circle, not below it: the list has overflow-hidden for its
+          rounded corners, which would clip anything leaving the row. */}
+      <span className="pointer-events-none absolute top-1/2 left-7 z-20 hidden -translate-y-1/2 rounded-lg bg-navy px-2 py-1 text-xs whitespace-nowrap text-cream opacity-0 shadow-lg transition-opacity group-hover/grader:opacity-100 lg:block">
+        {names}
+      </span>
     </span>
   );
 }
@@ -141,18 +209,23 @@ function Group({
   title,
   submissions,
   state,
+  colors,
+  decisionOptions,
 }: {
   title: string;
   submissions: Submission[];
   state: SortState;
+  colors: Record<string, Record<string, string>>;
+  decisionOptions: Record<string, string[]>;
 }) {
   if (submissions.length === 0) return null;
 
   // Grader only earns a column in "Everything" — in "mine" it's always you.
+  // Everything past the title is sized to its content so the title keeps the rest.
   const cols =
     state.view === "all"
-      ? "sm:grid-cols-[minmax(0,1fr)_11rem_8rem]"
-      : "sm:grid-cols-[minmax(0,1fr)_8rem]";
+      ? "lg:grid-cols-[minmax(0,1fr)_3.25rem_8.5rem_6.5rem_6.5rem]"
+      : "lg:grid-cols-[minmax(0,1fr)_8.5rem_6.5rem_6.5rem]";
 
   return (
     <section>
@@ -163,18 +236,15 @@ function Group({
 
       <div className="overflow-hidden rounded-xl border border-line bg-white">
         <div
-          className={`hidden gap-4 border-b border-line bg-cream/60 px-4 py-2 sm:grid ${cols}`}
+          className={`hidden gap-4 border-b border-line bg-cream/60 px-4 py-2 lg:grid ${cols}`}
         >
           <SortLink column="proposal" label="Proposal" state={state} />
           {state.view === "all" && (
             <SortLink column="grader" label="Grader" state={state} />
           )}
-          <SortLink
-            column="status"
-            label="Status"
-            state={state}
-            className="text-right"
-          />
+          <SortLink column="grading" label="Grading" state={state} />
+          <SortLink column="verdict" label="Verdict" state={state} />
+          <SortLink column="next" label="Next steps" state={state} />
         </div>
 
         <ul className="divide-y divide-line">
@@ -182,32 +252,63 @@ function Group({
             const scored = RUBRIC_METRICS.filter(
               (m) => submission.fields[m.field],
             ).length;
+            // Not a whole-row link any more: the row holds dropdowns now, and a
+            // stray click navigating away mid-edit would be worse.
             return (
-              <li key={submission.id}>
-                <Link
-                  href={`/grade/${submission.id}`}
-                  className={`grid gap-1.5 px-4 py-3 transition-colors hover:bg-cream sm:items-center sm:gap-4 ${cols}`}
-                >
+              <li
+                key={submission.id}
+                className={`grid gap-1.5 px-4 py-3 transition-colors hover:bg-cream lg:items-center lg:gap-4 ${cols}`}
+              >
+                <span className="min-w-0">
+                  <Link
+                    href={`/grade/${submission.id}`}
+                    className="block truncate font-medium text-navy hover:text-meeple hover:underline"
+                  >
+                    {submission.title}
+                  </Link>
+                  <span className="block truncate text-sm text-ink/55">
+                    {submission.host}
+                  </span>
+                </span>
+                {state.view === "all" && (
                   <span className="min-w-0">
-                    <span className="block truncate font-medium text-navy">
-                      {submission.title}
-                    </span>
-                    <span className="block truncate text-sm text-ink/55">
-                      {submission.host}
-                    </span>
+                    <GraderChip graders={submission.graders} />
                   </span>
-                  {state.view === "all" && (
-                    <span className="min-w-0">
-                      <GraderChip graders={submission.graders} />
-                    </span>
-                  )}
-                  <span className="flex items-center gap-2 sm:justify-end">
-                    <span className="text-xs text-ink/45 tabular-nums">
-                      {scored}/{RUBRIC_METRICS.length}
-                    </span>
-                    <StatusPill submission={submission} />
+                )}
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="text-xs text-ink/45 tabular-nums">
+                    {scored}/{RUBRIC_METRICS.length}
                   </span>
-                </Link>
+                  <GradingPill
+                    submission={submission}
+                    colors={colors[GRADING_STATUS_FIELD]}
+                  />
+                </span>
+                <span className="flex min-w-0 items-center gap-1.5">
+                  {/* Below lg the columns stack, so they need their own labels. */}
+                  <span className="shrink-0 text-xs text-ink/40 lg:hidden">
+                    Verdict
+                  </span>
+                  <InlineSelect
+                    recordId={submission.id}
+                    field={VERDICT_FIELD}
+                    value={submission.verdict}
+                    options={decisionOptions[VERDICT_FIELD]}
+                    colors={colors[VERDICT_FIELD]}
+                  />
+                </span>
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <span className="shrink-0 text-xs text-ink/40 lg:hidden">
+                    Next steps
+                  </span>
+                  <InlineSelect
+                    recordId={submission.id}
+                    field={NEXT_STEPS_FIELD}
+                    value={submission.nextSteps}
+                    options={decisionOptions[NEXT_STEPS_FIELD]}
+                    colors={colors[NEXT_STEPS_FIELD]}
+                  />
+                </span>
               </li>
             );
           })}
@@ -250,6 +351,15 @@ export default async function GradePage(props: PageProps<"/grade">) {
   const dir = first(params.dir) === "desc" ? "desc" : "asc";
   const state: SortState = { sort, dir, view, q: rawQuery };
 
+  const decisionFields = await resolveEditableFields(DECISION_FIELDS);
+  const decisionOptions = Object.fromEntries(
+    decisionFields.map((f) => [f.field, [...f.options]]),
+  );
+  const colors = await optionColors([
+    VERDICT_FIELD,
+    NEXT_STEPS_FIELD,
+    GRADING_STATUS_FIELD,
+  ]);
   const me = session.grader.email;
   const byView: Record<ViewKey, Submission[]> = {
     mine: submissions.filter((s) => s.graders.some((g) => g.email === me)),
@@ -315,11 +425,15 @@ export default async function GradePage(props: PageProps<"/grade">) {
             title="To grade"
             submissions={visible.filter((s) => s.gradingStatus !== "Done")}
             state={state}
+            colors={colors}
+            decisionOptions={decisionOptions}
           />
           <Group
             title="Graded"
             submissions={visible.filter((s) => s.gradingStatus === "Done")}
             state={state}
+            colors={colors}
+            decisionOptions={decisionOptions}
           />
         </div>
       )}
