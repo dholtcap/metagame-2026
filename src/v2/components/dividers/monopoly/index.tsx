@@ -29,8 +29,10 @@ const LURCH = 0.45; // of the step spent moving
 // The dice spin this long before the pieces set off (dice/index.tsx SPIN_MS).
 const SPIN_MS = 700;
 // Track edges sit this far inside the row, and the top runs this far above
-// the dice; the whole thing is no wider than this.
+// the dice; the whole thing is no wider than this. On a screen narrower than
+// that the pieces walk the screen edge instead, a piece's half-width in.
 const INSET = 24;
+const EDGE = GLYPH_PX / 2 + 4;
 const ABOVE_DICE = 34;
 const MAX_WIDTH = 960;
 const RESET_MS = 900;
@@ -53,6 +55,9 @@ export default function MonopolyDivider() {
   const raf = useRef<number>(undefined);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [shaking, setShaking] = useState(false);
+  // Where the flag goes once measured: a pitch past the shoe, or the track's
+  // right corner when the screen is too narrow for that.
+  const [flagLeft, setFlagLeft] = useState<number | null>(null);
   const racing = race.player !== null;
 
   const place = (i: number, p: Point) => {
@@ -76,22 +81,25 @@ export default function MonopolyDivider() {
       y: cy,
     }));
     const last = rest.current[rest.current.length - 1];
-    const flag = { x: last.x + STEP, y: cy };
+    // The box is centred in the row, so the track is centred on the box,
+    // then held inside the screen.
+    const mid = b.width / 2;
+    const half = Math.min(
+      (row.getBoundingClientRect().width - 2 * INSET) / 2,
+      MAX_WIDTH / 2,
+    );
+    const left = Math.max(mid - half, EDGE - b.left);
+    const right = Math.min(
+      mid + half,
+      document.documentElement.clientWidth - b.left - EDGE,
+    );
+    const flag = { x: Math.min(last.x + STEP, right), y: cy };
+    setFlagLeft(flag.x - GLYPH_PX / 2);
     // The pieces start where they sit, each a pitch further round than the
     // one before it — the front piece has that much less to run.
     progress.current ??= rest.current.map((r) => flag.x - r.x);
-    // The box is centred in the row, so the track is centred on the box —
-    // but never so narrow that the flag falls off its right edge.
-    const mid = b.width / 2;
-    const half = Math.max(
-      Math.min(
-        (row.getBoundingClientRect().width - 2 * INSET) / 2,
-        MAX_WIDTH / 2,
-      ),
-      flag.x - mid + GLYPH_PX,
-    );
     const top = dice.getBoundingClientRect().top - b.top - ABOVE_DICE;
-    return makeTrack(flag, mid - half, mid + half, top);
+    return makeTrack(flag, left, right, top);
   };
 
   const stop = () => {
@@ -166,6 +174,11 @@ export default function MonopolyDivider() {
 
   useEffect(() => stop, []);
 
+  // Place the flag as soon as a token is picked.
+  useEffect(() => {
+    if (racing) measure();
+  }, [racing]);
+
   const onToken = (i: number) => {
     if (race.moving) return;
     if (racing) {
@@ -214,7 +227,7 @@ export default function MonopolyDivider() {
           className={`absolute top-1/2 -translate-y-1/2 transition-opacity duration-500 ${
             racing ? "opacity-100" : "opacity-0"
           }`}
-          style={{ left: `calc(100% + ${ICON_GAP_PX}px)` }}
+          style={{ left: flagLeft ?? `calc(100% + ${ICON_GAP_PX}px)` }}
         >
           <CheckeredFlag />
         </span>
