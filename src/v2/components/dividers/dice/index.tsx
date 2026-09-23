@@ -87,10 +87,13 @@ function d4Corners(): Face[] {
       const half = Math.acos(a[0] * b[0] + a[1] * b[1]) / 2;
       // digit ≈ 0.45em wide, 0.7em tall; seams are 2.5 either side of the edge
       const d = size * 0.35 + (size * 0.225 + 2.5) / Math.tan(half) + 1.5;
+      // Rounded: Node and the browser disagree on the last bit of the trig,
+      // which hydration would flag.
+      const r3 = (n: number) => Math.round(n * 1000) / 1000;
       out.push({
-        x: x + d * ux,
-        y: y + d * uy,
-        turn: (Math.atan2(ux, -uy) * 180) / Math.PI,
+        x: r3(x + d * ux),
+        y: r3(y + d * uy),
+        turn: r3((Math.atan2(ux, -uy) * 180) / Math.PI),
         size,
         corner,
       });
