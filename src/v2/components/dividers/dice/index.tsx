@@ -2,13 +2,16 @@
 
 // Faceted polyhedral "weird dice" (d4/d6/d8/d20) as solid charcoal glyphs with
 // transparent facet seams (cut via mask, so the page bg shows through) — the
-// same solid-with-negative-space language as the weirdchess divider. Just
-// dice — not a puzzle game. Click one and it spins twice and re-rolls every
-// visible face.
+// same solid-with-negative-space language as the weirdchess divider. Click
+// one and it spins twice and re-rolls every visible face. With a Monopoly
+// race on (monopoly/race.ts) that click is the player's roll: three phantom
+// copies roll for the rivals beneath the row, and the dice sit out until the
+// pieces land.
 import { useEffect, useRef, useState } from "react";
 import DividerRow from "../DividerRow";
-import { SHADOW } from "../sizing";
+import { ICON_GAP, SHADOW } from "../sizing";
 import { trackClick } from "../track";
+import { RIVAL_SHADES, setDiceEl, startTurn, useRace } from "../monopoly/race";
 
 const CHARCOAL = "#4d4d4d";
 // Bigger than GLYPH so the face values read, with the excess taken back as
@@ -34,7 +37,7 @@ type PipFace = {
   v: [number, number];
 };
 
-type Die = {
+export type Die = {
   id: string;
   sides: number;
   pivot: [number, number]; // visual centre, which the spin turns about
@@ -206,7 +209,7 @@ const PIPS: [number, number][][] = [
 // Distinct values, one per visible face. Opposite faces sum to sides + 1 and
 // can never be seen together, so no two values may. Narrow faces draw from 1–9
 // first, leaving the two-digit values for faces that fit them.
-function roll(die: Die): number[] {
+export function roll(die: Die): number[] {
   const slots = die.faces ?? die.pipFaces ?? [];
   const pool = Array.from({ length: die.sides }, (_, i) => i + 1);
   const out: number[] = new Array(slots.length);
@@ -238,22 +241,26 @@ function roll(die: Die): number[] {
   return out;
 }
 
-function DiceGlyph({ die }: { die: Die }) {
-  const [values, setValues] = useState(die.initial);
-  const [spins, setSpins] = useState(0);
-  const swap = useRef<ReturnType<typeof setTimeout>>(undefined);
-  useEffect(() => () => clearTimeout(swap.current), []);
-
-  const onClick = () => {
-    trackClick("dice");
-    setSpins((n) => n + 1);
-    clearTimeout(swap.current);
-    swap.current = setTimeout(() => setValues(roll(die)), SPIN_MS / 2);
-  };
-
+// One die, drawn: the spin is a rotate transition, so a change of `spins`
+// turns it twice.
+function DieSvg({
+  die,
+  values,
+  spins,
+  fill = CHARCOAL,
+  className = "",
+  onClick,
+}: {
+  die: Die;
+  values: number[];
+  spins: number;
+  fill?: string;
+  className?: string;
+  onClick?: () => void;
+}) {
   // WebKit won't repaint a masked shape when only the mask's text changes, so
   // the values go in the id — the reference itself changes with the roll.
-  const maskId = `dice-seam-${die.id}-${values.join("-")}`;
+  const maskId = `dice-seam-${die.id}-${fill.slice(1)}-${values.join("-")}`;
   return (
     <svg
       viewBox="0 0 100 100"
@@ -264,7 +271,7 @@ function DiceGlyph({ die }: { die: Die }) {
         transformOrigin: `${die.pivot[0]}% ${die.pivot[1]}%`,
         transitionDuration: `${SPIN_MS}ms`,
       }}
-      className={`${SIZE} ${SHADOW} transition-[rotate] ease-in-out`}
+      className={`${SIZE} ${SHADOW} transition-[rotate] ease-in-out ${className}`}
     >
       <mask
         id={maskId}
@@ -312,18 +319,83 @@ function DiceGlyph({ die }: { die: Die }) {
           </text>
         ))}
       </mask>
-      <path d={die.silhouette} fill={CHARCOAL} mask={`url(#${maskId})`} />
+      <path d={die.silhouette} fill={fill} mask={`url(#${maskId})`} />
     </svg>
+  );
+}
+
+function DiceGlyph({ die }: { die: Die }) {
+  const [values, setValues] = useState(die.initial);
+  const [spins, setSpins] = useState(0);
+  const race = useRace();
+  const swap = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(swap.current), []);
+
+  const onClick = () => {
+    const next = roll(die);
+    if (race.player !== null) {
+      // Cooldown: the pieces are still moving.
+      if (!startTurn(die.id, [next, roll(die), roll(die), roll(die)])) return;
+    }
+    trackClick("dice");
+    setSpins((n) => n + 1);
+    clearTimeout(swap.current);
+    swap.current = setTimeout(() => setValues(next), SPIN_MS / 2);
+  };
+
+  return <DieSvg die={die} values={values} spins={spins} onClick={onClick} />;
+}
+
+// The rivals' rolls: three copies of the die just thrown, in their greys,
+// spinning in beneath the row. They fade once the pieces have landed. Keyed
+// on the turn by the parent, so each turn spins from zero.
+function PhantomDice() {
+  const race = useRace();
+  const ref = useRef<HTMLSpanElement>(null);
+  const [spins, setSpins] = useState(0);
+  useEffect(() => {
+    // Flush the 0° style before turning, so the rotate transition plays.
+    ref.current?.getBoundingClientRect();
+    const id = requestAnimationFrame(() => setSpins(1));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const die = DICE.find((d) => d.id === race.turn?.dieId);
+  if (!race.turn || !die) return null;
+  return (
+    <span
+      ref={ref}
+      aria-hidden
+      className={`absolute top-full left-1/2 mt-4 flex -translate-x-1/2 items-center ${ICON_GAP} transition-opacity duration-500 ${
+        race.moving ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      {RIVAL_SHADES.map((shade, i) => (
+        <DieSvg
+          key={shade}
+          die={die}
+          values={race.turn!.rolls[i + 1]}
+          spins={spins}
+          fill={shade}
+        />
+      ))}
+    </span>
   );
 }
 
 // The hero puzzle's D&D row.
 export default function DiceDivider() {
+  const race = useRace();
   return (
     <DividerRow game="dnd">
-      {DICE.map((d) => (
-        <DiceGlyph key={d.id} die={d} />
-      ))}
+      <span
+        ref={setDiceEl}
+        className={`relative flex items-center ${ICON_GAP}`}
+      >
+        {DICE.map((d) => (
+          <DiceGlyph key={d.id} die={d} />
+        ))}
+        <PhantomDice key={race.turn?.id ?? "none"} />
+      </span>
     </DividerRow>
   );
 }

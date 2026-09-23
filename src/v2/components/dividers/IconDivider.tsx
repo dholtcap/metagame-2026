@@ -28,9 +28,11 @@ export type GameIcon = {
 export function IconGlyph({
   icon,
   className,
+  fill = CHARCOAL,
 }: {
   icon: GameIcon;
   className?: string;
+  fill?: string;
 }) {
   return (
     <svg
@@ -42,11 +44,12 @@ export function IconGlyph({
         <path
           key={i}
           d={d}
-          fill={CHARCOAL}
+          fill={fill}
           fillRule={icon.fillRule}
-          stroke={icon.strokeWidth ? CHARCOAL : undefined}
+          stroke={icon.strokeWidth ? fill : undefined}
           strokeWidth={icon.strokeWidth}
           strokeLinejoin="round"
+          className="transition-[fill,stroke] duration-300"
         />
       ))}
     </svg>

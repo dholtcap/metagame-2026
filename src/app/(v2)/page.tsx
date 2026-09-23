@@ -446,7 +446,7 @@ export default function Home() {
         </div>
       </section>
 
-      <DiceDivider />
+      <TetrisDivider />
 
       {/* venue */}
       <section id="venue" className={`${SECTION} md:py-14`}>
@@ -657,7 +657,7 @@ export default function Home() {
         </div>
       </section>
 
-      <TetrisDivider />
+      <DiceDivider />
 
       {/* key dates */}
       <section id="key-dates" className={`${SECTION} md:py-14`}>

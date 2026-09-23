@@ -9,6 +9,7 @@ export const CLICK_EGGS = [
   "dice",
   "clocktower",
   "invaders",
+  "monopoly",
 ] as const;
 export type ClickEgg = (typeof CLICK_EGGS)[number];
 
@@ -20,7 +21,8 @@ export type EggEvent =
   | { egg: "chess"; event: "castle" }
   | { egg: "tetris"; event: "clear" }
   | { egg: "clocktower"; event: "kill" }
-  | { egg: "invaders"; event: "win" };
+  | { egg: "invaders"; event: "win" }
+  | { egg: "monopoly"; event: "win" };
 
 // Groups one browser's eggs together and nothing more: a random code kept in
 // localStorage, so it survives reloads (how you get a finished rack back) and

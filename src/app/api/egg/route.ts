@@ -25,6 +25,7 @@ const parse = (body: Record<string, unknown>): EggEvent | null => {
   if (egg === "tetris" && event === "clear") return { egg, event };
   if (egg === "clocktower" && event === "kill") return { egg, event };
   if (egg === "invaders" && event === "win") return { egg, event };
+  if (egg === "monopoly" && event === "win") return { egg, event };
   return null;
 };
 
