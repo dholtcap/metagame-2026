@@ -3,9 +3,11 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import BtcModal from "@/v2/components/tickets/BtcModal";
+import DayPassModal from "@/v2/components/tickets/DayPassModal";
 import SupporterModal from "@/v2/components/tickets/SupporterModal";
 import { Button } from "@/v2/components/ui/button";
 import {
+  dayPasses,
   fullPriceTicketUrl,
   getTicket,
   supporterTier,
@@ -67,6 +69,7 @@ export default function TicketsPanel({
   const earlyBirdHref = standard ? ticketUrl(standard) : null;
   const standardHref = standard ? fullPriceTicketUrl(standard) : null;
   const [supporterOpen, setSupporterOpen] = useState(false);
+  const [dayPassOpen, setDayPassOpen] = useState(false);
   // /#supporter deep-links into the modal (e.g. from /sponsor); the tile's id
   // gives the browser its scroll target. Closing drops the hash so a repeat
   // click on the same link changes the URL again and reopens it.
@@ -233,6 +236,27 @@ export default function TicketsPanel({
             )}
           </span>
         </Button>
+        {/* Day passes: USD → the modal's Stripe links, BTC → its OpenNode form. */}
+        <Button
+          type="button"
+          variant="raised"
+          onClick={() => setDayPassOpen(true)}
+          // Narrower padding + a 32px line box so the three-price line fits the
+          // shared 210px tile at the same height as the others.
+          className={TILE.replace("px-7", "px-4")}
+        >
+          <span className={TILE_LABEL}>Day pass</span>
+          <span
+            className={`${HEADING} leading-[32px] text-tan ${isBtc ? "text-[15px]" : "text-[22px]"}`}
+          >
+            {isBtc
+              ? `\u20BF${dayPasses.map((p) => p.btc).join("/")}`
+              : dayPasses.map((p) => `$${p.usd}`).join("/")}
+          </span>
+          <span className={TILE_NOTE}>
+            {dayPasses.map((p) => p.date.long.slice(0, 3)).join(" · ")}
+          </span>
+        </Button>
         {/* Volunteer + financial aid: plain application links, deliberately not
             styled like the purchase tiles. */}
         <div
@@ -263,6 +287,7 @@ export default function TicketsPanel({
         </div>
       </div>
       {supporterOpen && <SupporterModal onClose={closeSupporter} />}
+      {dayPassOpen && <DayPassModal onClose={() => setDayPassOpen(false)} />}
       {btcOpen && standard && (
         <BtcModal
           ticket={standard}

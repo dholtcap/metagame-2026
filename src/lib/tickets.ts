@@ -130,10 +130,79 @@ export function supporterChipUrl(chip: SupporterChip): string | null {
   return link;
 }
 
+// ── Day passes ──────────────────────────────────────────────────────────────
+// Single-day admission. USD via Stripe Payment Links; BTC via the OpenNode modal at
+// a fixed price scaled off Standard's ₿/$ ratio (no discount codes on either rail).
+// Promo codes are off on the links so EARLYBIRD can't take $100 off a $100 pass.
+
+export type DayPass = {
+  id: "friday" | "saturday" | "sunday";
+  label: string;
+  usd: number;
+  btc: number;
+  /** The admitted day — drives the confirmation email's date line + calendar link. */
+  date: { long: string; ymd: string };
+  links: Record<StripeMode, string>;
+};
+
+export const dayPasses: DayPass[] = [
+  {
+    id: "friday",
+    label: "Friday Day Pass",
+    usd: 100,
+    btc: 0.0015,
+    date: { long: "Friday, November 6, 2026", ymd: "20261106" },
+    links: {
+      test: "https://buy.stripe.com/test_fZubJ0gUTgnJfRh9Vgfw40i",
+      live: "https://buy.stripe.com/6oU4gy343fjF9sTebwfw40d",
+    },
+  },
+  {
+    id: "saturday",
+    label: "Saturday Day Pass",
+    usd: 225,
+    btc: 0.0034,
+    date: { long: "Saturday, November 7, 2026", ymd: "20261107" },
+    links: {
+      test: "https://buy.stripe.com/test_7sYbJ07kj7Rd5cD7N8fw40j",
+      live: "https://buy.stripe.com/4gM4gy3435J56gH9Vgfw40e",
+    },
+  },
+  {
+    id: "sunday",
+    label: "Sunday Day Pass",
+    usd: 225,
+    btc: 0.0034,
+    date: { long: "Sunday, November 8, 2026", ymd: "20261108" },
+    links: {
+      test: "https://buy.stripe.com/test_7sYdR8dIHfjF48zd7sfw40k",
+      live: "https://buy.stripe.com/7sYdR8gUT2wT5cDc3ofw40f",
+    },
+  },
+];
+
+/** Look up a day pass by id; undefined when none matches. */
+export function getDayPass(id: string): DayPass | undefined {
+  return dayPasses.find((p) => p.id === id);
+}
+
+/** Checkout URL for a day pass in the active Stripe mode. */
+export function dayPassUrl(pass: DayPass): string | null {
+  return pass.links[stripeMode] || null;
+}
+
+/** The day pass a Stripe Payment Link URL (either mode) sells, if any. */
+export function dayPassForPaymentLinkUrl(
+  url: string | null | undefined,
+): DayPass | undefined {
+  if (!url) return undefined;
+  return dayPasses.find((p) => Object.values(p.links).includes(url));
+}
+
 /**
- * Tier label ("Standard" / "Supporter") for a Stripe Payment Link URL, matched
- * against the links above (both modes). Undefined for an unknown link — e.g. one
- * created in the dashboard outside this file.
+ * Tier label ("Standard" / "Supporter" / "Friday Day Pass") for a Stripe Payment
+ * Link URL, matched against the links above (both modes). Undefined for an
+ * unknown link — e.g. one created in the dashboard outside this file.
  */
 export function tierLabelForPaymentLinkUrl(
   url: string | null | undefined,
@@ -145,7 +214,7 @@ export function tierLabelForPaymentLinkUrl(
   for (const chip of supporterTier.chips) {
     if (Object.values(chip.links).includes(url)) return supporterTier.label;
   }
-  return undefined;
+  return dayPassForPaymentLinkUrl(url)?.label;
 }
 
 /**
